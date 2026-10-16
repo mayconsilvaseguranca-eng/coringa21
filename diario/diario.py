@@ -1,0 +1,243 @@
+import html
+V=[
+ ("v12","16/10 · 05:10","10 cartas novas no PvP e a tela Cartas",
+  "Adicionar todas as cartas simples de PvP, guardar as ideias avançadas no diário e criar uma aba com todas as cartas do jogo.",
+  [("Novo","5 cartas de ataque: Lâmina (+3 de dano em cada rival que você passar), Golpe Duplo (+50% se passar 3 ou mais), Precisão (+4 fechando com 20), Fúria (+40% com menos de 30 PV) e Cinco Lâminas (dobro de dano vencendo com 5 cartas)."),
+   ("Novo","5 cartas de defesa: Armadura (−15% de dano), Bandagem (+3 PV por rodada), Última Chance (fica com 1 PV uma vez), Muralha (no máximo 10 de dano se ficar em último) e Colete (uso único: estourou, não leva dano)."),
+   ("Novo","Tela Cartas, no menu inicial e no menu de pausa: abas PvP e Solo com todas as cartas, o que fazem e quanto custam."),
+   ("Novo","Seção Possíveis ideias neste diário, com as cartas do futuro modo PvP Avançado. Elas não estão no jogo."),
+   ("Mudou","O agente de testes ganhou dois testes: um duelo roteirizado com as cartas novas e a tela Cartas.")]),
+ ("v11.1","16/10 · 04:30","Vida dos jogadores maior no PvP",
+  "Aumentar a informação de vida dos jogadores no PvP.",
+  [("Mudou","Cada rival na mesa agora tem duas linhas: nome e situação em cima, vida grande embaixo e uma barra de vida no rodapé."),
+   ("Mudou","A faixa de jogadores no topo mostra a vida maior e em negrito."),
+   ("Mudou","No PvP, o quadro de Fichas × Mult só aparece na revelação da rodada, para sobrar espaço na mesa.")]),
+ ("v11","16/10 · 04:15","PvP mais organizado e revanche na mesma sala",
+  "Vida no lugar dos pontos no PvP, dano sem vírgula, voltar todo mundo para a mesma sala no fim e o tempo da jogada mais visível.",
+  [("Mudou","No PvP, o quadro de cima mostra sua vida no lugar dos pontos da rodada, e o outro quadro mostra o dano total que você causou."),
+   ("Mudou","Todo dano, cura e vida do PvP agora são números inteiros."),
+   ("Novo","No fim de uma partida multiplayer: Voltar para a sala (mesma sala, com os bots, para começar outra) ou Voltar ao menu."),
+   ("Mudou","O tempo da jogada virou uma pílula dourada no meio da mesa, com barra que esvazia. Fica vermelho e pulsando nos últimos 10 segundos.")]),
+ ("v10.1","16/10 · 04:00","Fim de partida mais claro",
+  "Quando a partida termina, mostrar só a opção de voltar ao menu.",
+  [("Mudou","No fim de qualquer partida (solo, PvP ou Sobrevivência) o botão principal agora é Voltar ao menu. Saíram Jogar de novo, Nova partida e Voltar ao lobby.")]),
+ ("v10","16/10 · 03:50","PvP mais longo, menos dinheiro e cartas rebalanceadas",
+  "Menos dinheiro no PvP, partidas mais longas, um controle para aumentar a vida de todos, cartas balanceadas e um ritmo mais calmo.",
+  [("Novo","Vida inicial na sala: quem cria ajusta com − e +, de 20 em 20 PV. O padrão continua automático pelo tamanho da mesa."),
+   ("Mudou","Vida padrão: 120 PV com 6 ou mais jogadores, até 168 com 2. Nos testes, partidas de 6 jogadores duraram 14 a 17 rodadas."),
+   ("Mudou","Dinheiro do PvP: $1 por rodada só se você passar alguém, $2 com a maior mão da mesa. Juros de $1 a cada $10, no máximo $2."),
+   ("Mudou","Cartas: Escudo absorve 4 por rodada (era 8), Espelho devolve 20% (era 30%), Golpe Crítico ×1,5 (era ×2). Preços entre $4 e $6."),
+   ("Mudou","Ritmo mais calmo: cartas, contagem de pontos e avisos ficaram 60% mais lentos. O resultado da rodada fica 20 segundos na tela."),
+   ("Corrigido","O dano do PvP encolhia depois da rodada 6, e uma partida de teste chegou a 56 rodadas. A base do dano agora é fixa.")]),
+ ("v9.1","16/10 · 03:25","Toda partida PvP chega ao fim",
+  "Correção encontrada pelo agente de testes.",
+  [("Corrigido","Os dois últimos jogadores podiam ficar dezenas de rodadas sem se eliminar, porque o dano encolhia nas rodadas longas. Agora existe um dano mínimo que cresce a cada rodada."),
+   ("Corrigido","A vitória do último de pé passa a ser conferida a cada segundo.")]),
+ ("v9","16/10 · 03:10","Animações de 21, telas sem rolagem e convite para o jogo",
+  "Animações de 21, sala sem rolar com muitos bots, contagem da loja, link de convite para o jogo, menus sem a partida ao fundo e pausa mais visível.",
+  [("Novo","Blackjack natural: explosão dourada com “BLACKJACK!” e naipes caindo."),
+   ("Novo","Chegar a 21 comprando: ondas verdes saindo das cartas e um “21!” subindo."),
+   ("Novo","Botão Convidar para o jogo na tela inicial: gera um link novo, e quem abre vê “Fulano te convidou”."),
+   ("Mudou","Sala compacta: cabe inteira com 10 jogadores, até no iPhone SE."),
+   ("Mudou","Mesa do PvP: rivais em linhas curtas, 3 por linha. Suas cartas não somem mais com 9 rivais."),
+   ("Mudou","Menus sem a partida anterior ao fundo."),
+   ("Mudou","Botão de pausa dourado, com o símbolo e a palavra “Pausa”."),
+   ("Corrigido","A contagem da loja aparece no topo e diminui ao vivo.")]),
+ ("v8","16/10 · 02:35","Logo legível e convite direto para a sala",
+  "Fonte melhor no 21 do logo e um link que leva direto para a sala.",
+  [("Mudou","O 21 do logo usa a fonte limpa dos números."),
+   ("Novo","Convidar amigos, na sala, manda um link que entra direto nela."),
+   ("Corrigido","Se os últimos jogadores zeravam juntos, a partida ficava sem vencedor. Agora sobrevive quem ficou menos negativo."),
+   ("Corrigido","A mesa podia travar esperando alguém que já tinha passado de rodada.")]),
+ ("v7","16/10 · 02:25","Bots, música, agente de testes e nome novo",
+  "Bots no PvP, testes automáticos, música com volume, loja só com as 6 cartas, confirmação de compra e o nome Família 21.",
+  [("Novo","Bots no PvP: quem cria a sala adiciona ou remove bots, que jogam sozinhos."),
+   ("Novo","Agente de testes: a cada atualização, o GitHub joga solo, PvP com bots, as cartas especiais e a Sobrevivência, 3 vezes cada."),
+   ("Novo","Música de fundo com controle de volume (começa em 25%)."),
+   ("Novo","Tocar numa carta da loja mostra a descrição e o botão Confirmar compra."),
+   ("Mudou","A loja do PvP oferece só as 6 cartas de ataque e defesa e fica aberta por 2 minutos."),
+   ("Mudou","O jogo se chama Família 21. O endereço do site continua o mesmo.")]),
+ ("v6","16/10 · 01:56","Cartas de ataque e defesa no PvP",
+  "Adicionar as cartas de ataque e defesa.",
+  [("Novo","Defesa: Escudo (absorve 8 de dano por rodada), Espelho (devolve 30%), Esquiva (ignora quem fechou com 17 ou menos)."),
+   ("Novo","Ataque: Golpe Crítico (blackjack causa dano dobrado), Sangria (+2 de dano por 3 rodadas), Vampiro (cura 25% do dano causado).")]),
+ ("v5.1","16/10 · 01:44","Partida PvP mais curta",
+  "Uma partida de 6 jogadores deve durar umas 10 rodadas.",
+  [("Mudou","PV conforme a mesa: 90 com 6 ou mais jogadores, até 130 com 2. Na simulação, 6 jogadores terminam em 9 a 11 rodadas.")]),
+ ("v5","16/10 · 01:19","PvP por rodadas, sem dealer",
+  "Tirar o dealer do PvP, jogar por rodadas e não repetir cartas entre jogadores.",
+  [("Mudou","Todos jogam a mesma rodada, e a mesa só revela as mãos quando todos fecham."),
+   ("Novo","45 segundos por jogada. Se acabar, a mão fecha sozinha."),
+   ("Mudou","Cada jogador tem o próprio baralho embaralhado de verdade."),
+   ("Mudou","Números com fonte limpa, mais fáceis de ler.")]),
+ ("v4","16/10 · 01:06","Modo PvP com pontos de vida",
+  "Um modo em que todos jogam contra todos com pontos de vida.",
+  [("Novo","Na sala, quem cria escolhe PvP ou Sobrevivência."),
+   ("Novo","Pontos de vida, dano nos rivais e eliminação de quem zera.")]),
+ ("—","16/10 · 00:35 a 01:00","Site no GitHub e envio automático",
+  "Ajuda para subir no GitHub e eu atualizar o site sozinho.",
+  [("Novo","Jogo publicado em mayconsilvaseguranca-eng.github.io/coringa21."),
+   ("Novo","O Claude envia cada versão nova direto para o site.")]),
+ ("v3","16/10 · 00:06 a 00:19","Multiplayer sem conta e lista de salas",
+  "Jogar sem conta no Claude, lista de salas e esta página de acompanhamento.",
+  [("Novo","Versão em um arquivo só, com salas por um servidor público de mensagens."),
+   ("Novo","Lista de salas abertas: toca na sala e digita o código."),
+   ("Novo","Este diário do projeto."),
+   ("Corrigido","Toques bloqueados depois de fechar menus e botões cobertos em telas baixas.")]),
+ ("v2","15/10 · 23:50","Letras legíveis e multiplayer",
+  "Letras mais fáceis de ler e multiplayer para até 10 pessoas.",
+  [("Mudou","Fonte limpa e maior nos textos."),
+   ("Novo","Salas com código, 3 vidas, Duelo e placar ao vivo.")]),
+ ("v1","15/10 · 23:35","Primeira versão",
+  "Um jogo de 21 no estilo Balatro para o celular.",
+  [("Novo","8 antes, blinds e chefes, Fichas × Mult, 18 coringas, planetas, loja e Desafio do dia.")]),
+]
+TAGC={"Novo":"t-new","Mudou":"t-chg","Corrigido":"t-fix"}
+def card(v,open_):
+  ver,when,title,ask,items=v
+  groups=""
+  for k in ["Novo","Mudou","Corrigido"]:
+    its=[t for (c,t) in items if c==k]
+    if not its: continue
+    groups+=f'<div class="grp"><span class="tag {TAGC[k]}">{ {"Novo":"Novidades","Mudou":"Mudanças","Corrigido":"Correções"}[k] }</span><ul>'+"".join(f"<li>{html.escape(t)}</li>" for t in its)+"</ul></div>"
+  return f'''<details class="ver" {"open" if open_ else ""}>
+  <summary><span class="vtag">{ver}</span><span class="vt"><b>{html.escape(title)}</b><small>{when}</small></span><span class="chev">›</span></summary>
+  <div class="vbody"><p class="ask"><b>Seu pedido</b>{html.escape(ask)}</p>{groups}</div>
+</details>'''
+cards="\n".join(card(v,i==0) for i,v in enumerate(V))
+last=V[0]
+page=f'''<title>Diário do Família 21</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@700&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: uma coluna de leitura — status no topo, última atualização em destaque, histórico em cartões que abrem e fecham, depois regras e limites. Mundo único de feltro escuro, igual ao jogo. */
+:root{{
+  --bg:#081d19; --panel:#10261f; --panel-2:#183630; --edge:#040d0b; --line:#24453d;
+  --ink:#f8f1df; --dim:#b3cdc3; --gold:#f5bd3a; --chips:#4d9bff; --mult:#ff6b61; --ok:#5fd38a;
+  --font:"Rubik", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --px:"Pixelify Sans", "Rubik", system-ui, sans-serif;
+  color-scheme:dark;
+}}
+body{{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;margin:0}}
+.wrap{{max-width:680px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:36px}}
+header{{display:flex;flex-direction:column;gap:10px}}
+.eyebrow{{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}}
+h1{{font-family:var(--px);font-size:clamp(34px,9vw,48px);line-height:1;margin:0;text-shadow:3px 3px 0 var(--edge)}}
+h1 span{{font-family:var(--font);font-weight:800;color:var(--gold)}}
+h2{{font-size:21px;font-weight:800;margin:0 0 4px;text-wrap:balance}}
+h3{{font-size:16px;font-weight:800;margin:0}}
+p{{margin:0}}
+.lead{{color:var(--dim);max-width:60ch}}
+.links{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}
+.lnk{{background:var(--panel);border:2px solid var(--edge);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}}
+.lnk small{{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}}
+.lnk a{{color:var(--gold);font-weight:700;word-break:break-all;font-size:14.5px}}
+.lnk b{{font-size:15px}}
+.now{{background:linear-gradient(160deg,color-mix(in srgb,var(--gold) 16%,var(--panel)),var(--panel));border:2px solid color-mix(in srgb,var(--gold) 55%,var(--edge));border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 4px 0 var(--edge)}}
+.now .top{{display:flex;align-items:center;gap:12px}}
+.badge{{font-family:var(--font);font-weight:800;background:var(--gold);color:#2a1b00;border-radius:10px;padding:6px 10px;font-size:18px;flex:0 0 auto}}
+.now .top b{{display:block;font-size:18px;line-height:1.25}}
+.now .top small{{color:var(--dim);font-size:13.5px}}
+section{{display:flex;flex-direction:column;gap:12px}}
+.sec-note{{color:var(--dim);font-size:14.5px}}
+.ver{{background:var(--panel);border:2px solid var(--edge);border-radius:14px;box-shadow:0 3px 0 var(--edge);overflow:hidden}}
+.ver summary{{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px}}
+.ver summary::-webkit-details-marker{{display:none}}
+.vtag{{font-weight:800;font-size:14px;color:var(--gold);background:var(--panel-2);border-radius:8px;padding:4px 8px;min-width:44px;text-align:center;flex:0 0 auto}}
+.vt{{flex:1;min-width:0;display:flex;flex-direction:column}}
+.vt b{{font-size:16px;line-height:1.3}}
+.vt small{{color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}}
+.chev{{color:var(--dim);font-size:22px;transition:transform .2s;flex:0 0 auto}}
+.ver[open] .chev{{transform:rotate(90deg)}}
+.vbody,.now .vbody{{padding:0 16px 18px;display:flex;flex-direction:column;gap:16px}}
+.now .vbody{{padding:0}}
+.ask{{background:var(--panel-2);border-left:3px solid var(--chips);border-radius:0 10px 10px 0;padding:10px 12px;font-size:15px;color:var(--ink)}}
+.ask b{{display:block;color:var(--chips);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}}
+.grp{{display:flex;flex-direction:column;gap:8px}}
+.grp ul{{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}}
+.grp li{{font-size:15px;line-height:1.5}}
+.grp li::marker{{color:var(--dim)}}
+.tag{{align-self:flex-start;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 8px}}
+.t-new{{background:color-mix(in srgb,var(--ok) 22%,transparent);color:var(--ok)}}
+.t-chg{{background:color-mix(in srgb,var(--chips) 22%,transparent);color:var(--chips)}}
+.t-fix{{background:color-mix(in srgb,var(--mult) 22%,transparent);color:var(--mult)}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}}
+.box{{background:var(--panel);border:2px solid var(--edge);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}}
+.box p,.box li{{font-size:14.5px;color:var(--dim)}}
+.box ul{{margin:0;padding-left:18px}}
+.limits{{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}}
+.limits li{{color:var(--dim);font-size:15px}}
+footer{{font-size:13px;color:var(--dim);border-top:1px solid var(--line);padding-top:14px}}
+@media (max-width:420px){{.links{{grid-template-columns:1fr}}}}
+@media (prefers-reduced-motion:reduce){{*{{transition:none!important}}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Diário do projeto · atualizado em 16/10/2026, 05:10</span>
+    <h1>Família <span>21</span></h1>
+    <p class="lead">Cada vez que o jogo muda, aparece aqui. A última atualização fica em destaque; as anteriores ficam fechadas logo abaixo, é só tocar para abrir.</p>
+  </header>
+
+  <div class="links">
+    <div class="lnk"><small>Site do jogo</small><a href="https://mayconsilvaseguranca-eng.github.io/coringa21/" target="_blank" rel="noopener">mayconsilvaseguranca-eng.github.io/coringa21</a></div>
+    <div class="lnk"><small>Como atualiza</small><b>Sozinho, 1 ou 2 minutos depois de cada mudança. Os testes rodam a cada envio.</b></div>
+  </div>
+
+  <section>
+    <h2>Última atualização</h2>
+    <div class="now">
+      <div class="top"><span class="badge">{last[0]}</span><div><b>{html.escape(last[2])}</b><small>{last[1]}</small></div></div>
+      <div class="vbody">{card(last,True).split('<div class="vbody">',1)[1].rsplit('</div>',1)[0]}</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Histórico</h2>
+    <p class="sec-note">Da mais nova para a mais antiga. Toque numa versão para ver os detalhes.</p>
+    {"".join(card(v,False) for v in V[1:])}
+  </section>
+
+  <section>
+    <h2>Como o jogo está agora</h2>
+    <div class="grid">
+      <div class="box"><h3>PvP</h3><p>Até 10 pessoas ou bots, sem dealer. Todos jogam a mesma rodada; na revelação, cada um causa dano em quem ficou abaixo. 120 a 168 PV conforme a mesa (ajustável na sala). Loja a cada 3 rodadas, com 16 cartas de ataque e defesa (veja todas na tela Cartas do jogo).</p></div>
+      <div class="box"><h3>Sobrevivência</h3><p>Até 10 pessoas, 3 vidas cada. Falhar uma blind custa 1 vida. No Duelo de cada ante, o menor placar perde 1 vida.</p></div>
+      <div class="box"><h3>Solo</h3><p>8 antes com blinds e chefes, 18 coringas, planetas e o Desafio do dia, com o mesmo baralho para todos.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Possíveis ideias</h2>
+    <p class="sec-note">Ainda não estão no jogo. Ficam guardadas para um futuro modo PvP Avançado, com cartas que escolhem um alvo ou mexem na mesa.</p>
+    <div class="grid">
+      <div class="box"><h3>Cartas com alvo</h3><ul><li><b>Mira:</b> todo o seu dano da rodada vai para um rival escolhido</li><li><b>Maldição:</b> um rival escolhido causa metade do dano na próxima rodada</li><li><b>Gelo:</b> um rival não pode pedir carta na próxima rodada</li><li><b>Roubo:</b> tira $3 de um rival</li><li><b>Troca de Mão:</b> troca uma carta sua com uma carta de um rival</li><li><b>Espião:</b> vê as cartas de um rival antes de jogar</li></ul></div>
+      <div class="box"><h3>Cartas de mesa</h3><ul><li><b>Tempestade:</b> todos levam 5 de dano</li><li><b>Trégua:</b> ninguém causa dano na próxima rodada</li><li><b>Teto 19:</b> na próxima rodada, passar de 19 já estoura</li><li><b>Embaralhar:</b> todos recebem cartas novas</li></ul></div>
+      <div class="box"><h3>Baralho especial</h3><ul><li><b>Carta Bomba:</b> quem tirar leva 10 de dano</li><li><b>Curinga Vermelho:</b> vale o que você quiser de 1 a 11</li><li><b>Carta Ouro:</b> dá $2 a quem tirar</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Testes automáticos</h2>
+    <div class="grid">
+      <div class="box"><h3>O que o agente testa</h3><ul><li>Partida solo inteira e loja com confirmação</li><li>PvP com 2 pessoas e 4 bots até sobrar um</li><li>As 16 cartas de ataque e defesa, em dois duelos roteirizados</li><li>A tela Cartas</li><li>Sobrevivência, lista de salas e reconexão</li></ul></div>
+      <div class="box"><h3>Quando</h3><p>A cada atualização enviada ao GitHub, 3 vezes cada teste. Se algo quebrar, o GitHub avisa na aba Actions.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Limitações conhecidas</h2>
+    <ul class="limits">
+      <li>As salas usam um servidor público e gratuito, sem garantia de ficar sempre no ar.</li>
+      <li>Os bots rodam no aparelho de quem criou a sala. Se essa pessoa sair, os bots param.</li>
+      <li>A duração do PvP (~15 rodadas com 6 jogadores) vem de testes e simulação e pode variar com as cartas compradas.</li>
+      <li>Se alguém ficar mais de 3 minutos sem internet, a mesa segue sem essa pessoa.</li>
+    </ul>
+  </section>
+
+  <footer>Feito com o Claude para o Maycon e a família. Peça mudanças na conversa que esta página é atualizada.</footer>
+</div>
+'''
+import os,sys; open(sys.argv[1] if len(sys.argv)>1 else os.path.join(os.path.dirname(os.path.abspath(__file__)),'diario.html'),'w').write(page)
