@@ -27,18 +27,20 @@ export default async function () {
       for (const p of [A, B]) { await p.waitForFunction(() => window.__c21.pvpReadyNext(), null, { timeout: 15000 }); await p.evaluate(() => window.__c21.pvpNext()); }
       return r;
     }
-    check(JSON.stringify(await hp()) === '[130,130]', 'PV iniciais de 2 jogadores deveriam ser 130');
-    // Blackjack de Ana com Golpe Crítico: 122 de dano; Escudo absorve 8; Espelho devolve 30% de 114.
+    const h0 = (await hp())[0];
+    check(h0 === 168, `PV iniciais de 2 jogadores deveriam ser 168, são ${h0}`);
+    const up = x => Math.ceil(Math.round(x * 10) / 10);
+    // Blackjack de Ana com Golpe Crítico: 61 × 1,5 = 91,5 de dano; Escudo absorve 4; Espelho devolve 20% de 87,5.
     const r1 = await round([['A', '♠'], ['K', '♥']], [['10', '♣'], ['7', '♦']]);
-    check(r1[1] === 16, `Escudo/Crítico: Beto deveria ter 16 PV, tem ${r1[1]}`);
-    check(r1[0] === 96, `Espelho: Ana deveria ter 96 PV, tem ${r1[0]}`);
-    // Beto vence com 20; a Sangria de Ana (2) é absorvida pelo Escudo.
+    check(r1[1] === up(h0 - 87.5), `Escudo/Crítico: Beto deveria ter ${up(h0 - 87.5)} PV, tem ${r1[1]}`);
+    check(r1[0] === up(h0 - 17.5), `Espelho: Ana deveria ter ${up(h0 - 17.5)} PV, tem ${r1[0]}`);
+    // Beto vence com 20 (15 de dano); a Sangria de Ana (2) é absorvida pelo Escudo.
     const r2 = await round([['9', '♠'], ['6', '♥']], [['K', '♣'], ['Q', '♦']]);
-    check(r2[0] === 81 && r2[1] === 16, `rodada 2 errada: ${r2}`);
-    // Ana fecha com 16 e Beto estoura: Esquiva anula o dano; Vampiro cura Ana.
+    check(r2[0] === up(h0 - 17.5 - 15) && r2[1] === up(h0 - 87.5), `rodada 2 errada: ${r2}`);
+    // Ana fecha com 16 e Beto estoura: Esquiva anula o dano; Vampiro cura Ana em 3,3.
     const r3 = await round([['10', '♠'], ['6', '♥']], [['K', '♣'], ['Q', '♦'], ['5', '♠']]);
-    check(r3[1] === 16, `Esquiva: Beto deveria continuar com 16 PV, tem ${r3[1]}`);
-    check(r3[0] === 85, `Vampiro: Ana deveria ter 85 PV, tem ${r3[0]}`);
+    check(r3[1] === up(h0 - 87.5), `Esquiva: Beto deveria continuar com ${up(h0 - 87.5)} PV, tem ${r3[1]}`);
+    check(r3[0] === up(h0 - 17.5 - 15 + 3.3), `Vampiro: Ana deveria ter ${up(h0 - 17.5 - 15 + 3.3)} PV, tem ${r3[0]}`);
     check(t.errors.length === 0, 'erros na página: ' + t.errors.join(' | '));
     return 'cartas de ataque e defesa ok';
   } finally { await t.close(); }
