@@ -50,6 +50,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .score .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim)}
 .score .num{font-family:var(--font);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em;font-size:31px}
 .score .num.hpnum{color:#ff6b61}
+.score .num .of{font-size:15px;color:var(--ink-dim);margin-left:3px}
 .bar{height:6px;border-radius:3px;background:var(--edge);overflow:hidden;margin-top:4px}
 .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .4s}
 
@@ -80,11 +81,11 @@ body.menu #sheet{background:rgba(3,10,9,.35)}
 /* Rival strip */
 .strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;cursor:pointer;padding-bottom:2px;flex:0 0 auto}
 .strip::-webkit-scrollbar{display:none}
-.rv{flex:0 0 auto;display:flex;align-items:center;gap:6px;background:var(--panel);border:2px solid var(--edge);border-radius:999px;padding:3px 10px 3px 4px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.rv{flex:0 0 auto;display:flex;align-items:center;gap:6px;background:var(--panel);border:2px solid var(--edge);border-radius:999px;padding:4px 12px 4px 4px;font-size:13.5px;font-weight:800;white-space:nowrap}
 .rv.me{border-color:var(--gold)}
 .rv.out{opacity:.45}
 .dot{width:20px;height:20px;border-radius:50%;background:var(--pc);display:grid;place-items:center;font-size:11px;font-weight:800;color:#111;flex:0 0 auto}
-.rv .hearts{color:#ff6b61;letter-spacing:-1px}
+.rv .hearts{color:#ff6b61;letter-spacing:-.5px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
 .rv .where{color:var(--ink-dim);font-weight:600}
 
 /* Joker rack */
@@ -199,11 +200,15 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .cards.riv{display:block;width:100%;min-height:0;padding-top:2px}
 .rivals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:100%}
 .rivals.few{grid-template-columns:repeat(2,minmax(0,1fr))}
-.rvl{background:rgba(0,0,0,.32);border-radius:7px;padding:4px 6px;font-size:11.5px;line-height:1.2;font-weight:700;display:flex;align-items:center;gap:4px;min-width:0;color:var(--ink)}
-.rvl .dot{width:9px;height:9px;flex:0 0 auto}
+.rvl{position:relative;background:rgba(0,0,0,.34);border-radius:8px;padding:4px 7px 8px;font-size:12px;line-height:1.15;font-weight:700;display:flex;flex-direction:column;gap:1px;min-width:0;color:var(--ink);overflow:hidden}
+.rvl .top{display:flex;align-items:center;gap:5px;min-width:0}
+.rvl .dot{width:10px;height:10px;flex:0 0 auto}
 .rvl .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800}
-.rvl .hp{color:#ff8077;font-variant-numeric:tabular-nums;font-size:11px}
-.rvl .tg{min-width:18px;text-align:center;border-radius:5px;padding:0 4px;background:rgba(255,255,255,.08);color:var(--ink-dim);font-weight:800}
+.rvl .hp{color:#ff7a70;font-variant-numeric:tabular-nums;font-size:18px;font-weight:800;line-height:1.05}
+.rvl .hp small{font-size:9.5px;font-weight:800;margin-left:1px;color:#ff9a92}
+.rvl .hpbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.08)}
+.rvl .hpbar i{display:block;height:100%;background:#ff6b61}
+.rvl .tg{min-width:18px;text-align:center;border-radius:5px;padding:0 4px;background:rgba(255,255,255,.1);color:var(--ink-dim);font-weight:800;font-size:11.5px;flex:0 0 auto}
 .rvl .tg.ready{color:#5fd38a}
 .rvl .tg.shown{color:var(--gold)}
 .rvl .tg.is21{color:#0b2a1c;background:#5fd38a;box-shadow:0 0 10px rgba(95,211,138,.8)}
@@ -512,8 +517,8 @@ function renderHUD(){
     bb.innerHTML=`<div class="bn">${blindName()}</div><div class="bt">Meta <span class="num">${fmt(target())}</span><span class="rw">$${b.r}</span></div>`;
     $('#bar').style.width=Math.min(100,S.roundScore/target()*100)+'%';
   }
-  $('#rs').textContent=isPvp()?pvpHP():fmt(S.roundScore);
-  $('#rslbl').textContent=isPvp()?`Sua vida · máx. ${S.mp.maxHp||PVP_HP}`:'Pontos';
+  if(isPvp())$('#rs').innerHTML=`${pvpHP()}<small class="of">/${S.mp.maxHp||PVP_HP}</small>`;else $('#rs').textContent=fmt(S.roundScore);
+  $('#rslbl').textContent=isPvp()?'Sua vida':'Pontos';
   $('#rs').classList.toggle('hpnum',isPvp());
   renderCalc();
   const pvp=isPvp();
@@ -527,6 +532,7 @@ function renderHUD(){
 }
 function renderCalc(){
   const el=$('#calc');const k=S&&S.calc;
+  el.hidden=!!(S&&isPvp()&&S.phase!=='pshow');
   el.classList.toggle('lose',!!(k&&k.lose));
   if(!k){el.innerHTML=`<div class="hn"><span>Jogue uma mão</span><small>toque para ver as jogadas</small></div><div class="pill c">0</div><div class="x">×</div><div class="pill m">0</div>`;return}
   el.innerHTML=`<div class="hn"><span>${k.n}${k.l?` <small>nv ${k.l}</small>`:''}</span>${k.total!=null?`<span class="tot">= ${fmt(k.total)}</span>`:'<small>toque para ver as jogadas</small>'}</div><div class="pill c" id="pc-c">${fmt(k.c)}</div><div class="x">×</div><div class="pill m" id="pc-m">${fmt(k.m)}</div>`;
@@ -557,7 +563,7 @@ function renderRivals(){
     else if(reveal&&sub){tag=sub.x?'estourou':(+sub.t===21?(sub.bj?'BJ':'21'):sub.t);cls=sub.x?'bust':+sub.t===21?'is21':'shown'}
     else if(sub){tag='✓';cls='ready'}
     else tag='…';
-    return `<div class="rvl ${!st.al?'out':''}" title="${esc(p.name)}"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><span class="hp">${st.al?Math.max(0,+st.hp||0):''}</span><span class="tg ${cls}">${tag}</span></div>`}).join('')||'<p class="c-dim" style="font-size:13px">Esperando os rivais entrarem…</p>'}</div>`;
+    return `<div class="rvl ${!st.al?'out':''}" title="${esc(p.name)}"><span class="top"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><span class="tg ${cls}">${tag}</span></span><span class="hp">${st.al?Math.max(0,+st.hp||0)+'<small>PV</small>':'—'}</span>${st.al?`<span class="hpbar"><i style="width:${Math.max(0,Math.min(100,(+st.hp||0)/(S.mp.maxHp||PVP_HP)*100))}%"></i></span>`:''}</div>`}).join('')||'<p class="c-dim" style="font-size:13px">Esperando os rivais entrarem…</p>'}</div>`;
 }
 function renderTable(){
   if(!S){$('#dc').innerHTML='';$('#pc').innerHTML='';return}
@@ -1697,7 +1703,7 @@ function render0(){
   $('#strip').hidden=true;
   $('#blindBox').style.setProperty('--bc','var(--chips)');
   $('#blindBox').innerHTML=`<div class="bn">Blind Pequena</div><div class="bt">Meta <span class="num">80</span><span class="rw">$3</span></div>`;
-  $('#rs').textContent='0';$('#rs').classList.remove('hpnum');$('#rslbl').textContent='Pontos';$('#bar').style.width='0';$('#bar').style.background='';
+  $('#calc').hidden=false;$('#rs').textContent='0';$('#rs').classList.remove('hpnum');$('#rslbl').textContent='Pontos';$('#bar').style.width='0';$('#bar').style.background='';
   $('#calc').classList.remove('lose');
   $('#calc').innerHTML=`<div class="hn"><span>Blackjack <small>nv 1</small></span><span class="tot">= 244</span></div><div class="pill c">61</div><div class="x">×</div><div class="pill m">4</div>`;
   $('#stats').innerHTML=`<div class="stat h"><small>Mãos</small><span class="num">5</span></div><div class="stat s"><small>Trocas</small><span class="num">3</span></div><div class="stat mo"><small>Dinheiro</small><span class="num">$4</span></div><div class="stat"><small>Ante</small><span class="num">1<span class="c-dim">/8</span></span></div><button class="stat menu" data-act="menu" aria-label="Pausa"><span class="pz">❚❚</span><small>Pausa</small></button>`;
