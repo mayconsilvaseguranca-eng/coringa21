@@ -1,5 +1,13 @@
 import html
 V=[
+ ("v14","16/10 · 15:10","Carta de mesa sorteada a cada 3 rodadas",
+  "A carta de mesa vale durante as rodadas: sempre uma ativa, sorteada, por 3 rodadas (até a próxima loja), e a animação fica 5 segundos.",
+  [("Mudou","As cartas de mesa não se compram mais. A mesa sempre tem uma valendo para todos: sorteada no começo da partida e trocada por outra a cada loja (a cada 3 rodadas), sem repetir a anterior."),
+   ("Mudou","Para durar 3 rodadas: Tempestade tira 5 PV de todos no começo de cada rodada, e Trégua corta todo dano pela metade (3 rodadas sem dano travariam a partida). Teto 19 e Embaralhar continuam iguais."),
+   ("Mudou","A animação aparece quando a carta de mesa entra, mostra em que rodadas ela vale e fica 5 segundos na tela."),
+   ("Novo","A carta de mesa que está valendo aparece no topo da mesa, e o que ela faz aparece no meio da mesa entre as jogadas."),
+   ("Mudou","A loja do PvP voltou a ter 3 cartas (ataque e defesa). Quem cria a sala ainda pode desligar as cartas de mesa."),
+   ("Mudou","Teste das cartas de mesa refeito para a regra nova; os testes de contas exatas de dano jogam sem carta de mesa.")]),
  ("v13.2","16/10 · 08:00","Animação quando alguém usa uma carta de mesa",
   "Mostrar com uma animação qual carta de mesa foi usada, para todos se prepararem para a próxima rodada.",
   [("Novo","Quando alguém (pessoa ou bot) usa uma carta de mesa, aparece para todos: a carta entra girando no meio da tela, com o nome de quem usou, o que ela faz e em que rodada vale. Dura uns 3 segundos e não trava a tela."),
@@ -147,7 +155,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 08:00'
+UPD=AG['atualizado'] if AG else '16/10/2026, 15:10'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

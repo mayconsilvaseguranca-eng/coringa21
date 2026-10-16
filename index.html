@@ -223,7 +223,7 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .mesa-fx{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(109,74,149,.6),rgba(3,10,9,.78) 70%);animation:mfIn .3s ease-out both;z-index:40}
 .mesa-fx.out{animation:mfOut .45s ease-in forwards}
 .mf-box{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;max-width:280px;padding:0 16px}
-.mf-who{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;color:var(--ink);background:rgba(0,0,0,.45);border-radius:999px;padding:4px 12px 4px 6px;animation:mfPop .4s .1s both}
+.mf-who{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#e4d2ff;background:rgba(0,0,0,.5);border-radius:999px;padding:4px 12px;animation:mfPop .4s .1s both}
 .mf-who .dot{width:14px;height:14px}
 .mf-card{width:96px;height:132px;border-radius:12px;border:3px solid var(--edge);background:linear-gradient(160deg,color-mix(in srgb,var(--jc) 80%,#fff),var(--jc));display:grid;place-items:center;font-size:48px;font-weight:800;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35);box-shadow:0 0 0 3px #c9a6ff,0 0 36px rgba(201,166,255,.8),0 6px 0 var(--edge);animation:mfCard .8s cubic-bezier(.2,1.4,.4,1) both}
 .mf-name{font-family:var(--font-px);font-size:30px;color:#e4d2ff;text-shadow:3px 3px 0 var(--edge);animation:mfPop .4s .45s both}
@@ -233,6 +233,7 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 @keyframes mfOut{to{opacity:0;transform:scale(.96)}}
 @keyframes mfCard{0%{transform:translateY(-60vh) rotate(-540deg) scale(.3);opacity:0}60%{opacity:1}100%{transform:none}}
 @keyframes mfPop{from{opacity:0;transform:translateY(10px) scale(.9)}}
+.mesa-on{color:#c9a6ff!important;letter-spacing:.04em}
 .kind.mesa{background:color-mix(in srgb,var(--violet) 34%,transparent);color:#c9a6ff}
 .cfg{display:grid;grid-template-columns:1fr;gap:6px}
 .cfg .bots{gap:10px;padding:4px 10px}
@@ -453,11 +454,11 @@ const JK={
   ultima:{n:'Última Chance',d:'Uma vez por partida, fica com 1 PV em vez de zerar',c:5,g:'1',bg:'#5d6f3a',pvp:'def'},
   muralha:{n:'Muralha',d:'Se você ficar em último na rodada, leva 20% a menos de dano',c:5,g:'▥',bg:'#4f5f78',pvp:'def'},
   colete:{n:'Colete',d:'Uso único: se você estourar, não leva dano na rodada',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'},
-  /* cartas de mesa: uso único, mudam a próxima rodada para todo mundo (podem ser desligadas na sala) */
-  tempestade:{n:'Tempestade',d:'Na próxima rodada, todos os rivais levam 5 de dano',c:4,g:'ϟ',bg:'#4b5aa8',pvp:'mesa'},
-  tregua:{n:'Trégua',d:'Na próxima rodada, ninguém causa dano',c:3,g:'⊘',bg:'#4f8f86',pvp:'mesa'},
-  teto:{n:'Teto 19',d:'Na próxima rodada, passar de 19 estoura',c:3,g:'19',bg:'#8f6a24',pvp:'mesa'},
-  embaralhar:{n:'Embaralhar',d:'Na próxima rodada, a mesa dá cartas a todos até 17',c:3,g:'↻',bg:'#6d4a95',pvp:'mesa'}
+  /* cartas de mesa: sempre uma valendo para todos, sorteada a cada 3 rodadas (troca na loja). Podem ser desligadas na sala. */
+  tempestade:{n:'Tempestade',d:'No começo de cada rodada, todos levam 5 de dano',c:4,g:'ϟ',bg:'#4b5aa8',pvp:'mesa'},
+  tregua:{n:'Trégua',d:'Todo dano cai pela metade',c:3,g:'⊘',bg:'#4f8f86',pvp:'mesa'},
+  teto:{n:'Teto 19',d:'Passar de 19 estoura',c:3,g:'19',bg:'#8f6a24',pvp:'mesa'},
+  embaralhar:{n:'Embaralhar',d:'Ninguém decide: a mesa dá cartas a todos até 17',c:3,g:'↻',bg:'#6d4a95',pvp:'mesa'}
 };
 const JF={
   coringa:x=>x.m(4),
@@ -505,10 +506,15 @@ const isPvp=()=>!!(S&&S.mp&&S.mp.mode==='pvp');
 const isDuel=()=>!!(S&&S.mp&&S.mp.mode!=='pvp'&&S.bi===2);
 const KIND_TXT={atk:'Ataque',def:'Defesa',mesa:'Mesa'};
 /* efeitos de mesa de uma rodada: eventos {k,r} publicados por qualquer jogador da partida */
-function mesaFx(R){const out=[];if(!S||!S.mp||!S.mp.mesa)return out;
-  for(const p of gamePlayers()){const ev=p.me?S.mp.ev:(p.st&&Array.isArray(p.st.ev)?p.st.ev:[]);
-    for(const e of ev||[])if(e&&+e.r===R&&JK[e.k]&&JK[e.k].pvp==='mesa')out.push({k:e.k,pid:p.me?MP.pid:p.pid,name:p.me?'você':p.name})}
-  return out}
+/* Carta de mesa da rodada R: sorteada pela partida (igual em todos os aparelhos), troca a cada loja e nunca repete a anterior. */
+const MESA_K=['tempestade','tregua','teto','embaralhar'];
+function mesaCardFor(gid,R,seq){
+  if(!(R>=1))return null;const per=Math.floor((R-1)/PVP_SHOP_EVERY);
+  if(Array.isArray(seq)&&seq.length)return seq[per%seq.length];
+  let prev=-1;for(let i=0;i<=per;i++){let n=hashStr(String(gid)+':mesa:'+i)%(prev<0?4:3);if(prev>=0&&n>=prev)n++;prev=n}
+  return MESA_K[prev];
+}
+function mesaFx(R){if(!S||!S.mp||!S.mp.mesa)return [];const k=mesaCardFor(S.mp.gid,R,S.mp.mesaSeq);return k?[{k}]:[]}
 const fxOn=k=>!!(S&&S.mp&&Array.isArray(S.mp.fx)&&S.mp.fx.some(e=>e.k===k));
 const capNow=()=>isPvp()&&fxOn('teto')?19:21;
 const recvTotal=()=>Object.values((S&&S.mp&&S.mp.recv)||{}).reduce((a,b)=>a+(+b||0),0);
@@ -639,7 +645,7 @@ function turnClock(m){
   m.innerHTML=`<span class="turnpill ${left<=10?'late':''}"><span>Sua vez</span><b>${left}s</b><i style="width:${pct}%"></i></span>`;
 }
 function renderRivals(){
-  $('#dlbl').textContent='Mesa';
+  {const f=S.mp&&S.mp.fx&&S.mp.fx[0];$('#dlbl').textContent=f?`${JK[f.k].g} ${JK[f.k].n}`:'Mesa';$('#dlbl').classList.toggle('mesa-on',!!f)}
   const reveal=S.phase==='pshow'&&S.pv&&S.pv.r===S.round;
   const ps=gamePlayers().filter(p=>!p.me);
   $('#dt').textContent=`${ps.filter(p=>p.st&&p.st.al).length} vivos`;$('#dt').className='';
@@ -664,7 +670,7 @@ function renderTable(){
     const m=$('#msg');
     if(S.msg){m.className='msg';m.textContent=S.msg}
     else if(S.phase==='play'&&S.deadline){turnClock(m)}
-    else{m.className='msg rail';m.textContent=S.mp.fx&&S.mp.fx.length?'Mesa: '+[...new Set(S.mp.fx.map(e=>JK[e.k].n))].join(' · '):'Sem dealer · a maior mão vence'}
+    else{m.className='msg rail';m.textContent=S.mp.fx&&S.mp.fx.length?`${JK[S.mp.fx[0].k].n}: ${JK[S.mp.fx[0].k].d}`:'Sem dealer · a maior mão vence'}
     return;
   }
   const peek=has('vidente');
@@ -718,31 +724,17 @@ function pop(el,text,cls){
 /* Blackjack natural: explosão dourada com naipes caindo. Chegar a 21: onda verde saindo das cartas. */
 /* Anúncio de carta de mesa: aparece para todos quando alguém usa uma, uma de cada vez, sem travar a tela */
 const MESA_Q=[];let mesaShowing=false;
-function mesaAnnounce(ps){
-  if(!S||!S.mp||!S.mp.mesa)return;
-  if(!S.mp.evSeen)S.mp.evSeen={};
-  for(const p of ps){
-    const ev=p.me?S.mp.ev:(p.st&&Array.isArray(p.st.ev)?p.st.ev:[]);
-    for(const e of ev||[]){
-      if(!e||!JK[e.k]||JK[e.k].pvp!=='mesa')continue;
-      const key=(p.me?MP.pid:p.pid)+':'+e.k+':'+e.r;
-      if(S.mp.evSeen[key])continue;S.mp.evSeen[key]=1;
-      if(+e.r<(S.round||0))continue; /* evento antigo (ex.: voltou à partida depois) */
-      MESA_Q.push({k:e.k,r:+e.r,who:p.me?'Você':p.name,me:!!p.me,col:p.col});
-    }
-  }
-  if(!mesaShowing)mesaNext();
-}
+function mesaShow(k,R){MESA_Q.push({k,r:R});if(!mesaShowing)mesaNext()}
 function mesaNext(){
   const a=MESA_Q.shift();if(!a){mesaShowing=false;return}
   mesaShowing=true;const d=JK[a.k];
   const el=document.createElement('div');el.className='mesa-fx';
-  el.innerHTML=`<div class="mf-box"><div class="mf-who"><span class="dot" style="--pc:${colOf(a.col)}"></span>${esc(a.who)} usou</div>
+  el.innerHTML=`<div class="mf-box"><div class="mf-who">Nova carta de mesa</div>
   <div class="mf-card" style="--jc:${d.bg}"><span>${d.g}</span></div>
   <div class="mf-name">${esc(d.n)}</div><div class="mf-desc">${esc(d.d)}</div>
-  <div class="mf-when">Vale na rodada ${a.r}</div></div>`;
+  <div class="mf-when">Vale nas rodadas ${a.r} a ${a.r+PVP_SHOP_EVERY-1}</div></div>`;
   $('#fx').appendChild(el);beep(300,.12,'sawtooth',.04);setTimeout(()=>beep(600,.1,'triangle',.04),160);setTimeout(()=>beep(900,.16,'triangle',.04),320);
-  setTimeout(()=>{el.classList.add('out');setTimeout(()=>{el.remove();mesaNext()},RM?10:450)},RM?900:3200);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>{el.remove();mesaNext()},RM?10:450)},RM?900:5000);
 }
 function fxBlackjack(){
   beep(523,.12,'square',.05);setTimeout(()=>beep(659,.12,'square',.05),110);setTimeout(()=>beep(784,.12,'square',.05),220);setTimeout(()=>beep(1046,.3,'square',.05),330);
@@ -875,11 +867,10 @@ function collect(){
 }
 function openShop(){S.phase='shop';S.shop={items:genShopItems(),reroll:3};render();showShop()}
 function genShopItems(){
-  /* No PvP: 3 cartas de ataque ou defesa e, com as cartas de mesa ligadas, sempre 1 carta de mesa a mais. */
+  /* No PvP a loja tem 3 cartas de ataque ou defesa. As cartas de mesa não se compram: a mesa sorteia uma a cada loja. */
   if(isPvp()){
     const pool=shuffle(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def')&&!has(k)));
     const items=pool.slice(0,3).map(k=>({t:'j',k,sold:false}));
-    if(S.mp.mesa){const m=shuffle(Object.keys(JK).filter(k=>JK[k].pvp==='mesa'&&!has(k)));if(m.length)items.push({t:'j',k:m[0],sold:false})}
     return items;
   }
   const pool=shuffle(Object.keys(JK).filter(k=>!has(k)&&!JK[k].pvp));
@@ -950,11 +941,8 @@ function pvpStartRound(){
   S.round=(S.round||0)+1;
   S.ante=Math.min(8,1+Math.floor((S.round-1)/(PVP_SHOP_EVERY*2)));S.bi=0;
   S.mp.fx=mesaFx(S.round);
-  if(S.mp.fx.length){
-    const storm=S.mp.fx.filter(e=>e.k==='tempestade'&&e.pid!==MP.pid).length;
-    if(storm){if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(S.mp.hp-5*storm)}
-    S.mp.fx.forEach((e,i)=>setTimeout(()=>pop($('#blindBox'),e.k==='tempestade'&&e.pid===MP.pid?'Sua Tempestade: rivais −5 PV':`${JK[e.k].n} (${e.name})${e.k==='tempestade'?': −5 PV':''}`,'info'),400+i*700));
-  }
+  if(S.mp.fx.length&&(S.round-1)%PVP_SHOP_EVERY===0)mesaShow(S.mp.fx[0].k,S.round);
+  if(fxOn('tempestade')){if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(S.mp.hp-5);setTimeout(()=>pop($('#blindBox'),'Tempestade: −5 PV para todos','mult'),(S.round-1)%PVP_SHOP_EVERY===0?5600:400)}
   if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=3+(has('trocador')?2:0)}
   if(!S.deck||S.deck.length<15)S.deck=newDeck();
   S.phase='play';S.roundScore=0;S.calc=null;S.pv=null;S.mp.sub=null;S.handsLeft=1;S.awaitNext=false;
@@ -999,12 +987,12 @@ async function pvpShowdown(){
   if(!S.mp.bleed)S.mp.bleed={};
   /* sangria de rodadas anteriores */
   let bled=0;const truce=fxOn('tregua');
-  if(truce)extra.push('Trégua: ninguém causa dano nesta rodada');
+  if(truce)extra.push('Trégua: todo dano cai pela metade');
   for(const pid in S.mp.bleed){const b=S.mp.bleed[pid];
-    if(!truce&&S.round>b.from&&S.round<=b.to){const g=gamePlayers().find(x=>x.pid===pid);if(g&&g.st&&g.st.al){S.mp.sent[pid]=r1((S.mp.sent[pid]||0)+2);bled+=2}}
+    if(S.round>b.from&&S.round<=b.to){const g=gamePlayers().find(x=>x.pid===pid);if(g&&g.st&&g.st.al){const q=truce?1:2;S.mp.sent[pid]=r1((S.mp.sent[pid]||0)+q);bled+=q}}
     if(S.round>=b.to)delete S.mp.bleed[pid]}
   if(bled)extra.push(`Sangria: ${bled} de dano`);
-  if(pts>0&&beaten.length&&!truce){
+  if(pts>0&&beaten.length){
     dmg=Math.round(pts/ANTE_BASE[0]*DMG_K);
     per=Math.max(1,Math.round(dmg/Math.max(1,parts.length)),pvpMinHit(S.round));
     /* bônus de carta valem sobre o dano final (depois do dano mínimo da rodada) */
@@ -1014,6 +1002,7 @@ async function pvpShowdown(){
     if(has('lamina')){per+=3;extra.push('Lâmina: +3 em cada rival')}
     if(has('cinco')){const k=2*(S.player.length-1);per+=k;extra.push(`Cinco Lâminas: +${k} em cada rival`)}
     if(has('precisao')&&t===20){per+=7;extra.push('Precisão: fechou com 20, +7 em cada rival')}
+    if(truce)per=Math.max(1,Math.round(per/2));
     for(const b of beaten)S.mp.sent[b.pid]=r1((S.mp.sent[b.pid]||0)+per);
     S.mp.dealt=r1((S.mp.dealt||0)+per*beaten.length+bled);
     if(has('sangria'))for(const b of beaten)S.mp.bleed[b.pid]={from:S.round,to:S.round+3};
@@ -1309,7 +1298,6 @@ function mpTick(){
   const ps=gamePlayers();
   if(isPvp()){
     pvpCheckDamage(ps);
-    mesaAnnounce(ps);
     if(S.phase==='pwait'&&S.mp.alive&&!S.busy&&S.mp.sub&&S.mp.sub.r===S.round&&!pvpWaitingNames().length){pvpShowdown();return}
     if(['play','pwait','pshow'].includes(S.phase)){renderActions();renderRivals()}
   }
@@ -1393,25 +1381,10 @@ function botShop(b){
   b.money+=Math.min(2,Math.floor(b.money/10));
   const rnd=a=>a.sort(()=>Math.random()-.5);
   const offer=rnd(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def')&&!bHas(b,k))).slice(0,3);
-  if(b.mesa){const m=rnd(Object.keys(JK).filter(k=>JK[k].pvp==='mesa'&&!bHas(b,k)));if(m.length)offer.push(m[0])}
   for(const k of offer)if(b.cards.length<5&&JK[k].c<=b.money){b.money-=JK[k].c;b.cards.push(k)}
   b.st.n=b.cards.length;
 }
-function botFx(b,all,R){const out=[];if(!b.mesa)return out;
-  for(const e of b.ev)if(+e.r===R)out.push({k:e.k,pid:b.pid});
-  for(const p of all){const ev=p.st&&Array.isArray(p.st.ev)?p.st.ev:[];for(const e of ev)if(e&&+e.r===R&&JK[e.k]&&JK[e.k].pvp==='mesa')out.push({k:e.k,pid:p.pid})}
-  return out}
-/* Bot decide se usa uma carta de mesa na vez dele (vale na rodada seguinte) */
-function botUseMesa(b,others){
-  if(!b.mesa)return;
-  const low=others.every(p=>(+p.st.hp||0)>=b.hpv);
-  for(const k of b.cards.slice()){
-    if(JK[k].pvp!=='mesa')continue;
-    const go=k==='tempestade'||k==='teto'||(k==='tregua'&&b.hpv<b.maxHp*.35)||(k==='embaralhar'&&low&&others.length>0);
-    if(go){b.ev.push({k,r:b.r+1});b.cards=b.cards.filter(x=>x!==k)}
-  }
-  b.st.ev=b.ev.slice(-6);b.st.n=b.cards.length;
-}
+function botFx(b,all,R){if(!b.mesa)return [];const k=mesaCardFor(b.g,R);return k?[{k}]:[]}
 /* Defesa do bot: mesmas regras de pvpCheckDamage, aplicadas ao dano novo de cada rival. */
 function botDefend(b,all){
   const st=b.st;let ch=false;
@@ -1447,7 +1420,6 @@ function botTick(){
     if(!st.sub||st.sub.r<b.r){
       if(now>=b.nextAt){
         if(b.deck.length<15)b.deck=botDeck();
-        botUseMesa(b,others);
         /* para no 17 e dobra com 10 ou 11 (como uma pessoa atenta); com Teto 19 para no 15; com Embaralhar não decide */
         const cap=b.fx.some(e=>e.k==='teto')?19:21,auto=b.fx.some(e=>e.k==='embaralhar');
         const c=[b.deck.pop(),b.deck.pop()];let dbl=false;const t2=botTotal(c);
@@ -1463,8 +1435,8 @@ function botTick(){
         const myV=handVal(st.sub);const beaten=myV<0?[]:parts.filter(p=>p.v<myV);
         const truce=b.fx.some(e=>e.k==='tregua');
         /* sangria de rodadas anteriores */
-        for(const pid in b.bleed){const q=b.bleed[pid];if(!truce&&b.r>q.from&&b.r<=q.to&&others.some(p=>p.pid===pid))b.sent[pid]=r1((b.sent[pid]||0)+2);if(b.r>=q.to)delete b.bleed[pid]}
-        if(beaten.length&&!truce){
+        for(const pid in b.bleed){const q=b.bleed[pid];if(b.r>q.from&&b.r<=q.to&&others.some(p=>p.pid===pid))b.sent[pid]=r1((b.sent[pid]||0)+(truce?1:2));if(b.r>=q.to)delete b.bleed[pid]}
+        if(beaten.length){
           const s2=st.sub,cards=s2.c.length,t=s2.t;
           const type=s2.bj?'bj':s2.f?'five':t===21?'t21':'win';
           const chips=HANDS[type].c+s2.c.reduce((a,x)=>a+baseVal({r:String(x).replace(/[♠♥♦♣]/g,'')}),0);
@@ -1477,6 +1449,7 @@ function botTick(){
           if(bHas(b,'lamina'))per+=3;
           if(bHas(b,'cinco'))per+=2*(cards-1);
           if(bHas(b,'precisao')&&t===20)per+=7;
+          if(truce)per=Math.max(1,Math.round(per/2));
           for(const x of beaten)b.sent[x.pid]=r1((b.sent[x.pid]||0)+per);
           if(bHas(b,'sangria'))for(const x of beaten)b.bleed[x.pid]={from:b.r,to:b.r+3};
           if(bHas(b,'vampiro'))b.hpv=r1(Math.min(b.maxHp,b.hpv+Math.max(1,Math.round(per*beaten.length*0.15))));
@@ -1502,7 +1475,7 @@ function botTick(){
           if(bHas(b,'bandagem')&&b.hpv<b.maxHp/2)b.hpv=r1(Math.min(b.maxHp,b.hpv+3));
           b.r++;st.r=b.r;st.a=1+Math.floor((b.r-1)/(PVP_SHOP_EVERY*2));st.ph='play';b.nextAt=now+1500+Math.random()*3500;ch=true;
           b.fx=botFx(b,all,b.r);
-          const storm=b.fx.filter(e=>e.k==='tempestade'&&e.pid!==b.pid).length;if(storm)b.hpv=r1(b.hpv-5*storm)}
+          if(b.fx.some(e=>e.k==='tempestade'))b.hpv=r1(b.hpv-5)}
       }
     }
     if(st.al&&all.length&&all.every(p=>p.st&&!p.st.al)){st.ph='won';ch=true}
@@ -1660,7 +1633,7 @@ function showCards(tab){
   let body;
   if(tab==='pvp'){
     const atk=Object.keys(JK).filter(k=>JK[k].pvp==='atk'),def=Object.keys(JK).filter(k=>JK[k].pvp==='def'),mesa=Object.keys(JK).filter(k=>JK[k].pvp==='mesa');
-    body=`<p class="lb-desc">Só aparecem na loja do PvP: 3 de ataque ou defesa por vez, mais 1 de mesa. Você guarda até 5.</p><span class="kind atk" style="align-self:flex-start">Ataque · ${atk.length}</span><div class="cl">${atk.map(row).join('')}</div><span class="kind def" style="align-self:flex-start">Defesa · ${def.length}</span><div class="cl">${def.map(row).join('')}</div><span class="kind mesa" style="align-self:flex-start">Mesa · ${mesa.length}</span><p class="lb-desc" style="text-align:left">Uso único: toque nela durante a partida para valer na próxima rodada, para todo mundo. Quem cria a sala pode desligar.</p><div class="cl">${mesa.map(row).join('')}</div>`;
+    body=`<p class="lb-desc">Só aparecem na loja do PvP, 3 por vez. Você guarda até 5.</p><span class="kind atk" style="align-self:flex-start">Ataque · ${atk.length}</span><div class="cl">${atk.map(row).join('')}</div><span class="kind def" style="align-self:flex-start">Defesa · ${def.length}</span><div class="cl">${def.map(row).join('')}</div><span class="kind mesa" style="align-self:flex-start">Mesa · ${mesa.length}</span><p class="lb-desc" style="text-align:left">Não se compram. A mesa sempre tem uma valendo para todos, sorteada no começo e trocada a cada loja (3 rodadas). Quem cria a sala pode desligar.</p><div class="cl">${mesa.map(k=>row(k).replace(`<span class="ccp">$${JK[k].c}</span>`,'<span class="ccp">3 rod.</span>')).join('')}</div>`;
   }else{
     const jk=Object.keys(JK).filter(k=>!JK[k].pvp);
     body=`<p class="lb-desc">Aparecem no solo e na Sobrevivência. Os coringas agem da esquerda para a direita.</p><span class="kind" style="align-self:flex-start;background:var(--panel-2);color:var(--gold)">Coringas · ${jk.length}</span><div class="cl">${jk.map(row).join('')}</div>

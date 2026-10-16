@@ -14,6 +14,8 @@ export default async function () {
     await B.evaluate(() => { window.__c21.S.jokers = [{ k: 'armadura', v: 0 }, { k: 'bandagem', v: 0 }, { k: 'colete', v: 0 }, { k: 'ultima', v: 0 }]; });
     // baralho só com 2 para nenhuma mão inicial virar blackjack sozinha antes do roteiro
     for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.deck = Array.from({ length: 80 }, (_, i) => ({ r: '2', s: '♣', id: 5000 + i })); });
+    // sem carta de mesa: este teste confere contas exatas de dano
+    for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.mp.mesa = false; });
     for (const p of [A, B]) await p.click('[data-act=pvpgo]');
     const hp = () => Promise.all([A, B].map(p => p.evaluate(() => window.__c21.pvpHP())));
     async function round(ha, hb) {
