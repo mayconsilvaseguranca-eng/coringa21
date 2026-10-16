@@ -1,5 +1,10 @@
 import html
 V=[
+ ("v13.2","16/10 · 08:00","Animação quando alguém usa uma carta de mesa",
+  "Mostrar com uma animação qual carta de mesa foi usada, para todos se prepararem para a próxima rodada.",
+  [("Novo","Quando alguém (pessoa ou bot) usa uma carta de mesa, aparece para todos: a carta entra girando no meio da tela, com o nome de quem usou, o que ela faz e em que rodada vale. Dura uns 3 segundos e não trava a tela."),
+   ("Novo","Se duas cartas forem usadas juntas, elas aparecem uma depois da outra."),
+   ("Mudou","O teste das cartas de mesa agora confere que o outro jogador vê a animação.")]),
  ("v13.1","16/10 · 07:40","Loja com 4 opções: sempre uma carta de mesa",
   "A carta de mesa ganha uma vaga própria na loja: 4 opções, uma sempre de mesa.",
   [("Mudou","Loja do PvP com 4 cartas: 3 de ataque ou defesa e 1 de mesa, sempre. Com as cartas de mesa desligadas na sala, volta a ter 3. Os bots compram com a mesma regra."),
@@ -142,7 +147,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 07:40'
+UPD=AG['atualizado'] if AG else '16/10/2026, 08:00'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

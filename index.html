@@ -220,6 +220,19 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .mini .r{color:#ff8077}
 .kind{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:1px 7px}
 .kind.atk{background:color-mix(in srgb,var(--mult) 30%,transparent);color:#ff8f86}
+.mesa-fx{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(109,74,149,.6),rgba(3,10,9,.78) 70%);animation:mfIn .3s ease-out both;z-index:40}
+.mesa-fx.out{animation:mfOut .45s ease-in forwards}
+.mf-box{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;max-width:280px;padding:0 16px}
+.mf-who{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;color:var(--ink);background:rgba(0,0,0,.45);border-radius:999px;padding:4px 12px 4px 6px;animation:mfPop .4s .1s both}
+.mf-who .dot{width:14px;height:14px}
+.mf-card{width:96px;height:132px;border-radius:12px;border:3px solid var(--edge);background:linear-gradient(160deg,color-mix(in srgb,var(--jc) 80%,#fff),var(--jc));display:grid;place-items:center;font-size:48px;font-weight:800;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35);box-shadow:0 0 0 3px #c9a6ff,0 0 36px rgba(201,166,255,.8),0 6px 0 var(--edge);animation:mfCard .8s cubic-bezier(.2,1.4,.4,1) both}
+.mf-name{font-family:var(--font-px);font-size:30px;color:#e4d2ff;text-shadow:3px 3px 0 var(--edge);animation:mfPop .4s .45s both}
+.mf-desc{font-size:15px;font-weight:700;color:var(--ink);background:rgba(0,0,0,.5);border-radius:10px;padding:6px 10px;line-height:1.3;animation:mfPop .4s .6s both}
+.mf-when{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:rgba(0,0,0,.6);border-radius:999px;padding:4px 12px;animation:mfPop .4s .75s both}
+@keyframes mfIn{from{opacity:0}}
+@keyframes mfOut{to{opacity:0;transform:scale(.96)}}
+@keyframes mfCard{0%{transform:translateY(-60vh) rotate(-540deg) scale(.3);opacity:0}60%{opacity:1}100%{transform:none}}
+@keyframes mfPop{from{opacity:0;transform:translateY(10px) scale(.9)}}
 .kind.mesa{background:color-mix(in srgb,var(--violet) 34%,transparent);color:#c9a6ff}
 .cfg{display:grid;grid-template-columns:1fr;gap:6px}
 .cfg .bots{gap:10px;padding:4px 10px}
@@ -703,6 +716,34 @@ function pop(el,text,cls){
   $('#fx').appendChild(p);setTimeout(()=>p.remove(),1200);
 }
 /* Blackjack natural: explosão dourada com naipes caindo. Chegar a 21: onda verde saindo das cartas. */
+/* Anúncio de carta de mesa: aparece para todos quando alguém usa uma, uma de cada vez, sem travar a tela */
+const MESA_Q=[];let mesaShowing=false;
+function mesaAnnounce(ps){
+  if(!S||!S.mp||!S.mp.mesa)return;
+  if(!S.mp.evSeen)S.mp.evSeen={};
+  for(const p of ps){
+    const ev=p.me?S.mp.ev:(p.st&&Array.isArray(p.st.ev)?p.st.ev:[]);
+    for(const e of ev||[]){
+      if(!e||!JK[e.k]||JK[e.k].pvp!=='mesa')continue;
+      const key=(p.me?MP.pid:p.pid)+':'+e.k+':'+e.r;
+      if(S.mp.evSeen[key])continue;S.mp.evSeen[key]=1;
+      if(+e.r<(S.round||0))continue; /* evento antigo (ex.: voltou à partida depois) */
+      MESA_Q.push({k:e.k,r:+e.r,who:p.me?'Você':p.name,me:!!p.me,col:p.col});
+    }
+  }
+  if(!mesaShowing)mesaNext();
+}
+function mesaNext(){
+  const a=MESA_Q.shift();if(!a){mesaShowing=false;return}
+  mesaShowing=true;const d=JK[a.k];
+  const el=document.createElement('div');el.className='mesa-fx';
+  el.innerHTML=`<div class="mf-box"><div class="mf-who"><span class="dot" style="--pc:${colOf(a.col)}"></span>${esc(a.who)} usou</div>
+  <div class="mf-card" style="--jc:${d.bg}"><span>${d.g}</span></div>
+  <div class="mf-name">${esc(d.n)}</div><div class="mf-desc">${esc(d.d)}</div>
+  <div class="mf-when">Vale na rodada ${a.r}</div></div>`;
+  $('#fx').appendChild(el);beep(300,.12,'sawtooth',.04);setTimeout(()=>beep(600,.1,'triangle',.04),160);setTimeout(()=>beep(900,.16,'triangle',.04),320);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>{el.remove();mesaNext()},RM?10:450)},RM?900:3200);
+}
 function fxBlackjack(){
   beep(523,.12,'square',.05);setTimeout(()=>beep(659,.12,'square',.05),110);setTimeout(()=>beep(784,.12,'square',.05),220);setTimeout(()=>beep(1046,.3,'square',.05),330);
   const fx=$('#fx'),w=document.createElement('div');w.className='bj-fx';
@@ -1268,6 +1309,7 @@ function mpTick(){
   const ps=gamePlayers();
   if(isPvp()){
     pvpCheckDamage(ps);
+    mesaAnnounce(ps);
     if(S.phase==='pwait'&&S.mp.alive&&!S.busy&&S.mp.sub&&S.mp.sub.r===S.round&&!pvpWaitingNames().length){pvpShowdown();return}
     if(['play','pwait','pshow'].includes(S.phase)){renderActions();renderRivals()}
   }

@@ -50,6 +50,9 @@ export default async function () {
     }
     // Rodada 1: Ana usa Teto 19 (vale na 2). Ana 20 contra 18: Beto leva 15.
     await usar(A, 'teto');
+    // Beto vê a animação da carta usada pela Ana
+    const viu = await B.waitForFunction(() => { const f = document.querySelector('#fx .mesa-fx'); return f && f.textContent.includes('Teto 19') && f.textContent.includes('Ana') && f.textContent.includes('rodada 2'); }, null, { timeout: 8000 }).then(() => true, () => false);
+    check(viu, 'Beto não viu a animação do Teto 19 usado pela Ana');
     const r1 = await round([['K', '♠'], ['Q', '♥']], [['10', '♣'], ['8', '♦']]);
     check(r1[1] === h0 - 15, `rodada 1: Beto deveria ter ${h0 - 15} PV, tem ${r1[1]}`);
     // Rodada 2 com Teto 19: Beto fecha 20 e estoura; Ana 18 vence (14 de dano). Ana usa Trégua (vale na 3).
