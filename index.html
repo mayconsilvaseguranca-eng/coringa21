@@ -394,7 +394,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v16';
+const VERSION='v16.1';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -470,7 +470,6 @@ const JK={
   colete:{n:'Colete',d:'Uso único: se você estourar, não leva dano na rodada',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'},
   /* cartas de mesa: sempre uma valendo para todos, sorteada a cada 3 rodadas (troca na loja). Podem ser desligadas na sala. */
   tempestade:{n:'Tempestade',d:'No começo de cada rodada, todos levam 5 de dano',c:4,g:'ϟ',bg:'#4b5aa8',pvp:'mesa'},
-  tregua:{n:'Trégua',d:'Todo dano cai pela metade',c:3,g:'⊘',bg:'#4f8f86',pvp:'mesa'},
   ceu:{n:'Céu Aberto',d:'Só estoura acima de 23',c:3,g:'23',bg:'#2f7fb5',pvp:'mesa'},
   empate:{n:'Empate Sangrento',d:'Quem empatar com alguém leva 5 de dano',c:3,g:'=',bg:'#9a2f3a',pvp:'mesa'},
   curta:{n:'Mão Curta',d:'No máximo 3 cartas na mão',c:3,g:'3',bg:'#5f7a2f',pvp:'mesa'},
@@ -527,7 +526,7 @@ const isDuel=()=>!!(S&&S.mp&&S.mp.mode!=='pvp'&&S.bi===2);
 const KIND_TXT={atk:'Ataque',def:'Defesa',mesa:'Mesa'};
 /* efeitos de mesa de uma rodada: eventos {k,r} publicados por qualquer jogador da partida */
 /* Carta de mesa da rodada R: sorteada pela partida (igual em todos os aparelhos), troca a cada loja e nunca repete a anterior. */
-const MESA_K=['tempestade','tregua','teto','ceu','empate','curta','asferro','ouro','silencio','hospital'];
+const MESA_K=['tempestade','teto','ceu','empate','curta','asferro','ouro','silencio','hospital'];
 function mesaCardFor(gid,R,seq){
   if(!(R>=1))return null;const per=Math.floor((R-1)/(S&&S.mp&&S.mp.mesaEvery||PVP_SHOP_EVERY));
   if(Array.isArray(seq)&&seq.length)return seq[per%seq.length];
@@ -1034,10 +1033,9 @@ async function pvpShowdown(){
   let dmg=0,per=0;const extra=[];
   if(!S.mp.bleed)S.mp.bleed={};
   /* sangria de rodadas anteriores */
-  let bled=0;const truce=fxOn('tregua');
-  if(truce)extra.push('Trégua: todo dano cai pela metade');
+  let bled=0;
   for(const pid in S.mp.bleed){const b=S.mp.bleed[pid];
-    if(S.round>b.from&&S.round<=b.to){const g=gamePlayers().find(x=>x.pid===pid);if(g&&g.st&&g.st.al){const q=truce?1:2;S.mp.sent[pid]=r1((S.mp.sent[pid]||0)+q);bled+=q}}
+    if(S.round>b.from&&S.round<=b.to){const g=gamePlayers().find(x=>x.pid===pid);if(g&&g.st&&g.st.al){const q=2;S.mp.sent[pid]=r1((S.mp.sent[pid]||0)+q);bled+=q}}
     if(S.round>=b.to)delete S.mp.bleed[pid]}
   if(bled)extra.push(`Sangria: ${bled} de dano`);
   if(pts>0&&beaten.length){
@@ -1050,7 +1048,6 @@ async function pvpShowdown(){
     if(act('lamina')){per+=3;extra.push('Lâmina: +3 em cada rival')}
     if(act('cinco')){const k=2*(S.player.length-1);per+=k;extra.push(`Cinco Lâminas: +${k} em cada rival`)}
     if(act('precisao')&&t===20){per+=7;extra.push('Precisão: fechou com 20, +7 em cada rival')}
-    if(truce)per=Math.max(1,Math.round(per/2));
     for(const b of beaten)S.mp.sent[b.pid]=r1((S.mp.sent[b.pid]||0)+per);
     S.mp.dealt=r1((S.mp.dealt||0)+per*beaten.length+bled);
     if(act('sangria'))for(const b of beaten)S.mp.bleed[b.pid]={from:S.round,to:S.round+3};
@@ -1487,9 +1484,8 @@ function botTick(){
       if(!others.some(p=>!(p.st.sub&&p.st.sub.r===b.r))){
         const parts=others.map(p=>({pid:p.pid,v:handVal(p.st.sub)}));
         const myV=handVal(st.sub);const beaten=myV<0?[]:parts.filter(p=>p.v<myV);
-        const truce=b.fx.some(e=>e.k==='tregua');
         /* sangria de rodadas anteriores */
-        for(const pid in b.bleed){const q=b.bleed[pid];if(b.r>q.from&&b.r<=q.to&&others.some(p=>p.pid===pid))b.sent[pid]=r1((b.sent[pid]||0)+(truce?1:2));if(b.r>=q.to)delete b.bleed[pid]}
+        for(const pid in b.bleed){const q=b.bleed[pid];if(b.r>q.from&&b.r<=q.to&&others.some(p=>p.pid===pid))b.sent[pid]=r1((b.sent[pid]||0)+2);if(b.r>=q.to)delete b.bleed[pid]}
         if(beaten.length){
           const s2=st.sub,cards=s2.c.length,t=s2.t;
           const type=s2.bj?'bj':s2.f?'five':t===21?'t21':'win';
@@ -1503,7 +1499,6 @@ function botTick(){
           if(bAct(b,'lamina'))per+=3;
           if(bAct(b,'cinco'))per+=2*(cards-1);
           if(bAct(b,'precisao')&&t===20)per+=7;
-          if(truce)per=Math.max(1,Math.round(per/2));
           for(const x of beaten)b.sent[x.pid]=r1((b.sent[x.pid]||0)+per);
           if(bAct(b,'sangria'))for(const x of beaten)b.bleed[x.pid]={from:b.r,to:b.r+3};
           if(bAct(b,'vampiro'))b.hpv=r1(Math.min(b.maxHp,b.hpv+Math.max(1,Math.round(per*beaten.length*0.15))));

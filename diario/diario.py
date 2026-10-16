@@ -1,5 +1,8 @@
 import html
 V=[
+ ("v16.1","16/10 · 20:20","Trégua saiu",
+  "Tirar a carta de mesa Trégua.",
+  [("Mudou","A carta de mesa Trégua saiu do jogo. A mesa agora sorteia entre 9 cartas de mesa, uma a cada 3 rodadas, sem repetir a anterior.")]),
  ("v16","16/10 · 17:05","Partidas mais longas e reações",
   "Partidas um pouco mais longas, até cada um ter umas 4 cartas compradas, e um botão de reações durante a partida.",
   [("Mudou","Vida inicial do PvP: 200 PV com 6 ou mais jogadores (era 120), até 232 com 2. Na simulação, uma partida de 6 dura umas 16 rodadas (eram 11) e quem chega ao fim tem umas 4 cartas compradas."),
@@ -175,7 +178,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 17:05'
+UPD=AG['atualizado'] if AG else '16/10/2026, 20:20'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

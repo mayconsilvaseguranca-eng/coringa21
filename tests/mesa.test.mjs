@@ -1,4 +1,4 @@
-// PvP: a mesa sempre tem uma carta de mesa, sorteada a cada 3 rodadas (troca na loja). Confere Teto 19, Trégua e Tempestade, a animação e a opção de desligar.
+// PvP: a mesa sempre tem uma carta de mesa, sorteada a cada 3 rodadas (troca na loja). Confere Teto 19, a troca de carta e a Tempestade, a animação e a opção de desligar.
 import { setup, check, createRoom, joinRoom } from './lib.mjs';
 
 export default async function () {
@@ -13,7 +13,7 @@ export default async function () {
     // baralho só com 2 para nenhuma mão inicial virar blackjack sozinha antes do roteiro
     for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.deck = Array.from({ length: 80 }, (_, i) => ({ r: '2', s: '♣', id: 5000 + i })); });
     // sequência fixa só no teste (no jogo é sorteada pela partida)
-    for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.mp.mesaSeq = ['teto', 'tregua', 'tempestade']; });
+    for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.mp.mesaSeq = ['teto', 'ceu', 'tempestade']; });
     for (const p of [A, B]) await p.click('[data-act=pvpgo]');
     const hp = () => Promise.all([A, B].map(p => p.evaluate(() => window.__c21.pvpHP())));
     async function round(ha, hb) {
@@ -47,15 +47,15 @@ export default async function () {
     await round([['10', '♠'], ['8', '♥']], [['10', '♣'], ['8', '♦']]);
     check((await fx()).every(x => x === 'teto'), 'o Teto 19 deveria valer nas 3 rodadas');
     await round([['10', '♠'], ['8', '♥']], [['10', '♣'], ['8', '♦']]);
-    // Rodada 4 (depois da loja): troca para Trégua. Ana 20 contra 18: 15 de dano vira 8.
+    // Rodada 4 (depois da loja): troca para Céu Aberto. Ana 20 contra 18: 15 de dano.
     const r4 = await round([['K', '♠'], ['Q', '♥']], [['10', '♣'], ['8', '♦']]);
-    check((await fx()).every(x => x === 'tregua'), `rodada 4 deveria ter Trégua: ${await fx()}`);
-    check(r4[1] === h0 - 22, `Trégua: Beto deveria ter ${h0 - 22} PV, tem ${r4[1]}`);
+    check((await fx()).every(x => x === 'ceu'), `rodada 4 deveria ter Céu Aberto: ${await fx()}`);
+    check(r4[1] === h0 - 29, `rodada 4: Beto deveria ter ${h0 - 29} PV, tem ${r4[1]}`);
     await round([['10', '♠'], ['8', '♥']], [['10', '♣'], ['8', '♦']]);
     await round([['10', '♠'], ['8', '♥']], [['10', '♣'], ['8', '♦']]);
     // Rodada 7: Tempestade tira 5 de todos no começo.
     const r7 = await round([['10', '♠'], ['8', '♥']], [['10', '♣'], ['8', '♦']]);
-    check(r7[0] === h0 - 5 && r7[1] === h0 - 27, `Tempestade: esperado Ana ${h0 - 5} e Beto ${h0 - 27}, veio ${r7}`);
+    check(r7[0] === h0 - 5 && r7[1] === h0 - 34, `Tempestade: esperado Ana ${h0 - 5} e Beto ${h0 - 34}, veio ${r7}`);
     check(t.errors.length === 0, 'erros na página: ' + t.errors.join(' | '));
     await t.close();
 
@@ -75,6 +75,6 @@ export default async function () {
       check(await C.evaluate(() => window.__c21.S.mp.mesa === false && !(window.__c21.S.mp.fx || []).length), 'a partida deveria começar sem carta de mesa');
       check(t2.errors.length === 0, 'erros na página: ' + t2.errors.join(' | '));
     } finally { await t2.close(); }
-    return 'cartas de mesa ok (troca a cada loja, Teto 19, Trégua, Tempestade, animação e opção desligar)';
+    return 'cartas de mesa ok (troca a cada loja, Teto 19, Tempestade, animação e opção desligar)';
   } finally { await t.close().catch(() => {}); }
 }
