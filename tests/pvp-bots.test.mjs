@@ -34,7 +34,7 @@ export default async function () {
     }
     check(alive <= 1, `a partida não terminou (ainda ${alive} vivos na rodada ${rounds})`);
     check(rounds <= 25, `partida longa demais: ${rounds} rodadas`);
-    await A.waitForTimeout(2000);
+    await A.waitForFunction(() => window.__c21.gamePlayers().some(p => p.st && p.st.ph === 'won'), null, { timeout: 10000 }).catch(() => {});
     const final = await A.evaluate(() => window.__c21.gamePlayers().map(p => ({ n: p.name, ph: p.st && p.st.ph, hp: p.st && p.st.hp })));
     check(final.filter(x => x.ph === 'won').length === 1, 'não houve exatamente um vencedor: ' + JSON.stringify(final));
     check(t.errors.length === 0, 'erros na página: ' + t.errors.join(' | '));
