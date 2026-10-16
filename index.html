@@ -299,7 +299,8 @@ const JF={
 const jDesc=j=>JK[j.k].d+(j.k==='escalada'?` (agora +${j.v||0})`:'');
 const sellPrice=k=>Math.max(1,Math.floor(JK[k].c/2));
 const COLORS=['#f0453a','#2b86f0','#f5bd3a','#3fbf6a','#a05be0','#ff7ab6','#25c3c3','#ff8a2a','#c9d14a','#e8e8e8'];
-const MAXP=10, LIVES=3;
+const MAXP=10, LIVES=3, PVP_HP=150, DMG_K=10;
+const r1=x=>Math.round((+x||0)*10)/10;
 
 /* ---------- Armazenamento ---------- */
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -321,10 +322,14 @@ function newRun(seedStr,label,mp){
 }
 function pickBoss(prev){const ks=Object.keys(BOSSES).filter(k=>k!==prev);return pick(ks)}
 const has=k=>S.jokers.some(j=>j.k===k);
-const isDuel=()=>!!(S&&S.mp&&S.bi===2);
+const isPvp=()=>!!(S&&S.mp&&S.mp.mode==='pvp');
+const isDuel=()=>!!(S&&S.mp&&S.mp.mode!=='pvp'&&S.bi===2);
+const recvTotal=()=>Object.values((S&&S.mp&&S.mp.recv)||{}).reduce((a,b)=>a+(+b||0),0);
+const pvpHP=()=>Math.max(0,Math.ceil(r1((S.mp.maxHp||PVP_HP)-recvTotal())));
+const dmgOf=pts=>r1(pts/target(S.ante,0)*DMG_K);
 const bossOn=k=>S&&S.bi===2&&S.boss===k&&S.phase==='play';
 function target(a,i){a=a??S.ante;i=i??S.bi;let base=a<=8?ANTE_BASE[a-1]:ANTE_BASE[7]*Math.pow(2.2,a-8);return Math.round(base*BLINDS[i].k/10)*10}
-function blindName(i){i=i??S.bi;if(i===2)return (S&&S.mp?'Duelo · ':'')+BOSSES[S.boss].n;return BLINDS[i].n}
+function blindName(i){i=i??S.bi;if(i===2)return (S&&S.mp&&S.mp.mode!=='pvp'?'Duelo · ':'')+BOSSES[S.boss].n;return BLINDS[i].n}
 function save(){if(!S||S.busy)return;if(S.mp)store.set(SAVE_MP,{S,rs:R.s,code:MP.code});else if(S.phase!=='over')store.set(SAVE,{S,rs:R.s})}
 
 /* ---------- Cartas ---------- */
@@ -352,7 +357,12 @@ function renderHUD(){
   if(!S)return;
   const b=BLINDS[S.bi];const bb=$('#blindBox');
   bb.style.setProperty('--bc',b.col);
-  if(isDuel()){
+  $('#bar').style.background=isPvp()?'var(--mult)':'';
+  if(isPvp()){
+    const hp=pvpHP(),mx=S.mp.maxHp||PVP_HP;
+    bb.innerHTML=`<div class="bn">${blindName()}</div><div class="bt">PV <span class="num">${hp}</span><span class="c-dim">/${mx}</span><span class="rw" style="color:#ff8077">⚔ ${fmt(S.roundDmg||0)}</span></div>`;
+    $('#bar').style.width=Math.min(100,hp/mx*100)+'%';
+  }else if(isDuel()){
     const lead=duelLeader();
     bb.innerHTML=`<div class="bn">${blindName()}</div><div class="bt">Rival líder <span class="num">${fmt(lead)}</span><span class="rw">$${b.r}</span></div>`;
     $('#bar').style.width=(S.roundScore+lead?Math.min(100,S.roundScore/Math.max(S.roundScore,lead)*100):0)+'%';
@@ -431,8 +441,9 @@ function hv(k){const h=HANDS[k],l=S?S.levels[k]:1;return{c:h.c+h.lc*(l-1),m:h.m+
 /* ---------- Fluxo de jogo ---------- */
 function startBlind(){
   S.phase='play';S.deck=newDeck();S.roundScore=0;S.seguroUsed=false;
-  const base=isDuel()?4:5;
-  S.handsLeft=base-(S.bi===2&&S.boss==='agulha'?(isDuel()?1:2):0)+(has('reserva')?1:0);
+  const short=isDuel()||isPvp();const base=short?4:5;
+  S.handsLeft=base-(S.bi===2&&S.boss==='agulha'?(short?1:2):0)+(has('reserva')?1:0);
+  S.roundDmg=0;
   S.swapsLeft=(S.bi===2&&S.boss==='corrente')?0:3+(has('trocador')?2:0);
   S.calc=null;S.awaitNext=false;S.player=[];S.dealer=[];
   hideSheet();deal();
@@ -483,11 +494,13 @@ async function resolve(){
   const pts=await scoreHand(type,{total:p,dBust:d>21,isWin});
   if(isWin&&has('agiota')){S.money++;pop(jokerEl(S.jokers.findIndex(j=>j.k==='agiota')),'+$1','gold');beep(990,.08)}
   S.handsLeft--;S.stats.best=Math.max(S.stats.best,pts);S.stats.total+=pts;
+  if(isPvp()&&pts>0)dealDamage(pts);
   render();await sleep(450);
-  const duel=isDuel();
-  if(!duel&&S.roundScore>=target()){await sleep(300);blindWon();return}
-  if(S.handsLeft<=0){if(duel){duelFinished();return}if(S.mp){mpLifeLost();return}gameOver();return}
+  const duel=isDuel(),pvp=isPvp();
+  if(!duel&&!pvp&&S.roundScore>=target()){await sleep(300);blindWon();return}
+  if(S.handsLeft<=0){if(pvp){pvpRoundEnd();return}if(duel){duelFinished();return}if(S.mp){mpLifeLost();return}gameOver();return}
   S.busy=false;S.awaitNext=true;render();
+  if(S.mp)mpTick();
 }
 async function scoreHand(type,ctx){
   if(type==='bust'||type==='lose'){
@@ -579,6 +592,35 @@ function duelContinue(){
   S.phase='cash';render();showCash();
 }
 function eliminate(){S.busy=false;S.mp.alive=false;S.phase='out';render();showBoard()}
+function dealDamage(pts){
+  const dmg=dmgOf(pts);if(dmg<=0)return;
+  const tg=gamePlayers().filter(p=>!p.me&&p.st&&p.st.al);
+  S.roundDmg=r1((S.roundDmg||0)+dmg);S.mp.dealt=r1((S.mp.dealt||0)+dmg);
+  if(!tg.length){pop($('#rs'),`⚔ ${fmt(dmg)} (sem rivais vivos)`,'info');return}
+  const per=r1(dmg/tg.length);
+  for(const t of tg)S.mp.sent[t.pid]=r1((S.mp.sent[t.pid]||0)+per);
+  pop($('#rs'),tg.length>1?`⚔ ${fmt(per)} em cada rival`:`⚔ ${fmt(per)} em ${tg[0].name}`,'mult');
+  beep(220,.12,'sawtooth',.05);
+}
+function pvpRoundEnd(){
+  S.busy=false;S.stats.blinds++;
+  const b=BLINDS[S.bi],interest=interestNow();
+  S.cash={reward:b.r,hands:0,interest,bonus:0,total:b.r+interest};
+  S.phase='cash';render();showCash();mpTick();
+}
+function pvpCheckDamage(ps){
+  if(!S.mp.recv)S.mp.recv={};
+  let gained=0;const who=[];
+  for(const p of ps){if(p.me||!p.st||!p.st.dm||typeof p.st.dm!=='object')continue;
+    const v=Math.min(100000,Math.max(0,+p.st.dm[MP.pid]||0));const old=+S.mp.recv[p.pid]||0;
+    if(v>old+0.001){S.mp.recv[p.pid]=v;gained+=v-old;who.push(p.name)}}
+  if(gained>0&&S.mp.alive){
+    pop($('#blindBox'),`−${fmt(r1(gained))} PV · ${who.slice(0,2).join(', ')}${who.length>2?'…':''}`,'mult');
+    anim($('#blindBox'),'shake');beep(130,.15,'sawtooth',.05);
+    render();
+  }
+  if(S.mp.alive&&pvpHP()<=0&&!S.busy&&!['out','won'].includes(S.phase)){S.msg='Seus pontos de vida acabaram.';eliminate()}
+}
 function mpWin(){S.phase='won';render();showBoard();beep(660,.1);setTimeout(()=>beep(990,.2),140)}
 
 /* ---------- Multiplayer: sala ---------- */
@@ -673,7 +715,7 @@ class Sala extends Mq{
     const first=ps.slice().sort((a,b)=>(+a.presence.j||0)-(+b.presence.j||0)||(a.presence.pid<b.presence.pid?-1:1))[0];
     if(first.presence.pid!==this.pid)return;
     const lobby=ps.filter(p=>!p.presence.g).length;
-    const info={h:cleanName(this.me.name)||'Jogador',n:ps.length,s:lobby?'lobby':'jogo'};
+    const fp=first.presence;const info={h:cleanName(this.me.name)||'Jogador',n:ps.length,s:lobby?'lobby':'jogo',m:fp.lm==='surv'?'surv':'pvp'};
     const key=JSON.stringify(info);
     if(!force&&key===this.lastAnn)return;
     this.lastAnn=key;
@@ -714,7 +756,7 @@ class Vitrine extends Mq{
     if(!payload.length||payload.length>2000){this.rooms.delete(id);this._notify();return}
     let r;try{r=JSON.parse(TD.decode(payload))}catch(e){return}
     if(!r||typeof r!=='object')return;
-    this.rooms.set(id,{id,h:cleanName(r.h)||'Jogador',n:Math.max(1,Math.min(99,+r.n||1)),s:r.s==='jogo'?'jogo':'lobby',ts:Math.min(Date.now(),+r.ts||0)});
+    this.rooms.set(id,{id,h:cleanName(r.h)||'Jogador',n:Math.max(1,Math.min(99,+r.n||1)),s:r.s==='jogo'?'jogo':'lobby',m:r.m==='surv'?'surv':'pvp',ts:Math.min(Date.now(),+r.ts||0)});
     this._notify();
   }
   list(){const now=Date.now();return [...this.rooms.values()].filter(r=>now-r.ts<45000).sort((a,b)=>(a.s===b.s?0:a.s==='lobby'?-1:1)||b.ts-a.ts).slice(0,30)}
@@ -728,13 +770,14 @@ function renderRoomList(){
   if(!VIT){el.innerHTML='<p class="c-dim" style="text-align:center;font-size:13.5px">Não consegui carregar a lista agora. Você ainda pode entrar pelo código.</p>';return}
   if(!VIT.connected()){el.innerHTML='<p class="c-dim" style="text-align:center;font-size:13.5px">Procurando salas…</p>';return}
   const rs=VIT.list();
-  el.innerHTML=rs.length?rs.map(r=>`<button class="li roombtn" data-act="pickroom" data-id="${r.id}" data-h="${esc(r.h)}" ${r.s==='jogo'?'disabled':''}><span class="dot" style="--pc:${r.s==='jogo'?'#5b6b7a':'#5fd38a'}"></span><span class="grow"><b>Sala de ${esc(r.h)}</b><br><small class="c-dim">${r.n} jogador${r.n===1?'':'es'} · ${r.s==='jogo'?'partida em andamento':'esperando jogadores'}</small></span><span class="c-gold" style="font-weight:800">${r.s==='jogo'?'':'Entrar ›'}</span></button>`).join(''):'<p class="c-dim" style="text-align:center;font-size:13.5px">Nenhuma sala aberta agora. Crie uma e chame os amigos.</p>';
+  el.innerHTML=rs.length?rs.map(r=>`<button class="li roombtn" data-act="pickroom" data-id="${r.id}" data-h="${esc(r.h)}" ${r.s==='jogo'?'disabled':''}><span class="dot" style="--pc:${r.s==='jogo'?'#5b6b7a':'#5fd38a'}"></span><span class="grow"><b>Sala de ${esc(r.h)}</b><br><small class="c-dim">${r.m==='pvp'?'PvP':'Sobrevivência'} · ${r.n} jogador${r.n===1?'':'es'} · ${r.s==='jogo'?'partida em andamento':'esperando jogadores'}</small></span><span class="c-gold" style="font-weight:800">${r.s==='jogo'?'':'Entrar ›'}</span></button>`).join(''):'<p class="c-dim" style="text-align:center;font-size:13.5px">Nenhuma sala aberta agora. Crie uma e chame os amigos.</p>';
 }
 setInterval(()=>{if(VIT&&openSheet==='mphome')renderRoomList();if(NR&&NR.announce)NR.announce(false)},5000);
 setInterval(()=>{if(NR)onRoomChange()},5000);
 const MP={code:null,pid:null,name:'',col:0,j:0,msg:'',started:new Set()};
 MP.pid=store.get('c21-pid');if(typeof MP.pid!=='string'){MP.pid=rid();store.set('c21-pid',MP.pid)}
 MP.name=store.get('c21-name')||'';
+MP.mode=store.get('c21-mode')==='surv'?'surv':'pvp';
 MP.col=Number.isInteger(store.get('c21-col'))?store.get('c21-col'):Math.floor(Math.random()*COLORS.length);
 const colOf=i=>COLORS[Number.isInteger(i)&&i>=0&&i<COLORS.length?i:0];
 const cleanName=s=>String(s||'').replace(/[\u0000-\u001f​-‏‪-‮⁠-⁯]/g,'').trim().slice(0,14);
@@ -745,7 +788,7 @@ function roomPlayers(){
     const pr=p.presence||{};if(typeof pr.pid!=='string'||pr.pid.length>16)continue;
     const me=pr.pid===MP.pid;
     const prev=m.get(pr.pid);
-    if(!prev||(me?p.sameTab:p.updatedAt>prev.updatedAt))m.set(pr.pid,{pid:pr.pid,name:cleanName(pr.name)||'Jogador',col:pr.col,j:+pr.j||0,g:typeof pr.g==='string'?pr.g:null,start:pr.start,st:pr.st&&typeof pr.st==='object'?pr.st:null,me,off:!!p.off});
+    if(!prev||(me?p.sameTab:p.updatedAt>prev.updatedAt))m.set(pr.pid,{pid:pr.pid,name:cleanName(pr.name)||'Jogador',col:pr.col,j:+pr.j||0,g:typeof pr.g==='string'?pr.g:null,start:pr.start,st:pr.st&&typeof pr.st==='object'?pr.st:null,lm:pr.lm==='surv'?'surv':'pvp',me,off:!!p.off});
   }
   return [...m.values()];
 }
@@ -756,12 +799,14 @@ let lastPres='';
 function mpSync(){
   if(!NR||!S||!S.mp)return;
   const st={a:S.ante,b:S.bi,l:S.mp.lives,al:S.mp.alive?1:0,sc:S.roundScore,t:S.stats.total,ph:S.phase,dh:S.mp.dh,n:S.jokers.length};
+  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.dm=S.mp.sent;delete st.dh;delete st.l}
   const s=JSON.stringify(st);if(s===lastPres)return;lastPres=s;
   NR.presence({g:S.mp.gid,st}).catch(()=>{});
 }
 function mpTick(){
   if(!S||!S.mp)return;
   const ps=gamePlayers();
+  if(isPvp())pvpCheckDamage(ps);
   if(S.phase==='duelwait'&&S.mp.lastDuel<S.ante){
     const A=S.ante;
     const waiting=ps.filter(p=>!p.me&&p.st&&p.st.al&&!(Array.isArray(p.st.dh)&&p.st.dh[A]!=null));
@@ -782,7 +827,7 @@ function onRoomChange(){
     for(const p of roomPlayers()){const st=p.start;
       if(st&&typeof st==='object'&&typeof st.gid==='string'&&typeof st.seed==='string'&&Array.isArray(st.players)&&st.players.includes(MP.pid)&&!MP.started.has(st.gid)&&!done.includes(st.gid)){beginMP(st);return}}
   }
-  if(S&&S.mp){mpTick();renderStrip();if(S.phase==='play'&&isDuel()&&!S.busy)renderHUD()}
+  if(S&&S.mp){mpTick();renderStrip();if(S.phase==='play'&&(isDuel()||isPvp())&&!S.busy)renderHUD()}
   if(openSheet==='lobby')showLobby();else if(openSheet==='board')showBoard();else if(openSheet==='duelwait')showDuelWait();
 }
 async function enterRoom(code){
@@ -793,7 +838,7 @@ async function enterRoom(code){
   MP.name=nm;store.set('c21-name',nm);store.set('c21-col',MP.col);
   MP.msg='Entrando na sala…';showMPHome();
   const sala=new Sala(code,MP.pid);
-  sala.presence({name:MP.name,col:MP.col,j:Date.now(),g:null,start:null,st:null});
+  sala.presence({name:MP.name,col:MP.col,j:Date.now(),g:null,start:null,st:null,lm:MP.mode});
   try{NR=await sala.start()}catch(e){NR=null;MP.msg='Não consegui conectar ao servidor de salas. Confira a internet e tente de novo.';showMPHome();return}
   MP.code=code;MP.j=NR.me.j;MP.msg='';lastPres='';stopVitrine();
   NR.onPeers(()=>onRoomChange());
@@ -801,7 +846,7 @@ async function enterRoom(code){
 }
 function startGame(){
   const lp=lobbyPlayers().slice(0,MAXP);
-  const st={gid:rid(),seed:rid()+rid(),players:lp.map(p=>p.pid)};
+  const st={gid:rid(),seed:rid()+rid(),players:lp.map(p=>p.pid),mode:MP.mode};
   if(!st.players.includes(MP.pid))st.players.push(MP.pid);
   NR.presence({start:st}).catch(()=>{});
   beginMP(st);
@@ -810,7 +855,8 @@ function beginMP(st){
   MP.started.add(st.gid);lastPres='';
   const sv=store.get(SAVE_MP);
   if(sv&&sv.S&&sv.S.mp&&sv.S.mp.gid===st.gid){S=sv.S;R.s=sv.rs;S.busy=false;resume();return}
-  newRun(st.seed,'Sala '+MP.code.toUpperCase(),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0});
+  const mode=st.mode==='surv'?'surv':'pvp';
+  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:PVP_HP,sent:{},recv:{},dealt:0});
 }
 function backToLobby(){
   if(S&&S.mp){const d=store.get('c21-done')||[];d.push(S.mp.gid);store.set('c21-done',d.slice(-20))}
@@ -823,16 +869,16 @@ async function leaveRoom(){
   const r=NR;NR=null;MP.code=null;S=null;render0();showStart();
   try{r&&await r.leave()}catch(e){}
 }
-function rankKey(p){const st=p.st||{};const ph=st.ph;return [ph==='won'?3:st.al?(ph==='done'?2:1):0,+st.l||0,+st.a||0,+st.b||0,+st.t||0]}
+function rankKey(p){const st=p.st||{};const ph=st.ph;if(st.md==='pvp')return [ph==='won'?3:st.al?1:0,+st.hp||0,+st.a||0,+st.b||0,+st.t||0];return [ph==='won'?3:st.al?(ph==='done'?2:1):0,+st.l||0,+st.a||0,+st.b||0,+st.t||0]}
 function cmpRank(a,b){const x=rankKey(a),y=rankKey(b);for(let i=0;i<x.length;i++)if(x[i]!==y[i])return y[i]-x[i];return 0}
 function renderStrip(){
   const el=$('#strip');
   if(!S||!S.mp){el.hidden=true;return}
   el.hidden=false;
   const ps=gamePlayers().sort(cmpRank);
-  const letter=['P','G','D'];
+  const letter=isPvp()?['P','G','C']:['P','G','D'];
   el.innerHTML=ps.length?ps.map((p,i)=>{const st=p.st||{};const out=!st.al;
-    return `<div class="rv ${p.me?'me':''} ${out?'out':''} ${p.off?'off':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span>${esc(p.name)}<span class="hearts">${out?'fora':'♥'.repeat(Math.max(0,Math.min(3,+st.l||0)))}</span><span class="where">A${+st.a||1}·${letter[+st.b||0]||'P'}</span></div>`}).join('')+(NR&&!NR.connected()?'<div class="rv off" style="color:#ff8077">sem conexão · tentando de novo</div>':''):'<div class="rv">Conectando à sala…</div>';
+    return `<div class="rv ${p.me?'me':''} ${out?'out':''} ${p.off?'off':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span>${esc(p.name)}<span class="hearts">${out?'fora':st.md==='pvp'?`${Math.max(0,+st.hp||0)} PV`:'♥'.repeat(Math.max(0,Math.min(3,+st.l||0)))}</span><span class="where">A${+st.a||1}·${letter[+st.b||0]||'P'}</span></div>`}).join('')+(NR&&!NR.connected()?'<div class="rv off" style="color:#ff8077">sem conexão · tentando de novo</div>':''):'<div class="rv">Conectando à sala…</div>';
 }
 
 /* ---------- Telas ---------- */
@@ -868,7 +914,7 @@ function showMPHome(){
     <label class="field">Tem um código?<input id="codein" maxlength="8" autocomplete="off" autocapitalize="characters" value="${esc(code)}" placeholder="Ex.: K7M2"></label>
     <button class="btn b-hit" data-act="join">Entrar na sala</button>`;
   showSheet(`<h2>Multiplayer</h2>
-  <p>Todos jogam ao mesmo tempo com o mesmo baralho. Cada um tem <b style="color:#ff6b61">3 vidas</b>. Falhar uma blind custa uma vida, e no <b style="color:var(--gold)">Duelo</b> de cada ante quem fizer menos pontos perde outra. O último de pé vence.</p>
+  <p>Todos jogam ao mesmo tempo com o mesmo baralho. Quem cria a sala escolhe o modo: <b style="color:#ff6b61">PvP</b>, em que seus pontos viram dano nos rivais e quem zerar a vida sai, ou <b style="color:var(--gold)">Sobrevivência</b>, com 3 vidas e duelos. O último de pé vence.</p>
   ${MP.msg?`<div class="note">${esc(MP.msg)}</div>`:''}
   ${body}
   <button class="btn b-dim" data-act="home">Voltar</button>`,'mphome');
@@ -891,12 +937,21 @@ function tryJoinPick(id,host){
   if(!code||roomId(code)!==id){MP.msg='Código errado. Confira com quem criou a sala.';showJoinPrompt(id,host);return}
   MP.msg='';enterRoom(code);
 }
+const MODE_TXT={
+  pvp:{n:'PvP · todos contra todos',d:`Cada um começa com ${PVP_HP} pontos de vida. Os pontos de cada mão viram dano, dividido entre todos os rivais vivos. Quem zerar a vida sai. O último de pé vence.`},
+  surv:{n:'Sobrevivência',d:'Cada um tem 3 vidas. Falhar uma blind custa uma vida, e no Duelo de cada ante quem fizer menos pontos perde outra.'}
+};
+function modeBlock(amHost,host){
+  const m=amHost?MP.mode:(host&&host.lm)||'pvp';
+  if(!amHost)return `<div class="boss-note" style="border-color:var(--gold);background:var(--panel-2)"><b>Modo: ${MODE_TXT[m].n}</b>${MODE_TXT[m].d}</div>`;
+  return `<div class="field">Modo de jogo</div><div class="row"><button class="btn ${m==='pvp'?'b-dbl':'b-dim'}" data-act="mode" data-m="pvp">PvP<small>pontos de vida</small></button><button class="btn ${m==='surv'?'b-swap':'b-dim'}" data-act="mode" data-m="surv">Sobrevivência<small>3 vidas e duelos</small></button></div><p style="font-size:13.5px;text-align:center">${MODE_TXT[m].d}</p>`;
+}
 function showLobby(){
   const lp=lobbyPlayers();const playing=roomPlayers().filter(p=>p.g&&!p.off);
   const host=lp[0];const amHost=host&&host.pid===MP.pid;
   const sv=store.get(SAVE_MP);
   const canResume=sv&&sv.code===MP.code&&sv.S&&sv.S.mp&&!(store.get('c21-done')||[]).includes(sv.S.mp.gid);
-  const resumeBtn=canResume?`<button class="btn b-swap" data-act="mpresume">Voltar à partida em andamento<small>Ante ${sv.S.ante} · ${hearts(sv.S.mp.lives)}</small></button>`:'';
+  const resumeBtn=canResume?`<button class="btn b-swap" data-act="mpresume">Voltar à partida em andamento<small>Ante ${sv.S.ante}${sv.S.mp.mode==='pvp'?'':' · '+hearts(sv.S.mp.lives)}</small></button>`:'';
   showSheet(`<h2>Sala</h2>
   <div class="code">${esc((MP.code||'').toUpperCase())}</div>
   <div class="net ${NR&&NR.connected()?'':'bad'}">${NR&&NR.connected()?'● conectado':'● reconectando…'}</div>
@@ -906,6 +961,7 @@ function showLobby(){
   <div class="list">${lp.map((p,i)=>`<div class="li ${p.me?'me':''} ${i>=MAXP?'out':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span><span class="grow"><b>${esc(p.name)}</b>${p.me?' <span class="c-dim">(você)</span>':''}</span><span class="c-dim" style="font-size:12.5px">${i===0?'anfitrião':i>=MAXP?'sala cheia':'pronto'}</span></div>`).join('')||'<p>Conectando…</p>'}
   ${playing.length?`<div class="li out"><span class="grow">${playing.length} pessoa${playing.length>1?'s':''} em uma partida em andamento</span></div>`:''}</div>
   <p style="text-align:center;font-size:13.5px">${Math.min(lp.length,MAXP)}/${MAXP} jogadores</p>
+  ${modeBlock(amHost,host)}
   ${resumeBtn}
   ${amHost?`<button class="btn b-go" data-act="startgame" style="padding:14px 4px 12px;font-size:18px">Começar partida<small>${Math.min(lp.length,MAXP)} jogador${lp.length===1?'':'es'}${lp.length<2?' · dá para testar sozinho':''}</small></button>`:`<div class="note" style="text-align:center">Esperando ${host?esc(host.name):'o anfitrião'} começar a partida…</div>`}
   <button class="btn b-dim" data-act="leaveroom">Sair da sala</button>`,'lobby');
@@ -916,7 +972,8 @@ function showHow(back){
     <p>Cada mão é um 21 contra o dealer. <b>Pedir</b> compra carta, <b>Parar</b> passa a vez, <b>Dobrar</b> compra 1 carta e dobra o Mult. Toque numa carta sua e use <b>Trocar</b> para substituí-la.</p>
     <p>Se você ganha, marca <b class="c-chips">Fichas</b> × <b class="c-mult">Mult</b>. As Fichas somam o valor das suas cartas. Derrota e estouro valem 0.</p>
     <p>Depois de cada blind você recebe dinheiro (+$1 por mão sobrando e juros de $1 a cada $5) e vai à <b>loja</b>: coringas mudam a pontuação e planetas sobem o nível das jogadas.</p>
-    <p>No <b>multiplayer</b>, o chefe vira um <b>Duelo</b>: todos jogam 4 mãos e quem fizer menos pontos perde uma vida. O duelo só termina quando todos acabam.</p></div>
+    <p>No <b>PvP</b>, cada um começa com ${PVP_HP} pontos de vida e joga rodadas de 4 mãos, sem meta. Os pontos de cada mão viram dano, dividido entre todos os rivais vivos. Quem zerar a vida sai, e o último de pé vence.</p>
+    <p>Na <b>Sobrevivência</b>, cada um tem 3 vidas. Falhar uma blind custa uma vida, e o chefe vira um <b>Duelo</b> em que quem fizer menos pontos perde outra.</p></div>
     <button class="btn b-go" data-act="${back}">Entendi</button>`,'how');
 }
 function showHands(){
@@ -926,6 +983,7 @@ function showHands(){
 }
 function showSelect(){
   hideSheet();render();
+  if(isPvp())return showSelectPvp();
   const cards=BLINDS.map((b,i)=>`<div class="bcard ${i===S.bi?'cur':''} ${i<S.bi?'done':''}"><div class="chip" style="--bc:${b.col}">${i===2?(S.mp?'D':'!'):i===0?'P':'G'}</div><b style="font-size:13px">${i===2?(S.mp?'Duelo':BOSSES[S.boss].n):b.n}</b><small>Meta</small>${i===2&&S.mp?'<span class="num small">vencer os rivais</span>':`<span class="num">${fmt(target(S.ante,i))}</span>`}<small class="c-gold">+$${b.r}</small></div>`).join('');
   const bossTxt=S.bi===2?`<div class="boss-note"><b>${S.mp?'Duelo · ':''}${BOSSES[S.boss].n}</b>${BOSSES[S.boss].d}${S.mp?'<br><br>Todos jogam 4 mãos. Quem fizer menos pontos perde uma vida, e o mais alto ganha +$3.':''}</div>`:`<p style="text-align:center;font-size:13.5px">${S.mp?'Duelo':'Chefe'} deste ante: <b style="color:var(--ink)">${BOSSES[S.boss].n}</b>. ${BOSSES[S.boss].d}</p>`;
   showSheet(`<h2>Ante ${S.ante}${S.ante>8?' · sem fim':''}</h2>${S.seed?`<p style="text-align:center;font-size:13.5px">${esc(S.seed)}${S.mp?` · <span style="color:#ff6b61">${hearts(S.mp.lives)}</span>`:''}</p>`:''}
@@ -934,10 +992,20 @@ function showSelect(){
   <button class="btn b-go" data-act="play">Jogar ${S.bi===2?(S.mp?'o Duelo':'o Chefe'):BLINDS[S.bi].n}</button>
   <div class="row"><button class="btn b-dim" data-act="hands">Ver jogadas</button>${S.mp?'<button class="btn b-dim" data-act="board">Placar</button>':''}</div>`,'select');
 }
+function showSelectPvp(){
+  const hp=pvpHP(),mx=S.mp.maxHp||PVP_HP,unit=target(S.ante,0);
+  const cards=BLINDS.map((b,i)=>`<div class="bcard ${i===S.bi?'cur':''} ${i<S.bi?'done':''}"><div class="chip" style="--bc:${b.col}">${i===2?'!':i===0?'P':'G'}</div><b style="font-size:13px">${i===2?BOSSES[S.boss].n:b.n}</b><small>Mãos</small><span class="num">4</span><small class="c-gold">+$${b.r}</small></div>`).join('');
+  showSheet(`<h2>Ante ${S.ante} · PvP</h2><p style="text-align:center;font-size:13.5px">${esc(S.seed)} · <span style="color:#ff6b61;font-weight:800">${hp}/${mx} PV</span></p>
+  <div class="blinds">${cards}</div>
+  <div class="boss-note" style="border-color:var(--gold);background:var(--panel-2)"><b>Dano neste ante</b>Cada ${fmt(unit)} pontos viram ${DMG_K} de dano, dividido entre os rivais vivos.</div>
+  ${S.bi===2?`<div class="boss-note"><b>${BOSSES[S.boss].n}</b>${BOSSES[S.boss].d}</div>`:`<p style="text-align:center;font-size:13.5px">Chefe deste ante: <b style="color:var(--ink)">${BOSSES[S.boss].n}</b>. ${BOSSES[S.boss].d}</p>`}
+  <button class="btn b-go" data-act="play">Jogar ${S.bi===2?'o Chefe':BLINDS[S.bi].n}</button>
+  <div class="row"><button class="btn b-dim" data-act="hands">Ver jogadas</button><button class="btn b-dim" data-act="board">Placar</button></div>`,'select');
+}
 function showCash(){
   const c=S.cash;
-  showSheet(`<h2>${isDuel()?'Fim do duelo':'Blind vencida!'}</h2>
-  <div class="list"><div class="kv"><span>Pontos feitos</span><span class="num" style="color:var(--ink)">${fmt(S.roundScore)}</span></div><hr>
+  showSheet(`<h2>${isPvp()?'Fim da rodada':isDuel()?'Fim do duelo':'Blind vencida!'}</h2>
+  <div class="list"><div class="kv"><span>Pontos feitos</span><span class="num" style="color:var(--ink)">${fmt(S.roundScore)}</span></div>${isPvp()?`<div class="kv"><span>Dano causado</span><span class="num" style="color:#ff6b61">${fmt(S.roundDmg||0)}</span></div><div class="kv"><span>Seus PV</span><span class="num" style="color:#ff6b61">${pvpHP()}</span></div>`:''}<hr>
   <div class="kv"><span>Recompensa</span><span class="num">$${c.reward}</span></div>
   ${c.hands?`<div class="kv"><span>${c.hands} mão${c.hands===1?'':'s'} sobrando</span><span class="num">$${c.hands}</span></div>`:''}
   ${c.bonus?`<div class="kv"><span>Venceu o duelo</span><span class="num">$${c.bonus}</span></div>`:''}
@@ -995,16 +1063,17 @@ function showBoard(){
   const finished=ps.length>0&&!stillPlaying.length;
   let head;
   if(S.phase==='won')head='Você venceu! É o último de pé.';
-  else if(S.phase==='out')head='Você foi eliminado.';
+  else if(S.phase==='out')head=isPvp()?'Seus pontos de vida acabaram.':'Você foi eliminado.';
   else if(S.phase==='done')head='Você terminou o Ante 8!';
   else head='Placar da partida';
   const winner=finished&&ps[0];
-  const status=p=>{const st=p.st||{};if(st.ph==='won')return 'vencedor';if(!st.al)return 'fora';if(st.ph==='done')return 'terminou';return `Ante ${+st.a||1} · ${['Pequena','Grande','Duelo'][+st.b||0]}`};
+  const status=p=>{const st=p.st||{};if(st.ph==='won')return 'vencedor';if(!st.al)return 'fora';if(st.ph==='done')return 'terminou';return `Ante ${+st.a||1} · ${(st.md==='pvp'?['Pequena','Grande','Chefe']:['Pequena','Grande','Duelo'])[+st.b||0]}`};
   const missing=S.mp.players.length-ps.length;
   const ended=['out','done','won'].includes(S.phase);
   showSheet(`<h2>${head}</h2>
+  ${isPvp()&&S.mp.alive?`<div class="kv"><span>Seus PV</span><span class="num" style="color:#ff6b61">${pvpHP()}/${S.mp.maxHp||PVP_HP}</span></div><div class="kv"><span>Dano que você causou</span><span class="num">${fmt(S.mp.dealt||0)}</span></div>`:''}
   ${finished&&winner?`<div class="note" style="text-align:center;font-size:15px">Fim da partida. <b style="color:var(--gold)">${esc(winner.name)}</b> ficou em 1º lugar.</div>`:(ended?'<p style="text-align:center">O placar atualiza enquanto os outros jogam.</p>':'')}
-  <div class="list">${ps.map((p,i)=>{const st=p.st||{};return `<div class="li ${p.me?'me':''} ${!st.al?'out':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span><span class="grow"><b>${esc(p.name)}</b>${p.off&&!p.me?' <span class="c-dim">(offline)</span>':''}<br><small class="c-dim">${status(p)} · ${fmt(st.t)} pts no total</small></span><span style="color:#ff6b61;font-weight:800">${st.al?hearts(Math.min(3,+st.l||0)):''}</span></div>`}).join('')}
+  <div class="list">${ps.map((p,i)=>{const st=p.st||{};return `<div class="li ${p.me?'me':''} ${!st.al?'out':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span><span class="grow"><b>${esc(p.name)}</b>${p.off&&!p.me?' <span class="c-dim">(offline)</span>':''}<br><small class="c-dim">${status(p)} · ${fmt(st.t)} pts no total</small></span><span style="color:#ff6b61;font-weight:800">${st.al?(st.md==='pvp'?`${Math.max(0,+st.hp||0)} PV`:hearts(Math.min(3,+st.l||0))):''}</span></div>`}).join('')}
   ${missing>0?`<div class="li out"><span class="grow">${missing} jogador${missing>1?'es':''} fora da sala</span></div>`:''}</div>
   ${ended?'<button class="btn b-go" data-act="lobby">Voltar ao lobby</button>':'<button class="btn b-go" data-act="close">Voltar ao jogo</button>'}
   <button class="btn b-dim" data-act="leaveroom">Sair da sala</button>`,'board');
@@ -1063,6 +1132,7 @@ document.addEventListener('click',e=>{
     case 'joinpick':tryJoinPick(t.dataset.id,t.dataset.h||'');break;
     case 'mphomeback':MP.msg='';showMPHome();break;
     case 'startgame':startGame();break;
+    case 'mode':MP.mode=t.dataset.m==='surv'?'surv':'pvp';store.set('c21-mode',MP.mode);if(NR)NR.presence({lm:MP.mode});showLobby();break;
     case 'copycode':copyText(`Bora jogar Coringa 21! Abre ${location.href.split(/[?#]/)[0]} , toca em Multiplayer e entra na sala ${(MP.code||'').toUpperCase()}`,t);break;
     case 'leaveroom':leaveRoom();break;
     case 'lobby':backToLobby();break;
@@ -1159,7 +1229,7 @@ function render0(){
 })();
 
 render0();showStart();
-if(QS.get('test')==='1')window.__c21={get S(){return S},set S(v){S=v},MP,get NR(){return NR},render,startBlind,duelFinished,mpTick,showBoard,roomPlayers,gamePlayers,leaveShop,openShop,resolve};
+if(QS.get('test')==='1')window.__c21={get S(){return S},set S(v){S=v},MP,get NR(){return NR},render,startBlind,duelFinished,mpTick,dealDamage,pvpHP:()=>pvpHP(),showBoard,roomPlayers,gamePlayers,leaveShop,openShop,resolve};
 })();
 </script>
 </body>
