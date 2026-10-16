@@ -260,6 +260,7 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .logo.sm .l1{font-size:40px}
 .logo.sm .l2{font-size:68px}
 .logo.sm .l3{margin-top:2px}
+.logo .l3 .ver{color:var(--gold);letter-spacing:.06em;text-transform:none}
 .btn.sm{padding:9px 4px 8px;font-size:14.5px}
 .vol{padding:7px 12px}
 .lb-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -381,6 +382,8 @@ const $=s=>document.querySelector(s);
 const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
+/* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
+const VERSION='v15.1';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1553,7 +1556,7 @@ function todayStr(){const d=new Date();return `${String(d.getDate()).padStart(2,
 const hearts=n=>'♥'.repeat(Math.max(0,n));
 function showStart(){
   const sv=store.get(SAVE);
-  showSheet(`<div class="logo sm"><span class="l1">FAMÍLIA</span><span class="l2">21</span><span class="l3">blackjack roguelike</span></div>
+  showSheet(`<div class="logo sm"><span class="l1">FAMÍLIA</span><span class="l2">21</span><span class="l3">blackjack roguelike · <b class="ver" id="ver">${VERSION}</b></span></div>
     ${MP.invitedBy?`<div class="note" style="text-align:center;font-size:14px"><b style="color:var(--gold)">${esc(MP.invitedBy)}</b> te convidou para jogar! Toque em Multiplayer.</div>`:''}
     <button class="btn b-dbl" data-act="mphome" style="padding:13px 4px 11px;font-size:18px">Multiplayer<small>até 10 pessoas, uma contra as outras</small></button>
     ${sv?`<button class="btn b-go" data-act="continue">Continuar partida solo<small>Ante ${sv.S.ante} · $${sv.S.money}</small></button>`:''}

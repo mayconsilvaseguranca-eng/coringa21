@@ -18,6 +18,10 @@ export default async function () {
     check(wide, 'a tela de cartas passou da largura do celular');
     await p.click('[data-act=home]');
     await p.waitForSelector('[data-act=cardsh]');
+    await p.goto(p.url());
+    await p.waitForSelector('#ver');
+    const ver = (await p.textContent('#ver')).trim();
+    check(/^v\d+(\.\d+)?$/.test(ver), `a tela inicial deveria mostrar a versão, mostra "${ver}"`);
     check(t.errors.length === 0, 'erros na página: ' + t.errors.join(' | '));
     return `tela de cartas ok (${pvp} PvP, ${solo} solo)`;
   } finally { await t.close(); }

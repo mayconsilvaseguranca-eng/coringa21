@@ -11,6 +11,7 @@ Blackjack roguelike (estilo Balatro) para celular, para o Maycon e a família. T
 
 ## Como trabalhar (preferências do Maycon)
 - Toda mudança: editar `index.html`, rodar os testes, commit + push, atualizar o diário (uma vez, no fim).
+- A versão aparece na tela inicial: `const VERSION` no topo do script de `index.html`. Suba junto com a entrada nova do diário (mesmo número).
 - Não atualizar a prévia do claude.ai: o Maycon testa o PvP pelo site, e na prévia o multiplayer não funciona. Só se ele pedir.
 - Tudo cabe numa tela de celular sem rolar (testar no iPhone SE). Números legíveis: fonte Rubik; fonte pixel só na palavra FAMÍLIA do logo.
 - PvP é o modo principal. Dano e vida sempre inteiros. Ritmo mais lento (`PACE=1.6`).

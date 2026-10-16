@@ -1,5 +1,9 @@
 import html
 V=[
+ ("v15.1","16/10 · 15:40","Versão na tela inicial",
+  "Mostrar na tela inicial qual versão o jogo está.",
+  [("Novo","A tela inicial mostra a versão embaixo do logo (blackjack roguelike · v15.1), com o mesmo número deste diário. Assim dá para conferir se o celular já pegou a atualização."),
+   ("Mudou","O agente de testes confere que a versão aparece na tela inicial.")]),
  ("v15","16/10 · 15:45","7 cartas de mesa novas",
   "Adicionar as cartas de mesa sugeridas, menos Maré Alta, Azarão e Coroa Pesada.",
   [("Novo","Céu Aberto: só estoura acima de 23 (22 e 23 vencem 21). Mão Curta: no máximo 3 cartas, a mão fecha sozinha na terceira. Ás de Ferro: Ases valem só 1, então não tem blackjack."),
@@ -165,7 +169,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 15:45'
+UPD=AG['atualizado'] if AG else '16/10/2026, 15:40'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
