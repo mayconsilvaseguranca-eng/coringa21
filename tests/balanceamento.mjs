@@ -23,10 +23,10 @@ function playHand(p, rng){
   const c=[draw(),draw()];let doubled=false;
   if(tot(c)===21) return {c,doubled};
   // troca: mão dura de 12 a 16 com 2 cartas troca a menor
-  if(p.swaps>0&&c.length===2&&tot(c)>=12&&tot(c)<=16&&!c.includes('A')){const i=val(c[0])<=val(c[1])?0:1;c[i]=draw();p.swaps--;if(tot(c)===21)return{c,doubled}}
+  if(!p.bot&&p.swaps>0&&c.length===2&&tot(c)>=12&&tot(c)<=16&&!c.includes('A')){const i=val(c[0])<=val(c[1])?0:1;c[i]=draw();p.swaps--;if(tot(c)===21)return{c,doubled}}
   const t2=tot(c);
   if(p.dbl&&(t2===10||t2===11)){doubled=true;c.push(draw());return{c,doubled}}
-  const stop=p.stop||17;
+  const stop=p.bot?16+(rng()<.5?1:0):(p.stop||17);
   while(c.length<5){const t=tot(c);
     if(t>=21)break;
     if(p.has.cinco&&c.length===P.cincoN-1&&t<=15){c.push(draw());continue}
@@ -41,7 +41,7 @@ export function game(cfg, rng){
   const n=cfg.n, maxHp=cfg.hp||hpFor(n);
   const ps=[];
   for(let i=0;i<n;i++){const s=cfg.players[i]||{};
-    ps.push({i,hp:maxHp,al:true,has:{},cards:[],money:4,swaps:0,ult:false,colete:0,bleed:{},sent:0,dealt:0,dbl:s.dbl??true,stop:s.stop,buy:s.buy||'none',want:s.want||null,fixed:s.cards||[],t:0,acq:{}});
+    ps.push({i,hp:maxHp,al:true,has:{},cards:[],money:4,swaps:0,ult:false,colete:0,bleed:{},sent:0,dealt:0,dbl:s.bot?false:(s.dbl??true),stop:s.stop,bot:!!s.bot,buy:s.buy||'none',want:s.want||null,fixed:s.cards||[],t:0,acq:{}});
     for(const k of ps[i].fixed){ps[i].has[k]=true;ps[i].cards.push(k);ps[i].acq[k]=0}
   }
   let r=0, pingpong=0;
@@ -67,7 +67,7 @@ export function game(cfg, rng){
       const s=p.sub;const type=s.bj?'bj':s.f?'five':s.t===21?'t21':'win';
       let pts=(HANDS[type].c+s.c.reduce((a,x)=>a+val(x),0))*HANDS[type].m*(s.d?2:1);
       p.t+=pts;
-      let dmg=Math.round(pts/80*20);
+      let dmg=Math.round(pts/80*20*(p.bot?(1+0.05*Math.min(10,r-1)):1));
       if(!P.multOnPer&&!P.criticoFlat&&(type==='bj'||(P.critico21&&s.t===21))&&p.has.critico)dmg=Math.round(dmg*P.critico);
       if(!P.multOnPer&&p.has.cinco&&!P.cincoFlat&&!P.cincoExtra&&s.c.length>=P.cincoN&&s.t<=21)dmg=Math.round(dmg*P.cinco);
       if(!P.multOnPer&&p.has.furia&&!P.furiaFlat&&hp0.get(p)<P.furiaHp)dmg=Math.round(dmg*P.furia);
