@@ -200,6 +200,9 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .rvl.out{opacity:.45}
 .mini{font-weight:800;color:var(--ink);letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .mini .r{color:#ff8077}
+.kind{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:1px 7px}
+.kind.atk{background:color-mix(in srgb,var(--mult) 30%,transparent);color:#ff8f86}
+.kind.def{background:color-mix(in srgb,var(--chips) 30%,transparent);color:#8fc1ff}
 .roombtn{border:0;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
 .roombtn:disabled{opacity:.5;cursor:default}
 .roombtn:not(:disabled):active{transform:translateY(2px)}
@@ -294,7 +297,13 @@ const JK={
   trocador:{n:'Trocador',d:'+2 trocas por blind',c:4,g:'⇄',bg:'#7a5a2a'},
   sangue:{n:'Sangue Quente',d:'+15 Fichas por carta de ♥ ou ♦',c:4,g:'♥',bg:'#a8243a'},
   escalada:{n:'Escalada',d:'Ganha +1 Mult a cada mão vencida',c:7,g:'▲',bg:'#3b8a7a'},
-  ganancia:{n:'Ganância',d:'+1 Mult para cada $5 que você tem',c:5,g:'¢',bg:'#8c7a16'}
+  ganancia:{n:'Ganância',d:'+1 Mult para cada $5 que você tem',c:5,g:'¢',bg:'#8c7a16'},
+  escudo:{n:'Escudo',d:'Absorve os primeiros 8 de dano que você levar em cada rodada',c:6,g:'◈',bg:'#3d6f9e',pvp:'def'},
+  espelho:{n:'Espelho',d:'Devolve 30% do dano que você leva para quem te bateu',c:6,g:'◐',bg:'#6b7fa0',pvp:'def'},
+  esquiva:{n:'Esquiva',d:'Você não leva dano de rivais que fecharam a mão com 17 ou menos',c:5,g:'≈',bg:'#2f8a7e',pvp:'def'},
+  critico:{n:'Golpe Crítico',d:'Seu blackjack causa o dobro de dano',c:6,g:'✸',bg:'#c43d2b',pvp:'atk'},
+  sangria:{n:'Sangria',d:'Quem você passar perde 2 PV a mais nas 3 rodadas seguintes',c:6,g:'‡',bg:'#8e1f36',pvp:'atk'},
+  vampiro:{n:'Vampiro',d:'Você recupera 25% do dano que causa',c:7,g:'V',bg:'#5a2a6e',pvp:'atk'}
 };
 const JF={
   coringa:x=>x.m(4),
@@ -341,7 +350,8 @@ const has=k=>S.jokers.some(j=>j.k===k);
 const isPvp=()=>!!(S&&S.mp&&S.mp.mode==='pvp');
 const isDuel=()=>!!(S&&S.mp&&S.mp.mode!=='pvp'&&S.bi===2);
 const recvTotal=()=>Object.values((S&&S.mp&&S.mp.recv)||{}).reduce((a,b)=>a+(+b||0),0);
-const pvpHP=()=>Math.max(0,Math.ceil(r1((S.mp.maxHp||PVP_HP)-recvTotal())));
+const pvpHP=()=>Math.max(0,Math.ceil(r1(S.mp.hp!=null?S.mp.hp:(S.mp.maxHp||PVP_HP)-recvTotal())));
+const pvpHeal=x=>{if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(Math.min(S.mp.maxHp||PVP_HP,S.mp.hp+x))};
 const dmgOf=pts=>r1(pts/target(S.ante,0)*DMG_K);
 const bossOn=k=>S&&S.bi===2&&S.boss===k&&S.phase==='play';
 function target(a,i){a=a??S.ante;i=i??S.bi;let base=a<=8?ANTE_BASE[a-1]:ANTE_BASE[7]*Math.pow(2.2,a-8);return Math.round(base*BLINDS[i].k/10)*10}
@@ -604,9 +614,10 @@ function collect(){
 }
 function openShop(){S.phase='shop';S.shop={items:genShopItems(),reroll:3};render();showShop()}
 function genShopItems(){
-  const pool=shuffle(Object.keys(JK).filter(k=>!has(k)));
+  const pool=shuffle(Object.keys(JK).filter(k=>!has(k)&&(!JK[k].pvp||isPvp())));
   const hs=shuffle(Object.keys(HANDS));
   const items=[];
+  if(isPvp()){const pv=pool.filter(k=>JK[k].pvp);if(pv.length&&!pool.slice(0,2).some(k=>JK[k].pvp)){pool.splice(pool.indexOf(pv[0]),1);pool.unshift(pv[0])}}
   pool.slice(0,2).forEach(k=>items.push({t:'j',k,sold:false}));
   hs.slice(0,2).forEach(k=>items.push({t:'p',k,sold:false}));
   return items;
@@ -699,16 +710,27 @@ async function pvpShowdown(){
   S.msg=me.x?'Você estourou':!parts.length?'Sem rivais nesta rodada':beaten.length===parts.length?'Você teve a maior mão da mesa!':beaten.length?`Você passou ${beaten.length} de ${parts.length} rivais`:'Ninguém ficou abaixo de você';
   render();
   const pts=await scoreHand(type,{total:t,dBust:parts.some(p=>p.v<0),isWin:beaten.length>0});
-  let dmg=0,per=0;
+  let dmg=0,per=0;const extra=[];
+  if(!S.mp.bleed)S.mp.bleed={};
+  /* sangria de rodadas anteriores */
+  let bled=0;
+  for(const pid in S.mp.bleed){const b=S.mp.bleed[pid];
+    if(S.round>b.from&&S.round<=b.to){const g=gamePlayers().find(x=>x.pid===pid);if(g&&g.st&&g.st.al){S.mp.sent[pid]=r1((S.mp.sent[pid]||0)+2);bled+=2}}
+    if(S.round>=b.to)delete S.mp.bleed[pid]}
+  if(bled)extra.push(`Sangria: ${bled} de dano`);
   if(pts>0&&beaten.length){
-    dmg=r1(pts/target(S.ante,0)*DMG_K);per=r1(dmg/Math.max(1,parts.length));
+    dmg=r1(pts/target(S.ante,0)*DMG_K);
+    if(type==='bj'&&has('critico')){dmg=r1(dmg*2);extra.push('Golpe Crítico: dano em dobro')}
+    per=r1(dmg/Math.max(1,parts.length));
     for(const b of beaten)S.mp.sent[b.pid]=r1((S.mp.sent[b.pid]||0)+per);
-    S.mp.dealt=r1((S.mp.dealt||0)+per*beaten.length);
+    S.mp.dealt=r1((S.mp.dealt||0)+per*beaten.length+bled);
+    if(has('sangria'))for(const b of beaten)S.mp.bleed[b.pid]={from:S.round,to:S.round+3};
+    if(has('vampiro')){const h=r1(per*beaten.length*0.25);pvpHeal(h);extra.push(`Vampiro: +${fmt(h)} PV`)}
     pop($('#rs'),`⚔ ${fmt(per)} em ${beaten.length===1?beaten[0].name:beaten.length+' rivais'}`,'mult');beep(220,.12,'sawtooth',.05);
-  }
+  }else if(bled)S.mp.dealt=r1((S.mp.dealt||0)+bled);
   const earn=1+(beaten.length?2:0);S.money+=earn;
   if(beaten.length)S.stats.wins++;S.stats.hands++;S.stats.best=Math.max(S.stats.best,pts);S.stats.total+=pts;
-  S.pv={r:S.round,parts,beaten:beaten.map(b=>b.pid),pts,per,earn,type,myV,at:Date.now()};
+  S.pv={r:S.round,parts,beaten:beaten.map(b=>b.pid),pts,per,earn,type,myV,extra,at:Date.now()};
   S.mp.sd=S.round;S.busy=false;render();showPvpResult();
 }
 function pvpReadyNext(){
@@ -744,6 +766,7 @@ function showPvpResult(){
   const rows=[{name:MP.name+' (você)',col:MP.col,sub:S.mp.sub,v:v.myV,me:true},...v.parts].sort((a,b)=>b.v-a.v);
   showSheet(`<h2>Rodada ${v.r}</h2>
   <div class="note ${v.pts>0?'':'warn'}" style="text-align:center;font-size:15px">${esc(S.msg)}${v.pts>0?`<br><b style="color:var(--gold)">${fmt(v.pts)} pontos</b> viraram <b style="color:#ff6b61">${fmt(v.per)} de dano</b> em cada rival abaixo de você.`:''}</div>
+  ${v.extra&&v.extra.length?`<div class="note" style="text-align:center">${v.extra.map(esc).join('<br>')}</div>`:''}
   <div class="list">${rows.map(r=>`<div class="li ${r.me?'me':''} ${r.v<0?'out':''}"><span class="dot" style="--pc:${colOf(r.col)}"></span><span class="grow"><b>${esc(r.name)}</b>${!r.me&&v.beaten.includes(r.pid)?` <span class="c-mult">−${fmt(v.per)} PV</span>`:''}<br><span class="mini">${miniCards(r.sub&&r.sub.c)}</span></span><span class="num ${r.v<0?'c-mult':'c-gold'}" style="font-size:19px">${r.v<0?'estourou':(r.sub&&r.sub.t)}</span></div>`).join('')}</div>
   <div class="kv"><span>Seus PV</span><span class="num" style="color:#ff6b61">${pvpHP()}/${S.mp.maxHp||PVP_HP}</span></div>
   <div class="kv"><span>Dinheiro da rodada</span><span class="num">+$${v.earn}</span></div>
@@ -752,10 +775,21 @@ function showPvpResult(){
 }
 function pvpCheckDamage(ps){
   if(!S.mp.recv)S.mp.recv={};
-  let gained=0;const who=[];
+  if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();
+  let gained=0,blocked=0,reflected=0;const who=[];
   for(const p of ps){if(p.me||!p.st||!p.st.dm||typeof p.st.dm!=='object')continue;
     const v=Math.min(100000,Math.max(0,+p.st.dm[MP.pid]||0));const old=+S.mp.recv[p.pid]||0;
-    if(v>old+0.001){S.mp.recv[p.pid]=v;gained+=v-old;who.push(p.name)}}
+    if(!(v>old+0.001))continue;
+    S.mp.recv[p.pid]=v;let d=v-old;const raw=d;
+    const sub=p.st.sub;
+    if(has('esquiva')&&sub&&!sub.x&&(+sub.t||0)<=17)d=0;
+    if(has('escudo')&&d>0){if(S.mp.shR!==S.round){S.mp.shR=S.round;S.mp.shLeft=8}const a=Math.min(S.mp.shLeft||0,d);d-=a;S.mp.shLeft-=a}
+    if(has('espelho')&&d>0&&S.mp.alive){const back=r1(d*0.3);S.mp.sent[p.pid]=r1((S.mp.sent[p.pid]||0)+back);reflected+=back}
+    blocked+=raw-d;
+    if(d>0){S.mp.hp=r1(S.mp.hp-d);gained+=d;who.push(p.name)}
+  }
+  if(blocked>0.05&&S.mp.alive){pop($('#rack'),`Defesa: −${fmt(r1(blocked))} de dano`,'info');beep(700,.08,'triangle')}
+  if(reflected>0.05&&S.mp.alive)setTimeout(()=>pop($('#rs'),`Espelho: ${fmt(r1(reflected))} de volta`,'info'),300);
   if(gained>0&&S.mp.alive){
     pop($('#blindBox'),`−${fmt(r1(gained))} PV · ${who.slice(0,2).join(', ')}${who.length>2?'…':''}`,'mult');
     anim($('#blindBox'),'shake');beep(130,.15,'sawtooth',.05);
@@ -1003,7 +1037,7 @@ function beginMP(st){
   const sv=store.get(SAVE_MP);
   if(sv&&sv.S&&sv.S.mp&&sv.S.mp.gid===st.gid){S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;resume();return}
   const mode=st.mode==='surv'?'surv':'pvp';
-  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:hpFor(st.players.length),sent:{},recv:{},dealt:0});
+  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:hpFor(st.players.length),hp:hpFor(st.players.length),bleed:{},sent:{},recv:{},dealt:0});
 }
 function backToLobby(){
   if(S&&S.mp){const d=store.get('c21-done')||[];d.push(S.mp.gid);store.set('c21-done',d.slice(-20))}
@@ -1170,7 +1204,7 @@ function showShop(){
   const sh=S.shop;
   const items=sh.items.map((it,i)=>{
     if(it.t==='j'){const d=JK[it.k];const full=S.jokers.length>=5;
-      return `<div class="item ${it.sold?'sold':''}"><div class="art" style="--jc:${d.bg}">${d.g}</div><b>${d.n}</b><small>${d.d}</small><button class="btn b-go" data-act="buy" data-i="${i}" ${it.sold||S.money<d.c||full?'disabled':''}>${it.sold?'Comprado':full?'Sem espaço':'$'+d.c}</button></div>`}
+      return `<div class="item ${it.sold?'sold':''}"><div class="art" style="--jc:${d.bg}">${d.g}</div>${d.pvp?`<span class="kind ${d.pvp}">${d.pvp==='atk'?'Ataque':'Defesa'}</span>`:''}<b>${d.n}</b><small>${d.d}</small><button class="btn b-go" data-act="buy" data-i="${i}" ${it.sold||S.money<d.c||full?'disabled':''}>${it.sold?'Comprado':full?'Sem espaço':'$'+d.c}</button></div>`}
     const h=HANDS[it.k];
     return `<div class="item ${it.sold?'sold':''}"><div class="art planet" style="--jc:${h.pc}"></div><b>${h.p}</b><small>Sobe ${h.n} para nv ${S.levels[it.k]+1} (+${h.lc} Fichas, +${h.lm} Mult)</small><button class="btn b-go" data-act="buy" data-i="${i}" ${it.sold||S.money<3?'disabled':''}>${it.sold?'Usado':'$3'}</button></div>`}).join('');
   showSheet(`<h2>Loja</h2><div class="kv"><span>Seu dinheiro</span><span class="num">$${S.money}</span></div>
