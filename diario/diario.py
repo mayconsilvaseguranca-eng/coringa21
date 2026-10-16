@@ -4,7 +4,7 @@ V=[
   "Mostrar na tela inicial qual versão o jogo está.",
   [("Novo","A tela inicial mostra a versão embaixo do logo (blackjack roguelike · v15.1), com o mesmo número deste diário. Assim dá para conferir se o celular já pegou a atualização."),
    ("Mudou","O agente de testes confere que a versão aparece na tela inicial.")]),
- ("v15","16/10 · 15:45","7 cartas de mesa novas",
+ ("v15","16/10 · 15:30","7 cartas de mesa novas",
   "Adicionar as cartas de mesa sugeridas, menos Maré Alta, Azarão e Coroa Pesada.",
   [("Novo","Céu Aberto: só estoura acima de 23 (22 e 23 vencem 21). Mão Curta: no máximo 3 cartas, a mão fecha sozinha na terceira. Ás de Ferro: Ases valem só 1, então não tem blackjack."),
    ("Novo","Empate Sangrento: quem empatar com alguém leva 5 de dano. Febre do Ouro: o dinheiro das rodadas vem em dobro. Silêncio: as cartas de ataque e defesa não funcionam. Hospital: todos recuperam 4 PV no começo de cada rodada."),
