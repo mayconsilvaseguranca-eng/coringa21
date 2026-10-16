@@ -190,14 +190,19 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .rv.off{border-style:dashed}
 .net{font-size:12px;font-weight:700;text-align:center;color:#5fd38a}
 .net.bad{color:#ff8077}
-.rivals{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:5px;width:100%}
-.rvl{background:rgba(0,0,0,.32);border-radius:8px;padding:5px 7px;font-size:12.5px;font-weight:600;display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--ink-dim)}
-.rvl .nm{display:flex;align-items:center;gap:5px;color:var(--ink);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rvl .nm .dot{width:10px;height:10px}
-.rvl .hp{color:#ff8077;margin-left:auto;font-variant-numeric:tabular-nums}
-.rvl .ok{color:#5fd38a;font-weight:800}
-.rvl b{color:var(--gold)}
-.rvl.out{opacity:.45}
+.cards.riv{display:block;width:100%;min-height:0;padding-top:2px}
+.rivals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:100%}
+.rivals.few{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rvl{background:rgba(0,0,0,.32);border-radius:7px;padding:4px 6px;font-size:11.5px;line-height:1.2;font-weight:700;display:flex;align-items:center;gap:4px;min-width:0;color:var(--ink)}
+.rvl .dot{width:9px;height:9px;flex:0 0 auto}
+.rvl .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800}
+.rvl .hp{color:#ff8077;font-variant-numeric:tabular-nums;font-size:11px}
+.rvl .tg{min-width:18px;text-align:center;border-radius:5px;padding:0 4px;background:rgba(255,255,255,.08);color:var(--ink-dim);font-weight:800}
+.rvl .tg.ready{color:#5fd38a}
+.rvl .tg.shown{color:var(--gold)}
+.rvl .tg.is21{color:#0b2a1c;background:#5fd38a;box-shadow:0 0 10px rgba(95,211,138,.8)}
+.rvl .tg.bust{color:#ff8077}
+.rvl.out{opacity:.4}
 .mini{font-weight:800;color:var(--ink);letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .mini .r{color:#ff8077}
 .kind{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:1px 7px}
@@ -206,6 +211,55 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .vol{display:flex;align-items:center;gap:10px;background:var(--panel-2);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:700}
 .vol input{flex:1;min-width:0;accent-color:var(--gold);height:28px}
 .vol b{min-width:42px;text-align:right;color:var(--gold);font-variant-numeric:tabular-nums}
+.panel.compact{gap:8px;padding:12px 14px}
+.logo.sm .l1{font-size:40px}
+.logo.sm .l2{font-size:68px}
+.logo.sm .l3{margin-top:2px}
+.btn.sm{padding:9px 4px 8px;font-size:14.5px}
+.vol{padding:7px 12px}
+.lb-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lb-head small{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)}
+.lb-code{font-size:32px;font-weight:800;letter-spacing:.12em;color:var(--gold);line-height:1;font-variant-numeric:tabular-nums;-webkit-user-select:text;user-select:text}
+.lb-count{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim)}
+.lb-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.lb-p{display:flex;align-items:center;gap:6px;background:var(--panel-2);border-radius:8px;padding:6px 8px;min-width:0;font-size:13.5px}
+.lb-p.me{box-shadow:inset 0 0 0 2px var(--gold)}
+.lb-p .dot{width:12px;height:12px}
+.lb-p .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.lb-p small{font-size:10.5px;color:var(--ink-dim);font-weight:700}
+.seg{display:flex;background:var(--edge);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;border-radius:8px;padding:9px 4px;font-weight:800;font-size:14.5px;background:transparent;color:var(--ink-dim);cursor:pointer}
+.seg button.on.pvp{background:var(--mult);color:#fff}
+.seg button.on.surv{background:var(--violet);color:#fff}
+.lb-desc{font-size:12.5px!important;text-align:center;line-height:1.35!important}
+.lb-mode{background:var(--panel-2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35;color:var(--ink-dim)}
+.lb-mode b{color:var(--gold)}
+.bots{display:flex;align-items:center;gap:10px;background:var(--panel-2);border-radius:10px;padding:6px 10px;font-weight:800}
+.bots>span{flex:0 0 auto}
+.bots b{min-width:22px;text-align:center;font-size:18px;font-variant-numeric:tabular-nums}
+.bots small{margin-left:auto;font-size:11.5px;color:var(--ink-dim)}
+.step{width:38px;height:34px;border:0;border-radius:8px;background:var(--chips);color:#fff;font-size:22px;font-weight:800;line-height:1;cursor:pointer}
+.step:disabled{opacity:.3}
+.bj-fx{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.bj-burst{position:absolute;left:50%;top:45%;width:140vmax;height:140vmax;transform:translate(-50%,-50%) scale(0);background:radial-gradient(circle,rgba(245,189,58,.55) 0%,rgba(245,189,58,.18) 25%,transparent 55%);animation:bjburst 1.3s ease-out forwards}
+.bj-word{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.2) rotate(-12deg);font-family:var(--font-px);font-size:clamp(40px,13vw,64px);color:var(--gold);text-shadow:4px 4px 0 var(--mult),8px 8px 0 var(--edge);white-space:nowrap;animation:bjword 1.8s cubic-bezier(.2,1.6,.4,1) forwards}
+.bj-suit{position:absolute;top:-40px;color:#fbf4e2;text-shadow:0 2px 0 rgba(0,0,0,.4);animation:bjfall 1.6s ease-in forwards}
+.bj-suit.r{color:#ff6b61}
+.bj-cards .card{animation:bjcard .6s ease-out}
+@keyframes bjburst{60%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.1);opacity:0}}
+@keyframes bjword{25%{transform:translate(-50%,-50%) scale(1.15) rotate(-6deg)}40%{transform:translate(-50%,-50%) scale(1) rotate(-6deg)}80%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-6deg)}100%{opacity:0;transform:translate(-50%,-80%) scale(1.05) rotate(-6deg)}}
+@keyframes bjfall{to{transform:translateY(110vh) rotate(var(--rot));opacity:.2}}
+@keyframes bjcard{40%{transform:translateY(-18px) rotate(-6deg) scale(1.08)}}
+.ring21{position:absolute;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;border:4px solid #5fd38a;box-shadow:0 0 18px #5fd38a;animation:ring21 1.1s ease-out forwards;opacity:0}
+.word21{position:absolute;transform:translate(-50%,-50%);font-weight:800;font-size:46px;color:#5fd38a;text-shadow:0 3px 0 var(--edge),0 0 18px rgba(95,211,138,.7);animation:word21 1.2s ease-out forwards}
+.glow21 .card{animation:glow21 1s ease-out}
+@keyframes ring21{0%{opacity:1;transform:scale(.4)}100%{opacity:0;transform:scale(5)}}
+@keyframes word21{0%{opacity:0;transform:translate(-50%,-20%) scale(.6)}25%{opacity:1;transform:translate(-50%,-90%) scale(1.2)}70%{opacity:1;transform:translate(-50%,-110%) scale(1)}100%{opacity:0;transform:translate(-50%,-150%) scale(1)}}
+@keyframes glow21{30%{box-shadow:0 0 0 3px #5fd38a,0 0 24px #5fd38a}}
+.clock{text-align:center;font-size:14px;font-weight:700;color:var(--ink-dim);background:var(--panel-2);border-radius:999px;padding:6px 12px;align-self:center}
+.clock b{color:var(--ink);font-size:17px;font-variant-numeric:tabular-nums;margin-left:2px}
+.clock.late{background:color-mix(in srgb,var(--mult) 30%,var(--panel-2))}
+.clock.late b{color:#ff8077}
 .roombtn{border:0;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
 .roombtn:disabled{opacity:.5;cursor:default}
 .roombtn:not(:disabled):active{transform:translateY(2px)}
@@ -462,6 +516,7 @@ function renderCalc(){
   el.innerHTML=`<div class="hn"><span>${k.n}${k.l?` <small>nv ${k.l}</small>`:''}</span>${k.total!=null?`<span class="tot">= ${fmt(k.total)}</span>`:'<small>toque para ver as jogadas</small>'}</div><div class="pill c" id="pc-c">${fmt(k.c)}</div><div class="x">×</div><div class="pill m" id="pc-m">${fmt(k.m)}</div>`;
 }
 function renderJokers(){
+  $('#rack').hidden=!!(S&&isPvp()&&!S.jokers.length);
   let h='';
   for(let i=0;i<5;i++){const j=S&&S.jokers[i];
     if(j){const d=JK[j.k];h+=`<button class="joker" style="--jc:${d.bg}" data-act="joker" data-i="${i}" data-ji="${i}" aria-label="${d.n}">${j.k==='escalada'?`<span class="jv">+${j.v||0}</span>`:''}<span class="jg">${d.g}</span><span class="jn">${d.n}</span></button>`}
@@ -474,19 +529,18 @@ function renderRivals(){
   const reveal=S.phase==='pshow'&&S.pv&&S.pv.r===S.round;
   const ps=gamePlayers().filter(p=>!p.me);
   $('#dt').textContent=`${ps.filter(p=>p.st&&p.st.al).length} vivos`;$('#dt').className='';
-  $('#dc').innerHTML=`<div class="rivals">${ps.map(p=>{const st=p.st||{};const sub=st.sub&&st.sub.r===S.round?st.sub:null;
-    let line;
-    if(!st.al)line='<span class="c-dim">fora</span>';
-    else if(reveal&&sub)line=`<span class="mini">${miniCards(sub.c)}</span> <b>${sub.x?'estourou':sub.t}</b>`;
-    else if(sub)line='<span class="ok">✓ pronto</span>';
-    else if((+st.r||0)<S.round||st.ph==='shop'||st.ph==='cash'||st.ph==='pshow')line='<span class="c-dim">terminando a rodada</span>';
-    else line='<span class="c-dim">jogando…</span>';
-    return `<div class="rvl ${!st.al?'out':''}"><span class="nm"><span class="dot" style="--pc:${colOf(p.col)}"></span>${esc(p.name)} <span class="hp">${st.al?Math.max(0,+st.hp||0)+' PV':''}</span></span>${line}</div>`}).join('')||'<p class="c-dim" style="font-size:13px">Esperando os rivais entrarem…</p>'}</div>`;
-  $('#dc').classList.remove('tight');
+  $('#dc').classList.add('riv');
+  $('#dc').innerHTML=`<div class="rivals ${ps.length<=4?'few':''}">${ps.map(p=>{const st=p.st||{};const sub=st.sub&&st.sub.r===S.round?st.sub:null;
+    let tag,cls='';
+    if(!st.al){tag='fora';cls='out'}
+    else if(reveal&&sub){tag=sub.x?'estourou':(+sub.t===21?(sub.bj?'BJ':'21'):sub.t);cls=sub.x?'bust':+sub.t===21?'is21':'shown'}
+    else if(sub){tag='✓';cls='ready'}
+    else tag='…';
+    return `<div class="rvl ${!st.al?'out':''}" title="${esc(p.name)}"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><span class="hp">${st.al?Math.max(0,+st.hp||0):''}</span><span class="tg ${cls}">${tag}</span></div>`}).join('')||'<p class="c-dim" style="font-size:13px">Esperando os rivais entrarem…</p>'}</div>`;
 }
 function renderTable(){
   if(!S){$('#dc').innerHTML='';$('#pc').innerHTML='';return}
-  if(!isPvp())$('#dlbl').textContent='Dealer';
+  if(!isPvp()){$('#dlbl').textContent='Dealer';$('#dc').classList.remove('riv')}
   if(isPvp()){
     renderRivals();
     $('#pc').innerHTML=S.player.map(c=>{const anim=!seen.has(c.id);seen.add(c.id);return cardHTML(c,{anim,sel:S.sel===c.id})}).join('');
@@ -547,6 +601,22 @@ function pop(el,text,cls){
   p.className='pop '+cls;p.textContent=text;p.style.left=(r.left+r.width/2)+'px';p.style.top=(r.top+8)+'px';
   $('#fx').appendChild(p);setTimeout(()=>p.remove(),850);
 }
+/* Blackjack natural: explosão dourada com naipes caindo. Chegar a 21: onda verde saindo das cartas. */
+function fxBlackjack(){
+  beep(523,.12,'square',.05);setTimeout(()=>beep(659,.12,'square',.05),110);setTimeout(()=>beep(784,.12,'square',.05),220);setTimeout(()=>beep(1046,.3,'square',.05),330);
+  const fx=$('#fx'),w=document.createElement('div');w.className='bj-fx';
+  w.innerHTML='<div class="bj-burst"></div><div class="bj-word">BLACKJACK!</div>';
+  if(!RM)for(let k=0;k<26;k++){const c=document.createElement('span');c.className='bj-suit'+(k%4===1||k%4===2?' r':'');c.textContent=SUITS[k%4];c.style.left=(Math.random()*100)+'%';c.style.animationDelay=(Math.random()*.5)+'s';c.style.fontSize=(18+Math.random()*22)+'px';c.style.setProperty('--rot',(Math.random()*720-360)+'deg');w.appendChild(c)}
+  fx.appendChild(w);setTimeout(()=>w.remove(),2000);
+  anim($('#pc'),'bj-cards');
+}
+function fx21(){
+  beep(880,.08,'triangle',.05);setTimeout(()=>beep(1320,.18,'triangle',.05),90);
+  const r=$('#pc').getBoundingClientRect(),fx=$('#fx');
+  for(let k=0;k<3;k++){const ring=document.createElement('div');ring.className='ring21';ring.style.left=(r.left+r.width/2)+'px';ring.style.top=(r.top+r.height/2)+'px';ring.style.animationDelay=(k*.15)+'s';fx.appendChild(ring);setTimeout(()=>ring.remove(),1400)}
+  const t=document.createElement('div');t.className='word21';t.textContent='21!';t.style.left=(r.left+r.width/2)+'px';t.style.top=(r.top)+'px';fx.appendChild(t);setTimeout(()=>t.remove(),1300);
+  anim($('#pc'),'glow21');
+}
 function anim(el,cls){if(!el)return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
 const cardEl=id=>document.querySelector(`#pc [data-cid="${id}"]`);
 const jokerEl=i=>document.querySelector(`#rack [data-ji="${i}"]`);
@@ -566,11 +636,12 @@ async function deal(){
   S.busy=true;S.player=[];S.dealer=[];S.hidden=true;S.doubled=false;S.sel=null;S.msg='';S.calc=null;S.awaitNext=false;seen.clear();render();
   for(const w of ['p','d','p','d']){(w==='p'?S.player:S.dealer).push(draw());beep(520+Math.random()*120,.04);render();await sleep(200)}
   const p=total(S.player),d=total(S.dealer);
-  if(p===21||d===21){S.hidden=false;S.msg=p===21?'Blackjack!':'O dealer tem blackjack…';render();await sleep(650);await resolve();return}
+  if(p===21||d===21){S.hidden=false;S.msg=p===21?'Blackjack!':'O dealer tem blackjack…';render();if(p===21){fxBlackjack();await sleep(1300)}else await sleep(650);await resolve();return}
   S.busy=false;render();
 }
 async function afterDraw(){
   const p=total(S.player);
+  if(p===21){if(S.player.length===2){S.msg='Blackjack!';render();fxBlackjack();await sleep(1200)}else{S.msg='Chegou a 21!';render();fx21();await sleep(800)}}
   if(isPvp()){
     if(p>21){S.busy=true;S.msg='Estourou!';render();anim($('#pc'),'shake');await sleep(500);pvpSubmit();return}
     if(p===21||S.player.length>=5||S.doubled){pvpSubmit();return}
@@ -739,7 +810,7 @@ async function pvpDeal(){
   S.busy=true;S.player=[];S.dealer=[];S.doubled=false;S.sel=null;S.msg='';seen.clear();S.deadline=0;render();
   for(let k=0;k<2;k++){S.player.push(draw());beep(520+Math.random()*120,.04);render();await sleep(220)}
   S.deadline=Date.now()+PVP_TURN_MS;
-  if(total(S.player)===21){S.msg='Blackjack!';render();await sleep(500);pvpSubmit();return}
+  if(total(S.player)===21){S.msg='Blackjack!';render();fxBlackjack();await sleep(1300);pvpSubmit();return}
   S.busy=false;render();
 }
 function pvpSubmit(){
@@ -828,6 +899,7 @@ function pvpTimer(){
     if(openSheet==='pvpres'){const b=$('#pvpnext');if(b){b.disabled=!ok;const left=Math.max(0,Math.ceil(((S.pv?S.pv.at:now)+15000-now)/1000));b.innerHTML=ok?`Próxima rodada<small>${left}s</small>`:'Esperando a mesa aplicar o dano…'}}
     if(ok&&S.pv&&now>S.pv.at+15000)pvpNext();
   }else if(S.phase==='cash'&&S.deadline&&now>S.deadline){collect()}
+  if((S.phase==='shop'||S.phase==='cash')&&S.deadline){const c=$('#shopclock');if(c){c.innerHTML=clockText();c.classList.toggle('late',S.deadline-now<20000)}}
   else if(S.phase==='shop'&&S.deadline&&now>S.deadline){leaveShop()}
   else if(S.phase==='select'&&S.deadline&&now>S.deadline){pvpStartRound()}
 }
@@ -1099,7 +1171,7 @@ async function enterRoom(code){
 /* ---------- Bots do PvP ----------
    Quem cria a sala roda os bots no próprio aparelho e publica o estado deles na sala,
    como se fossem jogadores. Eles seguem as mesmas regras: fecham a mão, comparam e causam dano. */
-const BOT_NAMES=['Bot Ás','Bot Valete','Bot Dama','Bot Rei','Bot Curinga','Bot Trinca','Bot Naipe','Bot Ficha','Bot Banca'];
+const BOT_NAMES=['Ás','Valete','Dama','Rei','Curinga','Trinca','Naipe','Ficha','Banca'];
 let BOTS=[];
 function botPub(b){
   if(!NR)return;
@@ -1109,7 +1181,7 @@ function botPub(b){
 function addBot(){
   if(!NR)return;
   const lp=lobbyPlayers();if(lp.length>=MAXP)return;
-  const used=new Set(lp.map(p=>p.name));const name=BOT_NAMES.find(n=>!used.has(n))||('Bot '+(BOTS.length+1));
+  const used=new Set(lp.map(p=>p.name));const name=BOT_NAMES.find(n=>!used.has(n))||('Bot'+(BOTS.length+1));
   const usedC=new Set(lp.map(p=>p.col));let col=COLORS.findIndex((c,i)=>!usedC.has(i));if(col<0)col=BOTS.length%COLORS.length;
   const b={pid:'b'+rid().slice(0,7),name,col,j:Date.now()+BOTS.length,g:null,st:null};
   BOTS.push(b);botPub(b);beep(600,.05);
@@ -1227,22 +1299,24 @@ function renderStrip(){
 }
 
 /* ---------- Telas ---------- */
-function showSheet(html,name){$('#panel').innerHTML=html;$('#sheet').hidden=false;openSheet=name||'x'}
+function showSheet(html,name){$('#panel').classList.remove('compact');$('#panel').innerHTML=html;$('#sheet').hidden=false;openSheet=name||'x'}
 function hideSheet(){$('#sheet').hidden=true;openSheet=null}
 function bestLine(){const b=store.get(BEST);return b?`Seu recorde solo: Ante ${b.ante} · ${b.blinds} blinds · melhor mão ${fmt(b.hand)}`:'Ainda sem recorde solo neste aparelho'}
 function todayStr(){const d=new Date();return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`}
 const hearts=n=>'♥'.repeat(Math.max(0,n));
 function showStart(){
   const sv=store.get(SAVE);
-  showSheet(`<div class="logo"><span class="l1">FAMÍLIA</span><span class="l2">21</span><span class="l3">blackjack roguelike</span></div>
-    <p style="text-align:center">Vença o dealer, junte Fichas e Mult, compre coringas e sobreviva a 8 antes.</p>
-    <button class="btn b-dbl" data-act="mphome" style="padding:14px 4px 12px;font-size:18px">Multiplayer<small>até 10 pessoas, uma contra as outras</small></button>
+  showSheet(`<div class="logo sm"><span class="l1">FAMÍLIA</span><span class="l2">21</span><span class="l3">blackjack roguelike</span></div>
+    ${MP.invitedBy?`<div class="note" style="text-align:center;font-size:14px"><b style="color:var(--gold)">${esc(MP.invitedBy)}</b> te convidou para jogar! Toque em Multiplayer.</div>`:''}
+    <button class="btn b-dbl" data-act="mphome" style="padding:13px 4px 11px;font-size:18px">Multiplayer<small>até 10 pessoas, uma contra as outras</small></button>
     ${sv?`<button class="btn b-go" data-act="continue">Continuar partida solo<small>Ante ${sv.S.ante} · $${sv.S.money}</small></button>`:''}
     <div class="row"><button class="btn b-hit" data-act="new">Solo<small>baralho aleatório</small></button>
     <button class="btn b-swap" data-act="daily">Desafio do dia<small>${todayStr()}</small></button></div>
+    <button class="btn b-go" data-act="gameinvite">Convidar para o jogo<small>gera um link novo de convite</small></button>
     ${musicSlider()}
-    <div class="row"><button class="btn b-dim" data-act="how">Como jogar</button><button class="btn b-dim" data-act="mute">Efeitos: ${muted?'desligados':'ligados'}</button></div>
+    <div class="row"><button class="btn b-dim sm" data-act="how">Como jogar</button><button class="btn b-dim sm" data-act="mute">Efeitos: ${muted?'off':'on'}</button></div>
     <div class="best">${bestLine()}</div>`,'start');
+  $('#panel').classList.add('compact');
 }
 function showMPHome(){
   const nickEl=$('#nick'),codeEl=$('#codein');
@@ -1289,31 +1363,29 @@ const MODE_TXT={
 };
 function modeBlock(amHost,host){
   const m=amHost?MP.mode:(host&&host.lm)||'pvp';
-  if(!amHost)return `<div class="boss-note" style="border-color:var(--gold);background:var(--panel-2)"><b>Modo: ${MODE_TXT[m].n}</b>${MODE_TXT[m].d}</div>`;
+  const short={pvp:'Sem dealer: a maior mão da rodada causa dano em quem ficou abaixo. Quem zera a vida sai.',surv:'3 vidas. Falhar uma blind ou perder o Duelo custa uma vida.'}[m];
+  if(!amHost)return `<div class="lb-mode"><b>Modo: ${m==='pvp'?'PvP':'Sobrevivência'}</b> <span>${short}</span></div>`;
   const nb=BOTS.length,full=lobbyPlayers().length>=MAXP;
-  return `<div class="field">Modo de jogo</div><div class="row"><button class="btn ${m==='pvp'?'b-dbl':'b-dim'}" data-act="mode" data-m="pvp">PvP<small>pontos de vida</small></button><button class="btn ${m==='surv'?'b-swap':'b-dim'}" data-act="mode" data-m="surv">Sobrevivência<small>3 vidas e duelos</small></button></div><p style="font-size:13.5px;text-align:center">${MODE_TXT[m].d}</p>
-  ${m==='pvp'?`<div class="field">Bots</div><div class="row"><button class="btn b-hit" data-act="addbot" ${full?'disabled':''}>+ Adicionar bot<small>${full?'sala cheia':'jogam sozinhos'}</small></button><button class="btn b-dim" data-act="rmbot" ${nb?'':'disabled'}>− Remover bot<small>${nb} na sala</small></button></div>`:''}`;
+  return `<div class="seg"><button class="${m==='pvp'?'on pvp':''}" data-act="mode" data-m="pvp">PvP</button><button class="${m==='surv'?'on surv':''}" data-act="mode" data-m="surv">Sobrevivência</button></div>
+  <p class="lb-desc">${short}</p>
+  ${m==='pvp'?`<div class="bots"><span>Bots</span><button class="step" data-act="rmbot" ${nb?'':'disabled'} aria-label="Remover bot">−</button><b>${nb}</b><button class="step" data-act="addbot" ${full?'disabled':''} aria-label="Adicionar bot">+</button><small>${full?'sala cheia':'jogam sozinhos'}</small></div>`:''}`;
 }
 function showLobby(){
   const lp=lobbyPlayers();const playing=roomPlayers().filter(p=>p.g&&!p.off);
   const host=lp[0];const amHost=host&&host.pid===MP.pid;
   const sv=store.get(SAVE_MP);
   const canResume=sv&&sv.code===MP.code&&sv.S&&sv.S.mp&&!(store.get('c21-done')||[]).includes(sv.S.mp.gid);
-  const resumeBtn=canResume?`<button class="btn b-swap" data-act="mpresume">Voltar à partida em andamento<small>Ante ${sv.S.ante}${sv.S.mp.mode==='pvp'?'':' · '+hearts(sv.S.mp.lives)}</small></button>`:'';
-  showSheet(`<h2>Sala</h2>
-  <div class="code">${esc((MP.code||'').toUpperCase())}</div>
-  <div class="net ${NR&&NR.connected()?'':'bad'}">${NR&&NR.connected()?'● conectado':'● reconectando…'}</div>
-  <button class="btn b-go" data-act="copycode">Convidar amigos<small>manda um link que entra direto nesta sala</small></button>
-  <p id="share" class="note" style="font-size:12.5px;text-align:center;word-break:break-all">${esc(inviteLink())}</p>
-  <p style="font-size:13.5px;text-align:center">Quem abrir o link do convite cai direto aqui. Também dá para entrar pela lista de salas com o código. Ninguém precisa de conta.</p>
+  const ok=NR&&NR.connected();
+  showSheet(`<div class="lb-head"><div><small>Sala</small><span class="lb-code">${esc((MP.code||'').toUpperCase())}</span></div><span class="net ${ok?'':'bad'}">${ok?'● conectado':'● reconectando…'}</span></div>
+  <button class="btn b-go" data-act="copycode">Convidar amigos<small>link que entra direto nesta sala</small></button>
+  <span id="share" hidden>${esc(inviteLink())}</span>
   ${MP.msg?`<div class="note warn">${esc(MP.msg)}</div>`:''}
-  <div class="list">${lp.map((p,i)=>`<div class="li ${p.me?'me':''} ${i>=MAXP?'out':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span><span class="grow"><b>${esc(p.name)}</b>${p.me?' <span class="c-dim">(você)</span>':''}</span><span class="c-dim" style="font-size:12.5px">${i===0?'anfitrião':i>=MAXP?'sala cheia':p.bot?'bot':'pronto'}</span></div>`).join('')||'<p>Conectando…</p>'}
-  ${playing.length?`<div class="li out"><span class="grow">${playing.length} pessoa${playing.length>1?'s':''} em uma partida em andamento</span></div>`:''}</div>
-  <p style="text-align:center;font-size:13.5px">${Math.min(lp.length,MAXP)}/${MAXP} jogadores</p>
+  <div class="lb-count">${Math.min(lp.length,MAXP)}/${MAXP} jogadores${playing.length?` · ${playing.length} em outra partida`:''}</div>
+  <div class="lb-grid">${lp.slice(0,MAXP).map((p,i)=>`<div class="lb-p ${p.me?'me':''}"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><small>${i===0?'anfitrião':p.bot?'bot':p.me?'você':''}</small></div>`).join('')||'<p>Conectando…</p>'}</div>
   ${modeBlock(amHost,host)}
-  ${resumeBtn}
-  ${amHost?`<button class="btn b-go" data-act="startgame" style="padding:14px 4px 12px;font-size:18px">Começar partida<small>${Math.min(lp.length,MAXP)} jogador${lp.length===1?'':'es'}${lp.length<2?' · dá para testar sozinho':''}</small></button>`:`<div class="note" style="text-align:center">Esperando ${host?esc(host.name):'o anfitrião'} começar a partida…</div>`}
-  <button class="btn b-dim" data-act="leaveroom">Sair da sala</button>`,'lobby');
+  ${canResume?`<button class="btn b-swap" data-act="mpresume">Voltar à partida em andamento</button>`:''}
+  <div class="row">${amHost?`<button class="btn b-go" data-act="startgame" style="flex:2">Começar<small>${Math.min(lp.length,MAXP)} jogador${lp.length===1?'':'es'}</small></button>`:`<div class="note" style="flex:2;text-align:center;font-size:13px">Esperando ${host?esc(host.name):'o anfitrião'} começar…</div>`}<button class="btn b-dim" data-act="leaveroom">Sair</button></div>`,'lobby');
+  $('#panel').classList.add('compact');
 }
 function showHow(back){
   showSheet(`<h2>Como jogar</h2><div class="how list">
@@ -1355,7 +1427,7 @@ function showSelectPvp(){
 }
 function showCash(){
   const c=S.cash;
-  showSheet(`<h2>${isPvp()?'Hora da loja':isDuel()?'Fim do duelo':'Blind vencida!'}</h2>
+  showSheet(`<h2>${isPvp()?'Hora da loja':isDuel()?'Fim do duelo':'Blind vencida!'}</h2>${clockHTML()}
   <div class="list">${isPvp()?`<div class="kv"><span>Seus PV</span><span class="num" style="color:#ff6b61">${pvpHP()}/${S.mp.maxHp||PVP_HP}</span></div><div class="kv"><span>Dano que você já causou</span><span class="num" style="color:#ff6b61">${fmt(S.mp.dealt||0)}</span></div>`:`<div class="kv"><span>Pontos feitos</span><span class="num" style="color:var(--ink)">${fmt(S.roundScore)}</span></div>`}<hr>
   ${c.reward?`<div class="kv"><span>Recompensa</span><span class="num">$${c.reward}</span></div>`:''}
   ${c.hands?`<div class="kv"><span>${c.hands} mão${c.hands===1?'':'s'} sobrando</span><span class="num">$${c.hands}</span></div>`:''}
@@ -1375,15 +1447,17 @@ function showShop(){
       return `<div class="item ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><div class="art" style="--jc:${d.bg}">${d.g}</div>${d.pvp?`<span class="kind ${d.pvp}">${d.pvp==='atk'?'Ataque':'Defesa'}</span>`:''}<b>${d.n}</b><small>${d.d}</small><button class="btn b-go" data-act="shopitem" data-i="${i}" >${it.sold?'Comprado':full?'Sem espaço':'Ver · $'+d.c}</button></div>`}
     const h=HANDS[it.k];
     return `<div class="item ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><div class="art planet" style="--jc:${h.pc}"></div><b>${h.p}</b><small>Sobe ${h.n} para nv ${S.levels[it.k]+1} (+${h.lc} Fichas, +${h.lm} Mult)</small><button class="btn b-go" data-act="shopitem" data-i="${i}" >${it.sold?'Usado':'Ver · $3'}</button></div>`}).join('');
-  showSheet(`<h2>Loja</h2><div class="kv"><span>Seu dinheiro</span><span class="num">$${S.money}</span></div>
+  showSheet(`<h2>Loja</h2>${clockHTML()}<div class="kv"><span>Seu dinheiro</span><span class="num">$${S.money}</span></div>
   <p style="font-size:13px;text-align:center">Toque numa carta para ver o que ela faz e confirmar a compra.</p>
   <div class="shop">${items}</div>
   <p style="font-size:13.5px;text-align:center">${isPvp()?'Suas cartas':'Seus coringas'} (${S.jokers.length}/5) · toque para vender ou mudar a ordem</p>
   <div class="rack">${[0,1,2,3,4].map(i=>{const j=S.jokers[i];if(!j)return '<div class="slot"></div>';const d=JK[j.k];return `<button class="joker" style="--jc:${d.bg}" data-act="joker" data-i="${i}"><span class="jg">${d.g}</span><span class="jn">${d.n}</span></button>`}).join('')}</div>
   <div class="row"><button class="btn b-dbl" data-act="reroll" ${S.money<sh.reroll?'disabled':''}>${isPvp()?'Trocar cartas':'Trocar coringas'}<small>$${sh.reroll}</small></button>
   <button class="btn b-hit" data-act="leave">${isPvp()?'Voltar à mesa':'Próxima blind'}</button></div>
-  ${isPvp()?'<p style="font-size:12.5px;text-align:center">A mesa espera você. A loja fecha sozinha em ${Math.max(0,Math.ceil((S.deadline-Date.now())/1000))}s.</p>':''}`,'shop');
+  ${isPvp()?'<p style="font-size:12.5px;text-align:center">A mesa espera você voltar. Quando o tempo acabar, você volta sozinho.</p>':''}`,'shop');
 }
+function clockHTML(){return isPvp()&&S.deadline&&['shop','cash'].includes(S.phase)?`<div class="clock" id="shopclock">${clockText()}</div>`:''}
+function clockText(){const left=Math.max(0,Math.ceil((S.deadline-Date.now())/1000));return `${S.phase==='cash'?'A loja abre sozinha':'A loja fecha'} em <b>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}</b>`}
 function showBuy(i){
   const it=S.shop&&S.shop.items[i];if(!it)return;
   let art,name,desc,price,kind='',block='';
@@ -1394,7 +1468,7 @@ function showBuy(i){
     const a=hv(it.k);desc=`Sobe a jogada ${h.n} do nível ${l} para o ${l+1}: de ${a.c} para ${a.c+h.lc} Fichas e de ${a.m} para ${a.m+h.lm} Mult.`}
   if(it.sold)block='Você já comprou esta carta.';
   else if(!block&&S.money<price)block=`Falta $${price-S.money} para comprar.`;
-  showSheet(`<div class="item" style="background:none;border:0">${art}${kind}<h2>${esc(name)}</h2><p style="text-align:center;color:var(--ink);font-size:15.5px">${esc(desc)}</p></div>
+  showSheet(`${clockHTML()}<div class="item" style="background:none;border:0">${art}${kind}<h2>${esc(name)}</h2><p style="text-align:center;color:var(--ink);font-size:15.5px">${esc(desc)}</p></div>
   <div class="list"><div class="kv"><span>Preço</span><span class="num">$${price}</span></div><div class="kv"><span>Seu dinheiro</span><span class="num" style="color:var(--ink)">$${S.money}</span></div></div>
   ${block?`<div class="note warn" style="text-align:center">${block}</div>`:''}
   <button class="btn b-go" data-act="buyok" data-i="${i}" ${block?'disabled':''} style="padding:14px 4px 12px;font-size:17px">Confirmar compra · $${price}</button>
@@ -1509,6 +1583,7 @@ document.addEventListener('click',e=>{
     case 'addbot':addBot();showLobby();break;
     case 'rmbot':removeBot();showLobby();break;
     case 'copycode':shareInvite(t);break;
+    case 'gameinvite':shareGameInvite(t);break;
     case 'leaveroom':leaveRoom();break;
     case 'lobby':backToLobby();break;
     case 'mpresume':{const sv=store.get(SAVE_MP);if(sv&&sv.S&&sv.S.mp){MP.started.add(sv.S.mp.gid);S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;lastPres='';resume()}break}
@@ -1546,7 +1621,15 @@ function buy(i){
   else{if(S.money<3)return;S.money-=3;S.levels[it.k]++}
   it.sold=true;beep(880,.08);setTimeout(()=>beep(1180,.1),90);render();showShop();
 }
-const inviteLink=()=>location.origin+location.pathname+'?sala='+encodeURIComponent((MP.code||'').toUpperCase());
+const SITE_URL='https://mayconsilvaseguranca-eng.github.io/coringa21/';
+const siteBase=()=>/^https?:$/.test(location.protocol)&&!/claude\.ai$|claudeusercontent|claude\.site/.test(location.hostname)?location.origin+location.pathname:SITE_URL;
+const inviteLink=()=>siteBase()+'?sala='+encodeURIComponent((MP.code||'').toUpperCase());
+function gameInviteLink(){const p=new URLSearchParams();if(MP.name)p.set('de',MP.name);p.set('convite',rid().slice(0,6));return siteBase()+'?'+p.toString()}
+function shareGameInvite(btn){
+  const url=gameInviteLink(),text=`${MP.name?MP.name+' te convidou para':'Bora'} jogar Família 21! É um 21 com coringas e PvP, direto no navegador, sem cadastro:`;
+  if(navigator.share&&/^https?:/.test(location.protocol)){navigator.share({title:'Família 21',text,url}).then(()=>{btn.querySelector('small')?btn.querySelector('small').textContent='convite enviado!':btn.textContent='Convite enviado!'},()=>copyText(text+' '+url,btn));return}
+  copyText(text+' '+url,btn);
+}
 function shareInvite(btn){
   const url=inviteLink(),text=`Bora jogar Família 21 comigo! Toca no link para entrar direto na minha sala (${(MP.code||'').toUpperCase()}):`;
   if(navigator.share&&/^https?:/.test(location.protocol)){navigator.share({title:'Família 21',text,url}).then(()=>{btn.textContent='Convite enviado!'},()=>copyText(text+' '+url,btn));return}
@@ -1617,6 +1700,8 @@ function render0(){
 })();
 
 render0();
+MP.invitedBy=cleanName(QS.get('de')||'')||(QS.get('convite')?'Um amigo':'');
+if(QS.get('convite')||QS.get('de')){try{history.replaceState(null,'',location.pathname+(QS.get('broker')?'?broker='+encodeURIComponent(QS.get('broker'))+(QS.get('test')?'&test=1':''):''))}catch(e){}}
 const linkRoom=(QS.get('sala')||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8);
 if(linkRoom&&ROOM){
   try{history.replaceState(null,'',location.pathname+(QS.get('broker')?'?broker='+encodeURIComponent(QS.get('broker'))+(QS.get('test')?'&test=1':''):''))}catch(e){}

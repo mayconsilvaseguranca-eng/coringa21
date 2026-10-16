@@ -10,9 +10,9 @@ export default async function () {
     await B.waitForSelector('.roombtn', { timeout: 8000 });
     await B.click('.roombtn'); await B.fill('#codein', 'ZZZZ'); await B.click('[data-act=joinpick]');
     check((await B.textContent('#panel .note')).includes('Código errado'), 'código errado não foi recusado');
-    await B.fill('#codein', code.toLowerCase()); await B.click('[data-act=joinpick]'); await B.waitForSelector('.code');
-    await C.click('[data-act=mphome]'); await C.fill('#nick', 'Caio'); await C.fill('#codein', code); await C.click('[data-act=join]'); await C.waitForSelector('.code');
-    await A.waitForFunction(() => document.querySelectorAll('#panel .li').length >= 3, null, { timeout: 8000 });
+    await B.fill('#codein', code.toLowerCase()); await B.click('[data-act=joinpick]'); await B.waitForSelector('.lb-code');
+    await C.click('[data-act=mphome]'); await C.fill('#nick', 'Caio'); await C.fill('#codein', code); await C.click('[data-act=join]'); await C.waitForSelector('.lb-code');
+    await A.waitForFunction(() => document.querySelectorAll('#panel .lb-p').length >= 3, null, { timeout: 8000 });
     await A.click('[data-act=startgame]');
     for (const p of [A, B, C]) await p.waitForFunction(() => window.__c21.S && window.__c21.S.mp, null, { timeout: 8000 });
     const duel = (p, sc) => p.evaluate(sc => { const t = window.__c21, S = t.S; S.busy = false; S.bi = 2; S.phase = 'play'; S.roundScore = sc; t.duelFinished(); }, sc);

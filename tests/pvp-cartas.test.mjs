@@ -7,7 +7,7 @@ export default async function () {
     const A = await t.page('Ana'), B = await t.page('Beto');
     const code = await createRoom(A, 'Ana', 'pvp');
     await joinRoom(B, 'Beto', code);
-    await A.waitForFunction(() => document.querySelectorAll('#panel .li').length >= 2);
+    await A.waitForFunction(() => document.querySelectorAll('#panel .lb-p').length >= 2);
     await A.click('[data-act=startgame]');
     for (const p of [A, B]) await p.waitForFunction(() => window.__c21.S && window.__c21.S.mp);
     await A.evaluate(() => { window.__c21.S.jokers = [{ k: 'critico', v: 0 }, { k: 'sangria', v: 0 }, { k: 'vampiro', v: 0 }]; });

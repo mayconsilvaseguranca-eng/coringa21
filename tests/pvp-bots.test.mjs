@@ -12,10 +12,11 @@ export default async function () {
     const B = await t.page('Beto', 'iPhone 13', '&sala=' + code);
     check((await B.inputValue('#codein')) === code, 'o link de convite não preencheu o código');
     for (let i = 0; i < 4; i++) await A.click('[data-act=addbot]');
-    await B.fill('#nick', 'Beto'); await B.click('[data-act=join]'); await B.waitForSelector('.code');
-    await A.waitForFunction(() => document.querySelectorAll('#panel .li').length >= 6, null, { timeout: 8000 });
-    const lobby = await B.$$eval('#panel .li', els => els.map(e => e.textContent));
-    check(lobby.filter(x => x.includes('bot')).length === 4, 'Beto não vê os 4 bots na sala');
+    await B.fill('#nick', 'Beto'); await B.click('[data-act=join]'); await B.waitForSelector('.lb-code');
+    await A.waitForFunction(() => document.querySelectorAll('#panel .lb-p').length >= 6, null, { timeout: 8000 });
+    const seesBots = await B.waitForFunction(() => [...document.querySelectorAll('#panel .lb-p')].filter(e => e.textContent.includes('bot')).length === 4, null, { timeout: 10000 }).then(() => true, () => false);
+    check(seesBots, 'Beto não vê os 4 bots na sala');
+    check(await A.evaluate(() => { const p = document.querySelector('#panel'); return p.scrollHeight <= p.clientHeight + 2; }), 'a tela da sala precisa rolar com 6 jogadores');
     await A.click('[data-act=startgame]');
     for (const p of [A, B]) await p.waitForFunction(() => window.__c21.S && window.__c21.S.mp, null, { timeout: 10000 });
     check((await A.evaluate(() => window.__c21.S.mp.players.length)) === 6, 'a partida não começou com 6 jogadores');

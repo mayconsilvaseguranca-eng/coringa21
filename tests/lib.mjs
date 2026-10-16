@@ -36,13 +36,13 @@ export const handState = p => p.evaluate(() => {
 
 export async function createRoom(p, nick, mode) {
   await p.click('[data-act=mphome]'); await p.fill('#nick', nick); await p.click('[data-act=create]');
-  await p.waitForSelector('.code');
+  await p.waitForSelector('.lb-code');
   if (mode) { await p.click(`[data-act=mode][data-m=${mode}]`); }
-  return (await p.textContent('.code')).trim();
+  return (await p.textContent('.lb-code')).trim();
 }
 export async function joinRoom(p, nick, code) {
   await p.click('[data-act=mphome]'); await p.fill('#nick', nick); await p.fill('#codein', code); await p.click('[data-act=join]');
-  await p.waitForSelector('.code');
+  await p.waitForSelector('.lb-code');
 }
 
 // Um passo de jogo automático no PvP: joga, avança a rodada, passa pela loja.
