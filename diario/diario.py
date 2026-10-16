@@ -1,5 +1,9 @@
 import html
 V=[
+ ("v16.2","16/10 · 20:45","Teto 19 sem estouro na mão inicial e 2 trocas por loja",
+  "No Teto 19 ninguém pode estourar logo no início, e o Trocar fica só 2 vezes a cada loja.",
+  [("Corrigido","Com Teto 19, quem recebia 20 ou 21 nas duas primeiras cartas estourava sem jogar. Agora a mão inicial nunca estoura: a segunda carta é trocada até caber. Vale para pessoas e bots."),
+   ("Mudou","No PvP, o Trocar vale 2 vezes a cada loja (eram 3).")]),
  ("v16.1","16/10 · 20:20","Trégua saiu",
   "Tirar a carta de mesa Trégua.",
   [("Mudou","A carta de mesa Trégua saiu do jogo. A mesa agora sorteia entre 9 cartas de mesa, uma a cada 3 rodadas, sem repetir a anterior.")]),
@@ -178,7 +182,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 20:20'
+UPD=AG['atualizado'] if AG else '16/10/2026, 20:45'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

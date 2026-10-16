@@ -14,6 +14,8 @@ export default async function () {
     for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.deck = Array.from({ length: 80 }, (_, i) => ({ r: '2', s: '♣', id: 5000 + i })); });
     // sequência fixa só no teste (no jogo é sorteada pela partida)
     for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.mp.mesaSeq = ['teto', 'ceu', 'tempestade']; });
+    // Ana recebe K + Q (20) na mão inicial: com Teto 19 a segunda carta deve ser trocada
+    await A.evaluate(() => { const d = window.__c21.S.deck; d.push({ r: 'Q', s: '♥', id: 7001 }, { r: 'K', s: '♠', id: 7002 }); });
     for (const p of [A, B]) await p.click('[data-act=pvpgo]');
     const hp = () => Promise.all([A, B].map(p => p.evaluate(() => window.__c21.pvpHP())));
     async function round(ha, hb) {
@@ -36,6 +38,10 @@ export default async function () {
       return r;
     }
     const h0 = (await hp())[0];
+    await A.waitForFunction(() => window.__c21.S.phase === 'play' && !window.__c21.S.busy, null, { timeout: 15000 });
+    const ini = await A.evaluate(() => ({ n: window.__c21.S.player.length, t: window.__c21.S.player.reduce((a, c) => a + (c.r === 'A' ? 11 : 'JQK'.includes(c.r) ? 10 : +c.r), 0), sw: window.__c21.S.swapsLeft }));
+    check(ini.n === 2 && ini.t <= 19, `Teto 19: a mão inicial não pode estourar (${ini.n} cartas, ${ini.t})`);
+    check(ini.sw === 2, `deveria ter 2 trocas por loja, tem ${ini.sw}`);
     const fx = () => Promise.all([A, B].map(p => p.evaluate(() => (window.__c21.S.mp.fx || []).map(e => e.k).join(','))));
     check((await fx()).every(x => x === 'teto'), `rodada 1 deveria ter Teto 19 para os dois: ${await fx()}`);
     const viu = await B.waitForFunction(() => { const f = document.querySelector('#fx .mesa-fx'); return f && f.textContent.includes('Teto 19') && f.textContent.includes('rodadas 1 a 3'); }, null, { timeout: 8000 }).then(() => true, () => false);

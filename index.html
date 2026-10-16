@@ -394,7 +394,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v16.1';
+const VERSION='v16.2';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -995,7 +995,7 @@ function pvpStartRound(){
   if(S.mp.fx.length&&(S.round-1)%PVP_SHOP_EVERY===0)mesaShow(S.mp.fx[0].k,S.round);
   if(fxOn('hospital')&&S.mp.hp!=null){pvpHeal(4);setTimeout(()=>pop($('#blindBox'),'Hospital: +4 PV','info'),(S.round-1)%PVP_SHOP_EVERY===0?5600:400)}
   if(fxOn('tempestade')){if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(S.mp.hp-5);setTimeout(()=>pop($('#blindBox'),'Tempestade: −5 PV para todos','mult'),(S.round-1)%PVP_SHOP_EVERY===0?5600:400)}
-  if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=3+(act('trocador')?2:0)}
+  if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=2} /* PvP: 2 trocas a cada loja */
   if(!S.deck||S.deck.length<15)S.deck=newDeck();
   S.phase='play';S.roundScore=0;S.calc=null;S.pv=null;S.mp.sub=null;S.handsLeft=1;S.awaitNext=false;
   hideSheet();pvpDeal();
@@ -1003,6 +1003,8 @@ function pvpStartRound(){
 async function pvpDeal(){
   S.busy=true;S.player=[];S.dealer=[];S.doubled=false;S.sel=null;S.msg='';seen.clear();S.deadline=0;render();
   for(let k=0;k<2;k++){S.player.push(draw());beep(520+Math.random()*120,.04);render();await sleep(220)}
+  /* a mão inicial nunca estoura (ex.: Teto 19): troca a segunda carta até caber */
+  for(let g=0;g<20&&total(S.player)>capNow();g++){S.player[1]=draw();render();await sleep(160)}
   S.deadline=Date.now()+PVP_TURN_MS;
   if(total(S.player)>capNow()){S.msg=`Passou de ${capNow()}: estourou`;render();await sleep(700);pvpSubmit();return}
   if(total(S.player)===21){S.msg='Blackjack!';render();fxBlackjack();await sleep(1300);pvpSubmit();return}
@@ -1473,7 +1475,8 @@ function botTick(){
         if(b.deck.length<15)b.deck=botDeck();
         /* para no 17 e dobra com 10 ou 11 (como uma pessoa atenta); com Teto 19 para no 15 */
         const cap=bFx(b,'teto')?19:bFx(b,'ceu')?23:21,iron=bFx(b,'asferro'),mx=bFx(b,'curta')?3:5;
-        const c=[b.deck.pop(),b.deck.pop()];let dbl=false;const t2=botTotal(c,iron);
+        const c=[b.deck.pop(),b.deck.pop()];for(let g=0;g<20&&botTotal(c,iron)>cap&&b.deck.length>6;g++)c[1]=b.deck.pop();
+        let dbl=false;const t2=botTotal(c,iron);
         if(cap===21&&(t2===10||t2===11)){dbl=true;c.push(b.deck.pop())}
         else while(botTotal(c,iron)<cap-4&&c.length<mx)c.push(b.deck.pop());
         const t=botTotal(c,iron);
