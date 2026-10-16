@@ -1,4 +1,4 @@
-// Loja: cabe inteira no iPhone SE sem rolar, no PvP (com as descrições mais longas) e no solo.
+// Loja e sala: cabem inteiras no iPhone SE sem rolar, no PvP (com as descrições mais longas) e no solo.
 import { setup, check } from './lib.mjs';
 import { createRoom } from './lib.mjs';
 
@@ -30,9 +30,16 @@ export default async function () {
     
     out.solo=await B.evaluate(()=>{const p=document.querySelector('#panel');return {sh:p.scrollHeight,ch:p.clientHeight}});
     
+    // Sala com 10 jogadores no iPhone SE
+    const C = await t.page('Caio','iPhone SE');
+    await createRoom(C, 'Caio', 'pvp');
+    for (let i = 0; i < 9; i++) await C.click('[data-act=addbot]').catch(() => {});
+    await C.waitForTimeout(600);
+    out.sala = await C.evaluate(() => { const p = document.querySelector('#panel'); return { sh: p.scrollHeight, ch: p.clientHeight, sw: p.scrollWidth, cw: p.clientWidth }; });
+    check(out.sala.sh <= out.sala.ch + 2 && out.sala.sw <= out.sala.cw + 2, `a sala com 10 jogadores não cabe no iPhone SE: ${JSON.stringify(out.sala)}`);
     check(out.pvp.sh <= out.pvp.ch + 2, `a loja do PvP rola no iPhone SE (${out.pvp.sh} > ${out.pvp.ch})`);
     check(out.solo.sh <= out.solo.ch + 2, `a loja do solo rola no iPhone SE (${out.solo.sh} > ${out.solo.ch})`);
     check(t.errors.length === 0, 'erros na página: ' + t.errors.join(' | '));
-    return `loja cabe no iPhone SE (PvP ${out.pvp.sh}px, solo ${out.solo.sh}px)`;
+    return `loja e sala cabem no iPhone SE (loja PvP ${out.pvp.sh}px, solo ${out.solo.sh}px, sala ${out.sala.sh}px)`;
   } finally { await t.close(); }
 }

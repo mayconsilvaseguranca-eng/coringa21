@@ -220,6 +220,24 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .mini .r{color:#ff8077}
 .kind{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:5px;padding:1px 7px}
 .kind.atk{background:color-mix(in srgb,var(--mult) 30%,transparent);color:#ff8f86}
+.kind.mesa{background:color-mix(in srgb,var(--violet) 34%,transparent);color:#c9a6ff}
+.cfg{display:grid;grid-template-columns:1fr;gap:6px}
+.cfg .bots{gap:10px;padding:4px 10px}
+.cfg .bots>span{display:flex;flex-direction:column;line-height:1.05;font-size:13.5px}
+.cfg .bots>span small{margin:0;font-size:10px}
+.cfg .bots b{min-width:44px;font-size:17px;text-align:center}
+.cfg .bots>span{min-width:40px}
+.cfg .step{width:28px;height:30px;font-size:19px;flex:0 0 auto}
+.lb-grid.many{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.lb-grid.many .lb-p{padding:5px 6px;font-size:12.5px;gap:4px}
+.lb-grid.many .lb-p small{font-size:11px;color:var(--gold)}
+.lb-grid.many .lb-p.isbot .nm{font-style:italic;color:var(--ink-dim)}
+.cfg .bots{min-width:0}
+.cfg .bots>span{flex:0 0 auto}
+.bots .tgl{margin-left:auto;flex:0 0 auto}
+.bots small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tgl{border:0;border-radius:8px;padding:7px 12px;font-weight:800;font-size:14px;background:var(--edge);color:var(--ink-dim);cursor:pointer}
+.tgl.on{background:var(--violet);color:#fff}
 .kind.def{background:color-mix(in srgb,var(--chips) 30%,transparent);color:#8fc1ff}
 .vol{display:flex;align-items:center;gap:10px;background:var(--panel-2);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:700}
 .vol input{flex:1;min-width:0;accent-color:var(--gold);height:28px}
@@ -420,7 +438,12 @@ const JK={
   bandagem:{n:'Bandagem',d:'Vida abaixo da metade: +3 PV por rodada',c:4,g:'+',bg:'#3f8a6a',pvp:'def'},
   ultima:{n:'Última Chance',d:'Uma vez por partida, um golpe que te zeraria deixa você com 1 PV',c:5,g:'1',bg:'#5d6f3a',pvp:'def'},
   muralha:{n:'Muralha',d:'Se você ficar em último na rodada, leva 20% a menos de dano',c:5,g:'▥',bg:'#4f5f78',pvp:'def'},
-  colete:{n:'Colete',d:'Uso único: na rodada em que você estourar, ninguém te causa dano',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'}
+  colete:{n:'Colete',d:'Uso único: na rodada em que você estourar, ninguém te causa dano',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'},
+  /* cartas de mesa: uso único, mudam a próxima rodada para todo mundo (podem ser desligadas na sala) */
+  tempestade:{n:'Tempestade',d:'Uso único: na próxima rodada, todos os rivais levam 5 de dano',c:4,g:'ϟ',bg:'#4b5aa8',pvp:'mesa'},
+  tregua:{n:'Trégua',d:'Uso único: na próxima rodada, ninguém causa dano',c:3,g:'⊘',bg:'#4f8f86',pvp:'mesa'},
+  teto:{n:'Teto 19',d:'Uso único: na próxima rodada, passar de 19 já estoura para todos',c:3,g:'19',bg:'#8f6a24',pvp:'mesa'},
+  embaralhar:{n:'Embaralhar',d:'Uso único: na próxima rodada, ninguém decide: todos recebem cartas até 17 ou mais',c:3,g:'↻',bg:'#6d4a95',pvp:'mesa'}
 };
 const JF={
   coringa:x=>x.m(4),
@@ -466,6 +489,14 @@ function pickBoss(prev){const ks=Object.keys(BOSSES).filter(k=>k!==prev);return 
 const has=k=>S.jokers.some(j=>j.k===k);
 const isPvp=()=>!!(S&&S.mp&&S.mp.mode==='pvp');
 const isDuel=()=>!!(S&&S.mp&&S.mp.mode!=='pvp'&&S.bi===2);
+const KIND_TXT={atk:'Ataque',def:'Defesa',mesa:'Mesa'};
+/* efeitos de mesa de uma rodada: eventos {k,r} publicados por qualquer jogador da partida */
+function mesaFx(R){const out=[];if(!S||!S.mp||!S.mp.mesa)return out;
+  for(const p of gamePlayers()){const ev=p.me?S.mp.ev:(p.st&&Array.isArray(p.st.ev)?p.st.ev:[]);
+    for(const e of ev||[])if(e&&+e.r===R&&JK[e.k]&&JK[e.k].pvp==='mesa')out.push({k:e.k,pid:p.me?MP.pid:p.pid,name:p.me?'você':p.name})}
+  return out}
+const fxOn=k=>!!(S&&S.mp&&Array.isArray(S.mp.fx)&&S.mp.fx.some(e=>e.k===k));
+const capNow=()=>isPvp()&&fxOn('teto')?19:21;
 const recvTotal=()=>Object.values((S&&S.mp&&S.mp.recv)||{}).reduce((a,b)=>a+(+b||0),0);
 const pvpHP=()=>Math.max(0,Math.ceil(r1(S.mp.hp!=null?S.mp.hp:(S.mp.maxHp||PVP_HP)-recvTotal())));
 const pvpHeal=x=>{if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(Math.min(S.mp.maxHp||PVP_HP,S.mp.hp+x))};
@@ -615,11 +646,11 @@ function renderTable(){
     $('#pc').innerHTML=S.player.map(c=>{const anim=!seen.has(c.id);seen.add(c.id);return cardHTML(c,{anim,sel:S.sel===c.id})}).join('');
     $('#pc').classList.toggle('tight',S.player.length>4);
     const pt=S.player.length?total(S.player):null;const pEl=$('#ptot');
-    pEl.textContent=pt==null?'–':pt;pEl.className=pt>21?'bust':(pt>=20?'hot':'');
+    pEl.textContent=pt==null?'–':pt;pEl.className=pt>capNow()?'bust':(pt>=capNow()-1?'hot':'');
     const m=$('#msg');
     if(S.msg){m.className='msg';m.textContent=S.msg}
     else if(S.phase==='play'&&S.deadline){turnClock(m)}
-    else{m.className='msg rail';m.textContent='Sem dealer · a maior mão vence'}
+    else{m.className='msg rail';m.textContent=S.mp.fx&&S.mp.fx.length?'Mesa: '+[...new Set(S.mp.fx.map(e=>JK[e.k].n))].join(' · '):'Sem dealer · a maior mão vence'}
     return;
   }
   const peek=has('vidente');
@@ -710,9 +741,9 @@ async function deal(){
 }
 async function afterDraw(){
   const p=total(S.player);
-  if(p===21){if(S.player.length===2){S.msg='Blackjack!';render();fxBlackjack();await sleep(1200)}else{S.msg='Chegou a 21!';render();fx21();await sleep(800)}}
+  if(p===21&&capNow()===21){if(S.player.length===2){S.msg='Blackjack!';render();fxBlackjack();await sleep(1200)}else{S.msg='Chegou a 21!';render();fx21();await sleep(800)}}
   if(isPvp()){
-    if(p>21){S.busy=true;S.msg='Estourou!';render();anim($('#pc'),'shake');await sleep(500);pvpSubmit();return}
+    if(p>capNow()){S.busy=true;S.msg='Estourou!';render();anim($('#pc'),'shake');await sleep(500);pvpSubmit();return}
     if(p===21||S.player.length>=5||S.doubled){pvpSubmit();return}
     S.busy=false;render();return;
   }
@@ -804,7 +835,7 @@ function openShop(){S.phase='shop';S.shop={items:genShopItems(),reroll:3};render
 function genShopItems(){
   /* No PvP a loja só tem as cartas de ataque e defesa. */
   if(isPvp()){
-    const pool=shuffle(Object.keys(JK).filter(k=>JK[k].pvp&&!has(k)));
+    const pool=shuffle(Object.keys(JK).filter(k=>JK[k].pvp&&!has(k)&&(JK[k].pvp!=='mesa'||S.mp.mesa)));
     return pool.slice(0,3).map(k=>({t:'j',k,sold:false}));
   }
   const pool=shuffle(Object.keys(JK).filter(k=>!has(k)&&!JK[k].pvp));
@@ -874,6 +905,12 @@ function pvpStartRound(){
   S.mp.hk=Math.max(S.mp.hk||0,S.round||0);
   S.round=(S.round||0)+1;
   S.ante=Math.min(8,1+Math.floor((S.round-1)/(PVP_SHOP_EVERY*2)));S.bi=0;
+  S.mp.fx=mesaFx(S.round);
+  if(S.mp.fx.length){
+    const storm=S.mp.fx.filter(e=>e.k==='tempestade'&&e.pid!==MP.pid).length;
+    if(storm){if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(S.mp.hp-5*storm)}
+    S.mp.fx.forEach((e,i)=>setTimeout(()=>pop($('#blindBox'),e.k==='tempestade'&&e.pid===MP.pid?'Sua Tempestade: rivais −5 PV':`${JK[e.k].n} (${e.name})${e.k==='tempestade'?': −5 PV':''}`,'info'),400+i*700));
+  }
   if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=3+(has('trocador')?2:0)}
   if(!S.deck||S.deck.length<15)S.deck=newDeck();
   S.phase='play';S.roundScore=0;S.calc=null;S.pv=null;S.mp.sub=null;S.handsLeft=1;S.awaitNext=false;
@@ -883,15 +920,22 @@ async function pvpDeal(){
   S.busy=true;S.player=[];S.dealer=[];S.doubled=false;S.sel=null;S.msg='';seen.clear();S.deadline=0;render();
   for(let k=0;k<2;k++){S.player.push(draw());beep(520+Math.random()*120,.04);render();await sleep(220)}
   S.deadline=Date.now()+PVP_TURN_MS;
+  if(fxOn('embaralhar')){
+    /* Embaralhar: a mesa dá cartas até 17 (ou o teto − 4) e fecha a mão sozinha */
+    S.msg='Embaralhar: a mesa joga por todos';render();await sleep(700);
+    while(total(S.player)<capNow()-4&&S.player.length<5){S.player.push(draw());beep(520,.04);render();await sleep(380)}
+    S.msg=total(S.player)>capNow()?'Estourou':`A mesa fechou com ${total(S.player)}`;render();await sleep(600);pvpSubmit();return}
+  if(total(S.player)>capNow()){S.msg=`Passou de ${capNow()}: estourou`;render();await sleep(700);pvpSubmit();return}
   if(total(S.player)===21){S.msg='Blackjack!';render();fxBlackjack();await sleep(1300);pvpSubmit();return}
   S.busy=false;render();
 }
 function pvpSubmit(){
   if(S.phase!=='play')return;
   const t=total(S.player);
-  S.mp.sub={r:S.round,t:Math.min(t,99),c:S.player.map(cardStr),bj:S.player.length===2&&t===21?1:0,f:S.player.length>=5&&t<=21?1:0,x:t>21?1:0};
+  const cap=capNow();
+  S.mp.sub={r:S.round,t:Math.min(t,99),c:S.player.map(cardStr),bj:S.player.length===2&&t===21&&cap===21?1:0,f:S.player.length>=5&&t<=cap?1:0,x:t>cap?1:0};
   S.phase='pwait';S.busy=false;S.deadline=0;S.sel=null;
-  if(!S.msg)S.msg=t>21?'Estourou':`Você fechou com ${t}`;
+  if(!S.msg)S.msg=t>cap?'Estourou':`Você fechou com ${t}`;
   render();mpTick();
 }
 const handVal=sub=>!sub||sub.x?-1:(+sub.t||0)+(sub.bj?.5:0)+(sub.f?.25:0);
@@ -910,12 +954,13 @@ async function pvpShowdown(){
   let dmg=0,per=0;const extra=[];
   if(!S.mp.bleed)S.mp.bleed={};
   /* sangria de rodadas anteriores */
-  let bled=0;
+  let bled=0;const truce=fxOn('tregua');
+  if(truce)extra.push('Trégua: ninguém causa dano nesta rodada');
   for(const pid in S.mp.bleed){const b=S.mp.bleed[pid];
-    if(S.round>b.from&&S.round<=b.to){const g=gamePlayers().find(x=>x.pid===pid);if(g&&g.st&&g.st.al){S.mp.sent[pid]=r1((S.mp.sent[pid]||0)+2);bled+=2}}
+    if(!truce&&S.round>b.from&&S.round<=b.to){const g=gamePlayers().find(x=>x.pid===pid);if(g&&g.st&&g.st.al){S.mp.sent[pid]=r1((S.mp.sent[pid]||0)+2);bled+=2}}
     if(S.round>=b.to)delete S.mp.bleed[pid]}
   if(bled)extra.push(`Sangria: ${bled} de dano`);
-  if(pts>0&&beaten.length){
+  if(pts>0&&beaten.length&&!truce){
     dmg=Math.round(pts/ANTE_BASE[0]*DMG_K);
     per=Math.max(1,Math.round(dmg/Math.max(1,parts.length)),pvpMinHit(S.round));
     /* bônus de carta valem sobre o dano final (depois do dano mínimo da rodada) */
@@ -1186,7 +1231,7 @@ function renderRoomList(){
 }
 setInterval(()=>{if(VIT&&openSheet==='mphome')renderRoomList();if(NR&&NR.announce)NR.announce(false)},5000);
 setInterval(()=>{if(NR)onRoomChange()},5000);
-const MP={code:null,pid:null,name:'',col:0,j:0,msg:'',started:new Set()};
+const MP={code:null,pid:null,name:'',col:0,j:0,msg:'',started:new Set(),mesaOff:!!store.get('c21-mesaoff')};
 MP.pid=store.get('c21-pid');if(typeof MP.pid!=='string'){MP.pid=rid();store.set('c21-pid',MP.pid)}
 MP.name=store.get('c21-name')||'';
 MP.mode=store.get('c21-mode')==='surv'?'surv':'pvp';
@@ -1200,7 +1245,7 @@ function roomPlayers(){
     const pr=p.presence||{};if(typeof pr.pid!=='string'||pr.pid.length>16)continue;
     const me=pr.pid===MP.pid;
     const prev=m.get(pr.pid);
-    if(!prev||(me?p.sameTab:p.updatedAt>prev.updatedAt))m.set(pr.pid,{pid:pr.pid,name:cleanName(pr.name)||'Jogador',col:pr.col,j:+pr.j||0,g:typeof pr.g==='string'?pr.g:null,start:pr.start,st:pr.st&&typeof pr.st==='object'?pr.st:null,lm:pr.lm==='surv'?'surv':'pvp',lhp:Math.max(0,Math.min(500,+pr.lhp||0)),bot:!!pr.bot,me,off:!!p.off});
+    if(!prev||(me?p.sameTab:p.updatedAt>prev.updatedAt))m.set(pr.pid,{pid:pr.pid,name:cleanName(pr.name)||'Jogador',col:pr.col,j:+pr.j||0,g:typeof pr.g==='string'?pr.g:null,start:pr.start,st:pr.st&&typeof pr.st==='object'?pr.st:null,lm:pr.lm==='surv'?'surv':'pvp',lhp:Math.max(0,Math.min(500,+pr.lhp||0)),lmo:!!pr.lmo,bot:!!pr.bot,me,off:!!p.off});
   }
   return [...m.values()];
 }
@@ -1211,7 +1256,7 @@ let lastPres='';
 function mpSync(){
   if(!NR||!S||!S.mp)return;
   const st={a:S.ante,b:S.bi,l:S.mp.lives,al:S.mp.alive?1:0,sc:S.roundScore,t:S.stats.total,ph:S.phase,dh:S.mp.dh,n:S.jokers.length};
-  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;delete st.dh;delete st.l;delete st.sc}
+  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);delete st.dh;delete st.l;delete st.sc}
   const s=JSON.stringify(st);if(s===lastPres)return;lastPres=s;
   NR.presence({g:S.mp.gid,st}).catch(()=>{});
 }
@@ -1254,7 +1299,7 @@ async function enterRoom(code){
   MP.name=nm;store.set('c21-name',nm);store.set('c21-col',MP.col);
   MP.msg='Entrando na sala…';showMPHome();
   const sala=new Sala(code,MP.pid);
-  sala.presence({name:MP.name,col:MP.col,j:Date.now(),g:null,start:null,st:null,lm:MP.mode});
+  sala.presence({name:MP.name,col:MP.col,j:Date.now(),g:null,start:null,st:null,lm:MP.mode,lmo:MP.mesaOff?1:0});
   try{NR=await sala.start()}catch(e){NR=null;MP.msg='Não consegui conectar ao servidor de salas. Confira a internet e tente de novo.';showMPHome();return}
   MP.code=code;MP.j=NR.me.j;MP.msg='';lastPres='';stopVitrine();
   NR.onPeers(()=>onRoomChange());
@@ -1289,9 +1334,9 @@ function botStart(st){
     if(!st.players.includes(b.pid))continue;
     b.g=st.gid;b.players=st.players.slice();b.maxHp=(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length);b.r=1;b.sd=0;b.sent={};b.deck=[];
     /* bots também compram e usam cartas de ataque e defesa */
-    b.hpv=b.maxHp;b.seen={};b.cards=[];b.money=4;b.bleed={};b.ult=0;b.coleteR=0;b.shR=0;b.shLeft=0;
+    b.hpv=b.maxHp;b.seen={};b.cards=[];b.money=4;b.bleed={};b.ult=0;b.coleteR=0;b.shR=0;b.shLeft=0;b.mesa=st.mesa!==0;b.ev=[];b.fx=[];
     b.nextAt=Date.now()+4000+Math.random()*4000;
-    b.st={md:'pvp',al:1,hp:b.maxHp,dm:{},r:1,sd:0,sub:null,ph:'play',t:0,a:1,n:0};
+    b.st={md:'pvp',al:1,hp:b.maxHp,dm:{},r:1,sd:0,sub:null,ph:'play',t:0,a:1,n:0,ev:[]};
     botPub(b);
   }
 }
@@ -1301,9 +1346,24 @@ function botTotal(c){let t=0,a=0;for(const x of c){t+=baseVal(x);if(x.r==='A')a+
 /* Loja do bot: juros, depois compra cartas sorteadas que couberem no bolso (máximo 5). */
 function botShop(b){
   b.money+=Math.min(2,Math.floor(b.money/10));
-  const offer=Object.keys(JK).filter(k=>JK[k].pvp&&!bHas(b,k)).sort(()=>Math.random()-.5).slice(0,3);
+  const offer=Object.keys(JK).filter(k=>JK[k].pvp&&!bHas(b,k)&&(JK[k].pvp!=='mesa'||b.mesa)).sort(()=>Math.random()-.5).slice(0,3);
   for(const k of offer)if(b.cards.length<5&&JK[k].c<=b.money){b.money-=JK[k].c;b.cards.push(k)}
   b.st.n=b.cards.length;
+}
+function botFx(b,all,R){const out=[];if(!b.mesa)return out;
+  for(const e of b.ev)if(+e.r===R)out.push({k:e.k,pid:b.pid});
+  for(const p of all){const ev=p.st&&Array.isArray(p.st.ev)?p.st.ev:[];for(const e of ev)if(e&&+e.r===R&&JK[e.k]&&JK[e.k].pvp==='mesa')out.push({k:e.k,pid:p.pid})}
+  return out}
+/* Bot decide se usa uma carta de mesa na vez dele (vale na rodada seguinte) */
+function botUseMesa(b,others){
+  if(!b.mesa)return;
+  const low=others.every(p=>(+p.st.hp||0)>=b.hpv);
+  for(const k of b.cards.slice()){
+    if(JK[k].pvp!=='mesa')continue;
+    const go=k==='tempestade'||k==='teto'||(k==='tregua'&&b.hpv<b.maxHp*.35)||(k==='embaralhar'&&low&&others.length>0);
+    if(go){b.ev.push({k,r:b.r+1});b.cards=b.cards.filter(x=>x!==k)}
+  }
+  b.st.ev=b.ev.slice(-6);b.st.n=b.cards.length;
 }
 /* Defesa do bot: mesmas regras de pvpCheckDamage, aplicadas ao dano novo de cada rival. */
 function botDefend(b,all){
@@ -1340,21 +1400,24 @@ function botTick(){
     if(!st.sub||st.sub.r<b.r){
       if(now>=b.nextAt){
         if(b.deck.length<15)b.deck=botDeck();
-        /* para no 17 e dobra com 10 ou 11 (como uma pessoa atenta) */
+        botUseMesa(b,others);
+        /* para no 17 e dobra com 10 ou 11 (como uma pessoa atenta); com Teto 19 para no 15; com Embaralhar não decide */
+        const cap=b.fx.some(e=>e.k==='teto')?19:21,auto=b.fx.some(e=>e.k==='embaralhar');
         const c=[b.deck.pop(),b.deck.pop()];let dbl=false;const t2=botTotal(c);
-        if(t2===10||t2===11){dbl=true;c.push(b.deck.pop())}
-        else while(botTotal(c)<17&&c.length<5)c.push(b.deck.pop());
+        if(!auto&&cap===21&&(t2===10||t2===11)){dbl=true;c.push(b.deck.pop())}
+        else while(botTotal(c)<cap-4&&c.length<5)c.push(b.deck.pop());
         const t=botTotal(c);
-        st.sub={r:b.r,t:Math.min(t,99),c:c.map(cardStr),bj:c.length===2&&t===21?1:0,f:c.length>=5&&t<=21?1:0,x:t>21?1:0};
+        st.sub={r:b.r,t:Math.min(t,99),c:c.map(cardStr),bj:c.length===2&&t===21&&cap===21?1:0,f:c.length>=5&&t<=cap?1:0,x:t>cap?1:0};
         b.dbl=dbl;st.ph='pwait';ch=true;
       }
     }else if(b.sd<b.r){
       if(!others.some(p=>!(p.st.sub&&p.st.sub.r===b.r))){
         const parts=others.map(p=>({pid:p.pid,v:handVal(p.st.sub)}));
         const myV=handVal(st.sub);const beaten=myV<0?[]:parts.filter(p=>p.v<myV);
+        const truce=b.fx.some(e=>e.k==='tregua');
         /* sangria de rodadas anteriores */
-        for(const pid in b.bleed){const q=b.bleed[pid];if(b.r>q.from&&b.r<=q.to&&others.some(p=>p.pid===pid))b.sent[pid]=r1((b.sent[pid]||0)+2);if(b.r>=q.to)delete b.bleed[pid]}
-        if(beaten.length){
+        for(const pid in b.bleed){const q=b.bleed[pid];if(!truce&&b.r>q.from&&b.r<=q.to&&others.some(p=>p.pid===pid))b.sent[pid]=r1((b.sent[pid]||0)+2);if(b.r>=q.to)delete b.bleed[pid]}
+        if(beaten.length&&!truce){
           const s2=st.sub,cards=s2.c.length,t=s2.t;
           const type=s2.bj?'bj':s2.f?'five':t===21?'t21':'win';
           const chips=HANDS[type].c+s2.c.reduce((a,x)=>a+baseVal({r:String(x).replace(/[♠♥♦♣]/g,'')}),0);
@@ -1390,7 +1453,9 @@ function botTick(){
           if(b.coleteR&&b.coleteR<=b.r){b.cards=b.cards.filter(k=>k!=='colete');b.coleteR=0;st.n=b.cards.length}
           if(b.r%PVP_SHOP_EVERY===0)botShop(b);
           if(bHas(b,'bandagem')&&b.hpv<b.maxHp/2)b.hpv=r1(Math.min(b.maxHp,b.hpv+3));
-          b.r++;st.r=b.r;st.a=1+Math.floor((b.r-1)/(PVP_SHOP_EVERY*2));st.ph='play';b.nextAt=now+1500+Math.random()*3500;ch=true}
+          b.r++;st.r=b.r;st.a=1+Math.floor((b.r-1)/(PVP_SHOP_EVERY*2));st.ph='play';b.nextAt=now+1500+Math.random()*3500;ch=true;
+          b.fx=botFx(b,all,b.r);
+          const storm=b.fx.filter(e=>e.k==='tempestade'&&e.pid!==b.pid).length;if(storm)b.hpv=r1(b.hpv-5*storm)}
       }
     }
     if(st.al&&all.length&&all.every(p=>p.st&&!p.st.al)){st.ph='won';ch=true}
@@ -1400,7 +1465,7 @@ function botTick(){
 setInterval(botTick,600);
 function startGame(){
   const lp=lobbyPlayers().slice(0,MAXP);
-  const st={gid:rid(),seed:rid()+rid(),players:lp.map(p=>p.pid),mode:MP.mode,hp:MP.hpSet||0};
+  const st={gid:rid(),seed:rid()+rid(),players:lp.map(p=>p.pid),mode:MP.mode,hp:MP.hpSet||0,mesa:MP.mesaOff?0:1};
   if(!st.players.includes(MP.pid))st.players.push(MP.pid);
   NR.presence({start:st}).catch(()=>{});
   if(st.mode==='pvp')botStart(st);else clearBots();
@@ -1411,7 +1476,7 @@ function beginMP(st){
   const sv=store.get(SAVE_MP);
   if(sv&&sv.S&&sv.S.mp&&sv.S.mp.gid===st.gid){S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;resume();return}
   const mode=st.mode==='surv'?'surv':'pvp';
-  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),hp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),bleed:{},sent:{},recv:{},dealt:0});
+  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),hp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),bleed:{},sent:{},recv:{},dealt:0,mesa:st.mesa!==0,ev:[],fx:[]});
 }
 function backToLobby(){
   for(const b of BOTS){b.g=null;b.st=null;b.players=null;botPub(b)}
@@ -1516,12 +1581,13 @@ function setLobbyHP(d){const v=Math.max(40,Math.min(500,lobbyHP()+d));MP.hpSet=v
 function modeBlock(amHost,host){
   const m=amHost?MP.mode:(host&&host.lm)||'pvp';
   const short={pvp:'Sem dealer: a maior mão da rodada causa dano em quem ficou abaixo. Quem zera a vida sai.',surv:'3 vidas. Falhar uma blind ou perder o Duelo custa uma vida.'}[m];
-  if(!amHost)return `<div class="lb-mode"><b>Modo: ${m==='pvp'?'PvP':'Sobrevivência'}</b> <span>${short}</span>${m==='pvp'?`<br><b>Vida inicial:</b> ${host&&+host.lhp?+host.lhp:hpFor(lobbyPlayers().length)} PV`:''}</div>`;
+  if(!amHost)return `<div class="lb-mode"><b>Modo: ${m==='pvp'?'PvP':'Sobrevivência'}</b> <span>${short}</span>${m==='pvp'?`<br><b>Vida inicial:</b> ${host&&+host.lhp?+host.lhp:hpFor(lobbyPlayers().length)} PV · <b>Cartas de mesa:</b> ${host&&host.lmo?'desligadas':'ligadas'}`:''}</div>`;
   const nb=BOTS.length,full=lobbyPlayers().length>=MAXP;
   return `<div class="seg"><button class="${m==='pvp'?'on pvp':''}" data-act="mode" data-m="pvp">PvP</button><button class="${m==='surv'?'on surv':''}" data-act="mode" data-m="surv">Sobrevivência</button></div>
-  <p class="lb-desc">${short}</p>
-  ${m==='pvp'?`<div class="bots"><span>Vida</span><button class="step" data-act="hpdown" aria-label="Menos vida">−</button><b style="min-width:44px">${lobbyHP()}</b><button class="step" data-act="hpup" aria-label="Mais vida">+</button><small>${MP.hpSet?'PV para todos':'PV · automático'}</small></div>`:''}
-  ${m==='pvp'?`<div class="bots"><span>Bots</span><button class="step" data-act="rmbot" ${nb?'':'disabled'} aria-label="Remover bot">−</button><b>${nb}</b><button class="step" data-act="addbot" ${full?'disabled':''} aria-label="Adicionar bot">+</button><small>${full?'sala cheia':'jogam sozinhos'}</small></div>`:''}`;
+  ${lobbyPlayers().length>4?'':`<p class="lb-desc">${short}</p>`}
+  ${m==='pvp'?`<div class="cfg"><div class="bots"><span>Vida</span><button class="step" data-act="hpdown" aria-label="Menos vida">−</button><b>${lobbyHP()}</b><button class="step" data-act="hpup" aria-label="Mais vida">+</button></div>
+  <div class="bots"><span>Bots</span><button class="step" data-act="rmbot" ${nb?'':'disabled'} aria-label="Remover bot">−</button><b>${nb}</b><button class="step" data-act="addbot" ${full?'disabled':''} aria-label="Adicionar bot">+</button></div></div>
+  <div class="bots"><span>Cartas de mesa</span><button class="tgl ${MP.mesaOff?'':'on'}" data-act="mesatoggle" aria-pressed="${!MP.mesaOff}">${MP.mesaOff?'Desligadas':'Ligadas'}</button></div>`:''}`;
 }
 function showLobby(){
   const lp=lobbyPlayers();const playing=roomPlayers().filter(p=>p.g&&!p.off);
@@ -1530,11 +1596,11 @@ function showLobby(){
   const canResume=sv&&sv.code===MP.code&&sv.S&&sv.S.mp&&!(store.get('c21-done')||[]).includes(sv.S.mp.gid);
   const ok=NR&&NR.connected();
   showSheet(`<div class="lb-head"><div><small>Sala</small><span class="lb-code">${esc((MP.code||'').toUpperCase())}</span></div><span class="net ${ok?'':'bad'}">${ok?'● conectado':'● reconectando…'}</span></div>
-  <button class="btn b-go" data-act="copycode">Convidar amigos<small>link que entra direto nesta sala</small></button>
+  <button class="btn b-go sm" data-act="copycode">Convidar amigos<small>link que entra direto nesta sala</small></button>
   <span id="share" hidden>${esc(inviteLink())}</span>
   ${MP.msg?`<div class="note warn">${esc(MP.msg)}</div>`:''}
   <div class="lb-count">${Math.min(lp.length,MAXP)}/${MAXP} jogadores${playing.length?` · ${playing.length} ainda na partida anterior`:''}</div>
-  <div class="lb-grid">${lp.slice(0,MAXP).map((p,i)=>`<div class="lb-p ${p.me?'me':''}"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><small>${i===0?'anfitrião':p.bot?'bot':p.me?'você':''}</small></div>`).join('')||'<p>Conectando…</p>'}</div>
+  <div class="lb-grid ${lp.length>4?'many':''}">${lp.slice(0,MAXP).map((p,i)=>`<div class="lb-p ${p.me?'me':''} ${p.bot?'isbot':''}"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><small>${lp.length>4?(i===0?'★':p.me?'você':''):(i===0?'anfitrião':p.bot?'bot':p.me?'você':'')}</small></div>`).join('')||'<p>Conectando…</p>'}</div>
   ${modeBlock(amHost,host)}
   ${canResume?`<button class="btn b-swap" data-act="mpresume">Voltar à partida em andamento</button>`:''}
   <div class="row">${amHost?`<button class="btn b-go" data-act="startgame" style="flex:2">Começar<small>${Math.min(lp.length,MAXP)} jogador${lp.length===1?'':'es'}</small></button>`:`<div class="note" style="flex:2;text-align:center;font-size:13px">Esperando ${host?esc(host.name):'o anfitrião'} começar…</div>`}<button class="btn b-dim" data-act="leaveroom">Sair</button></div>`,'lobby');
@@ -1546,8 +1612,8 @@ function showCards(tab){
   const row=(k)=>{const d=JK[k];return `<div class="cc"><div class="art" style="--jc:${d.bg}">${d.g}</div><div class="cct"><b>${d.n}</b><span>${d.d}</span></div><span class="ccp">$${d.c}</span></div>`};
   let body;
   if(tab==='pvp'){
-    const atk=Object.keys(JK).filter(k=>JK[k].pvp==='atk'),def=Object.keys(JK).filter(k=>JK[k].pvp==='def');
-    body=`<p class="lb-desc">Só aparecem na loja do PvP, 3 por vez. Você guarda até 5.</p><span class="kind atk" style="align-self:flex-start">Ataque · ${atk.length}</span><div class="cl">${atk.map(row).join('')}</div><span class="kind def" style="align-self:flex-start">Defesa · ${def.length}</span><div class="cl">${def.map(row).join('')}</div>`;
+    const atk=Object.keys(JK).filter(k=>JK[k].pvp==='atk'),def=Object.keys(JK).filter(k=>JK[k].pvp==='def'),mesa=Object.keys(JK).filter(k=>JK[k].pvp==='mesa');
+    body=`<p class="lb-desc">Só aparecem na loja do PvP, 3 por vez. Você guarda até 5.</p><span class="kind atk" style="align-self:flex-start">Ataque · ${atk.length}</span><div class="cl">${atk.map(row).join('')}</div><span class="kind def" style="align-self:flex-start">Defesa · ${def.length}</span><div class="cl">${def.map(row).join('')}</div><span class="kind mesa" style="align-self:flex-start">Mesa · ${mesa.length}</span><p class="lb-desc" style="text-align:left">Uso único: toque nela durante a partida para valer na próxima rodada, para todo mundo. Quem cria a sala pode desligar.</p><div class="cl">${mesa.map(row).join('')}</div>`;
   }else{
     const jk=Object.keys(JK).filter(k=>!JK[k].pvp);
     body=`<p class="lb-desc">Aparecem no solo e na Sobrevivência. Os coringas agem da esquerda para a direita.</p><span class="kind" style="align-self:flex-start;background:var(--panel-2);color:var(--gold)">Coringas · ${jk.length}</span><div class="cl">${jk.map(row).join('')}</div>
@@ -1616,7 +1682,7 @@ function showShop(){
   /* Loja em linhas compactas: cabe inteira no iPhone SE sem rolar */
   const items=sh.items.map((it,i)=>{
     if(it.t==='j'){const d=JK[it.k];
-      return `<button class="si ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="art" style="--jc:${d.bg}">${d.g}</span><span class="t"><b>${d.n}${d.pvp?` <span class="kind ${d.pvp}">${d.pvp==='atk'?'Ataque':'Defesa'}</span>`:''}</b><span>${d.d}</span></span><span class="pr">${it.sold?'✓':full?'Cheio':'$'+d.c}</span></button>`}
+      return `<button class="si ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="art" style="--jc:${d.bg}">${d.g}</span><span class="t"><b>${d.n}${d.pvp?` <span class="kind ${d.pvp}">${KIND_TXT[d.pvp]}</span>`:''}</b><span>${d.d}</span></span><span class="pr">${it.sold?'✓':full?'Cheio':'$'+d.c}</span></button>`}
     const h=HANDS[it.k];
     return `<button class="si ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="art planet" style="--jc:${h.pc}"></span><span class="t"><b>${h.p}</b><span>Sobe ${h.n} para nv ${S.levels[it.k]+1} (+${h.lc} Fichas, +${h.lm} Mult)</span></span><span class="pr">${it.sold?'✓':'$3'}</span></button>`}).join('');
   showSheet(`<div class="shophead"><h2>Loja</h2>${clockHTML()}<span class="num money">$${S.money}</span></div>
@@ -1633,7 +1699,7 @@ function showBuy(i){
   const it=S.shop&&S.shop.items[i];if(!it)return;
   let art,name,desc,price,kind='',block='';
   if(it.t==='j'){const d=JK[it.k];art=`<div class="art" style="--jc:${d.bg};width:96px;height:128px;font-size:44px">${d.g}</div>`;name=d.n;desc=d.d;price=d.c;
-    if(d.pvp)kind=`<span class="kind ${d.pvp}">${d.pvp==='atk'?'Carta de ataque':'Carta de defesa'}</span>`;
+    if(d.pvp)kind=`<span class="kind ${d.pvp}">Carta de ${KIND_TXT[d.pvp].toLowerCase()}</span>`;
     if(S.jokers.length>=5)block='Você já tem 5 cartas. Venda uma para comprar esta.'}
   else{const h=HANDS[it.k],l=S.levels[it.k];art=`<div class="art planet" style="--jc:${h.pc};width:96px;height:96px"></div>`;name=h.p;price=3;
     const a=hv(it.k);desc=`Sobe a jogada ${h.n} do nível ${l} para o ${l+1}: de ${a.c} para ${a.c+h.lc} Fichas e de ${a.m} para ${a.m+h.lm} Mult.`}
@@ -1645,9 +1711,23 @@ function showBuy(i){
   <button class="btn b-go" data-act="buyok" data-i="${i}" ${block?'disabled':''} style="padding:14px 4px 12px;font-size:17px">Confirmar compra · $${price}</button>
   <button class="btn b-dim" data-act="toshop">Voltar à loja</button>`,'buy');
 }
+/* Carta de mesa: vale na próxima rodada que ainda ninguém começou */
+const mesaRound=()=>['play','pwait'].includes(S.phase)?S.round+1:(S.round||0)+(S.phase==='pshow'||S.phase==='cash'||S.phase==='shop'?2:1);
+function useMesa(i){
+  const j=S.jokers[i];if(!j||JK[j.k].pvp!=='mesa'||!isPvp()||!S.mp.alive||!S.mp.mesa)return;
+  const r=mesaRound();if(!S.mp.ev)S.mp.ev=[];S.mp.ev.push({k:j.k,r});S.jokers.splice(i,1);
+  beep(880,.1,'triangle');mpSync();render();resumeSheet();
+  setTimeout(()=>pop($('#blindBox'),`${JK[j.k].n}: vale na rodada ${r}`,'info'),200);
+}
 function showJoker(i){
   const j=S.jokers[i];if(!j)return;const d=JK[j.k];
   const canSell=!S.busy&&!['over','out','done','won'].includes(S.phase);
+  if(d.pvp==='mesa'&&isPvp()){
+    const can=S.mp.alive&&S.mp.mesa&&!['over','out','done','won'].includes(S.phase);
+    showSheet(`<div class="item" style="background:none;border:0"><div class="art" style="--jc:${d.bg};width:90px;height:120px;font-size:40px">${d.g}</div><span class="kind mesa">Carta de mesa</span><h2>${d.n}</h2><p style="text-align:center;color:var(--ink)">${d.d}</p></div>
+  <p style="text-align:center;font-size:13.5px">${can?`Se usar agora, vale na rodada ${mesaRound()} para todo mundo. Todos veem quem usou.`:'Não dá para usar agora.'}</p>
+  <button class="btn b-swap" data-act="usemesa" data-i="${i}" ${can?'':'disabled'}>Usar<small>vale na rodada ${mesaRound()}</small></button>
+  <div class="row"><button class="btn b-dbl" data-act="sell" data-i="${i}" ${canSell?'':'disabled'}>Vender por $${sellPrice(j.k)}</button><button class="btn b-go" data-act="${S.phase==='shop'?'toshop':'close'}">Voltar</button></div>`,'joker');return}
   showSheet(`<div class="item" style="background:none;border:0"><div class="art" style="--jc:${d.bg};width:90px;height:120px;font-size:40px">${d.g}</div><h2>${d.n}</h2><p style="text-align:center;color:var(--ink)">${jDesc(j)}</p></div>
   <p style="text-align:center;font-size:13.5px">Os coringas agem da esquerda para a direita. A ordem importa: some Mult antes de multiplicar.</p>
   <div class="row">${i>0?`<button class="btn b-dim" data-act="mvl" data-i="${i}">◀ Mover</button>`:''}${i<S.jokers.length-1?`<button class="btn b-dim" data-act="mvr" data-i="${i}">Mover ▶</button>`:''}</div>
@@ -1756,6 +1836,7 @@ document.addEventListener('click',e=>{
     case 'mode':MP.mode=t.dataset.m==='surv'?'surv':'pvp';store.set('c21-mode',MP.mode);if(MP.mode!=='pvp')clearBots();if(NR)NR.presence({lm:MP.mode});showLobby();break;
     case 'addbot':addBot();showLobby();break;
     case 'hpup':setLobbyHP(20);showLobby();break;
+    case 'mesatoggle':MP.mesaOff=!MP.mesaOff;store.set('c21-mesaoff',MP.mesaOff);if(NR)NR.presence({lmo:MP.mesaOff?1:0});showLobby();break;
     case 'hpdown':setLobbyHP(-20);showLobby();break;
     case 'rmbot':removeBot();showLobby();break;
     case 'copycode':shareInvite(t);break;
@@ -1779,6 +1860,7 @@ document.addEventListener('click',e=>{
     case 'leave':leaveShop();break;
     case 'toshopfresh':openShop();break;
     case 'joker':if(S)showJoker(i);break;
+    case 'usemesa':if(S)useMesa(i);break;
     case 'toshop':showShop();break;
     case 'sell':{const j=S.jokers[i];if(!j)break;S.money+=sellPrice(j.k);S.jokers.splice(i,1);beep(300,.08);render();if(S.phase==='shop')showShop();else resumeSheet();break}
     case 'mvl':case 'mvr':{const k=act==='mvl'?i-1:i+1;[S.jokers[i],S.jokers[k]]=[S.jokers[k],S.jokers[i]];render();showJoker(k);break}

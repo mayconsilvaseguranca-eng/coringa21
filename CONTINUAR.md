@@ -25,4 +25,5 @@ Blackjack roguelike (estilo Balatro) para celular, para o Maycon e a família. T
 - Bots (`botTick`, `botDefend`, `botShop`): compram cartas na loja e usam as mesmas regras das pessoas, param no 17, dobram com 10/11 e ganham +5% de dano por rodada (até +50%). Simulação: 2 pessoas contra 4 bots vencem ~40%.
 - Posição no PvP: `pvpRank()` (pela vida), mostrada no quadro de cima e no resultado da rodada.
 - Tela "Cartas" (`showCards`) lista as cartas de PvP e as do solo.
+- Cartas de mesa (`pvp:'mesa'`): uso único. `useMesa` publica um evento `{k,r}` em `st.ev`; `mesaFx(R)` junta os eventos da rodada de todos os jogadores (bots: `botFx`). Efeitos: Tempestade no início da rodada, Trégua no ataque, Teto 19 via `capNow()`, Embaralhar em `pvpDeal`. Ligadas ou desligadas na sala (`MP.mesaOff`, vai em `st.mesa` no início da partida).
 - Bots rodam no aparelho de quem criou a sala.

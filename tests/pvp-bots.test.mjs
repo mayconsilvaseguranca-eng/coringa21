@@ -14,7 +14,7 @@ export default async function () {
     for (let i = 0; i < 4; i++) await A.click('[data-act=addbot]');
     await B.fill('#nick', 'Beto'); await B.click('[data-act=join]'); await B.waitForSelector('.lb-code');
     await A.waitForFunction(() => document.querySelectorAll('#panel .lb-p').length >= 6, null, { timeout: 8000 });
-    const seesBots = await B.waitForFunction(() => [...document.querySelectorAll('#panel .lb-p')].filter(e => e.textContent.includes('bot')).length === 4, null, { timeout: 10000 }).then(() => true, () => false);
+    const seesBots = await B.waitForFunction(() => document.querySelectorAll('#panel .lb-p.isbot').length === 4, null, { timeout: 10000 }).then(() => true, () => false);
     check(seesBots, 'Beto não vê os 4 bots na sala');
     check(await A.evaluate(() => { const p = document.querySelector('#panel'); return p.scrollHeight <= p.clientHeight + 2; }), 'a tela da sala precisa rolar com 6 jogadores');
     // vida inicial ajustada pelo anfitrião: 120 automático + 2 × 20
@@ -49,8 +49,8 @@ export default async function () {
     await A.click('#panel [data-act=lobby]');
     await A.waitForSelector('.lb-code', { timeout: 5000 });
     check((await A.textContent('.lb-code')).trim() === code, 'voltou para outra sala');
-    await A.waitForFunction(() => [...document.querySelectorAll('#panel .lb-p')].filter(e => e.textContent.includes('bot')).length === 4, null, { timeout: 8000 }).catch(() => {});
-    const back = await A.$$eval('#panel .lb-p', els => els.filter(e => e.textContent.includes('bot')).length);
+    await A.waitForFunction(() => document.querySelectorAll('#panel .lb-p.isbot').length === 4, null, { timeout: 8000 }).catch(() => {});
+    const back = await A.$$eval('#panel .lb-p.isbot', els => els.length);
     check(back === 4, `os bots não voltaram para a sala (${back})`);
     await B.evaluate(() => window.__c21.showBoard()); await B.click('#panel [data-act=lobby]');
     await A.waitForFunction(() => document.querySelectorAll('#panel .lb-p').length >= 6, null, { timeout: 8000 });

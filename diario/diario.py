@@ -1,5 +1,14 @@
 import html
 V=[
+ ("v13","16/10 · 07:20","Cartas de mesa no PvP, com opção de desligar",
+  "Colocar no jogo as cartas que mudam a partida para todo mundo e deixar uma opção para desativar.",
+  [("Novo","4 cartas de mesa na loja do PvP, de uso único: você toca na carta e ela vale na próxima rodada, para todo mundo. Todos veem quem usou."),
+   ("Novo","Tempestade ($4): todos os rivais levam 5 de dano. Trégua ($3): ninguém causa dano. Teto 19 ($3): passar de 19 estoura. Embaralhar ($3): ninguém decide, a mesa dá cartas a cada um até 17 ou mais."),
+   ("Novo","Na sala, quem cria a partida liga ou desliga as cartas de mesa. Desligadas, elas não aparecem na loja de ninguém, nem dos bots."),
+   ("Novo","Os bots também compram e usam cartas de mesa: Tempestade e Teto 19 logo, Trégua quando estão com pouca vida, Embaralhar quando estão em último."),
+   ("Mudou","Tela Cartas: nova seção Mesa na aba PvP."),
+   ("Mudou","Sala mais compacta: com 5 ou mais jogadores, os nomes ficam em 3 colunas (bots em itálico, anfitrião com ★). Cabe inteira no iPhone SE até com 10, o que antes não acontecia."),
+   ("Novo","Testes novos: um duelo roteirizado com as 4 cartas de mesa e a opção de desligar, e a sala com 10 jogadores no iPhone SE.")]),
  ("v12.2","16/10 · 06:10","Bots com cartas, loja sem rolar e sua posição no PvP",
   "Deixar os bots menos fáceis, fazer a loja caber no iPhone SE e mostrar se estou em primeiro ou em último pela vida.",
   [("Novo","Bots compram cartas de ataque e defesa na loja, com o mesmo dinheiro das pessoas, e usam todas elas. Também jogam melhor: param no 17 e dobram com 10 ou 11."),
@@ -129,7 +138,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 06:10'
+UPD=AG['atualizado'] if AG else '16/10/2026, 07:20'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
