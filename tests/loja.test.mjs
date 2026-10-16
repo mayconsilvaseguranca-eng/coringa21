@@ -1,4 +1,4 @@
-// Loja e sala: cabem inteiras no iPhone SE sem rolar, no PvP (com as descrições mais longas) e no solo.
+// Loja e sala: cabem inteiras no iPhone SE sem rolar, no PvP (4 cartas, com as descrições mais longas) e no solo.
 import { setup, check } from './lib.mjs';
 import { createRoom } from './lib.mjs';
 
@@ -16,7 +16,7 @@ export default async function () {
     await A.waitForTimeout(1200);
     await A.evaluate(() => { const c=window.__c21,S=c.S; const keep=['colete','ultima','esquiva'];S.jokers=Object.keys(c.JK).filter(k=>c.JK[k].pvp&&!keep.includes(k)).slice(0,4).map(k=>({k,v:0}));S.money=12;S.phase='cash';S.cash={reward:0,hands:0,interest:0,bonus:0,total:0};
       const b=document.createElement('button');b.dataset.act='collect';document.body.appendChild(b);b.click(); });
-    await A.evaluate(()=>{const S=window.__c21.S;S.shop.items=['colete','ultima','esquiva'].map(k=>({t:'j',k,sold:false}));const b=document.createElement('button');b.dataset.act='toshop';document.body.appendChild(b);b.click();});
+    await A.evaluate(()=>{const S=window.__c21.S;S.shop.items=['colete','ultima','esquiva','embaralhar'].map(k=>({t:'j',k,sold:false}));const b=document.createElement('button');b.dataset.act='toshop';document.body.appendChild(b);b.click();});
     await A.waitForTimeout(700);
     
     out.pvp=await A.evaluate(()=>{const p=document.querySelector('#panel');return {sh:p.scrollHeight,ch:p.clientHeight}});

@@ -318,20 +318,21 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .shophead .clock b{font-size:15px}
 .shophead .money{margin-left:auto;font-size:24px;color:var(--gold)}
 .shophead .clock + .money{margin-left:0}
-.shoplist{display:flex;flex-direction:column;gap:6px}
-.si{display:flex;align-items:center;gap:9px;width:100%;background:var(--panel-2);border:2px solid var(--edge);border-radius:10px;padding:5px 8px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.shoplist{display:flex;flex-direction:column;gap:5px}
+.si{display:flex;align-items:center;gap:9px;width:100%;background:var(--panel-2);border:2px solid var(--edge);border-radius:10px;padding:4px 8px;cursor:pointer;text-align:left;font:inherit;color:inherit}
 .si:active{transform:translateY(2px)}
-.si .art{width:34px;height:44px;border-radius:7px;display:grid;place-items:center;font-size:18px;font-weight:800;border:2px solid var(--edge);background:var(--jc);flex:0 0 auto;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.si .art{width:32px;height:40px;border-radius:7px;display:grid;place-items:center;font-size:18px;font-weight:800;border:2px solid var(--edge);background:var(--jc);flex:0 0 auto;text-shadow:0 2px 0 rgba(0,0,0,.35)}
 .si .art.planet{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffffff55,transparent 45%),var(--jc)}
 .si .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .si .t b{font-size:14px;font-weight:800;line-height:1.2}
-.si .t b .kind{font-size:9.5px;padding:1px 5px;vertical-align:2px}
+.si .pc{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px}
+.si .pc .kind{font-size:9px;padding:1px 4px;white-space:nowrap}
 .si .t > span{font-size:12px;color:var(--ink-dim);line-height:1.2}
 .si .pr{flex:0 0 auto;min-width:44px;text-align:center;background:var(--gold);color:#2a1b00;border-radius:8px;padding:7px 6px;font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;box-shadow:0 2px 0 var(--edge)}
 .si.sold{opacity:.4}
 .shopnote{font-size:12.5px!important;text-align:center}
-.shoppanel .rack .joker,.shoppanel .rack .slot{height:52px}
-.shoppanel .rack .joker .jg{font-size:18px}
+.shoppanel .rack .joker,.shoppanel .rack .slot{height:44px}
+.shoppanel .rack .joker .jg{font-size:16px}
 .shoppanel .rack .joker .jn{font-size:9.5px}
 .note.warn{background:color-mix(in srgb,var(--mult) 20%,var(--panel-2))}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
@@ -425,7 +426,7 @@ const JK={
   ganancia:{n:'Ganância',d:'+1 Mult para cada $5 que você tem',c:5,g:'¢',bg:'#8c7a16'},
   escudo:{n:'Escudo',d:'Absorve os primeiros 2 de dano que você levar em cada rodada',c:5,g:'◈',bg:'#3d6f9e',pvp:'def'},
   espelho:{n:'Espelho',d:'Devolve 20% do dano que você leva para quem te bateu',c:4,g:'◐',bg:'#6b7fa0',pvp:'def'},
-  esquiva:{n:'Esquiva',d:'Você não leva dano de rivais que fecharam a mão com 17 ou menos',c:4,g:'≈',bg:'#2f8a7e',pvp:'def'},
+  esquiva:{n:'Esquiva',d:'Rivais que fecharam com 17 ou menos não te causam dano',c:4,g:'≈',bg:'#2f8a7e',pvp:'def'},
   critico:{n:'Golpe Crítico',d:'Fechar com 21 causa 50% a mais de dano',c:4,g:'✸',bg:'#c43d2b',pvp:'atk'},
   sangria:{n:'Sangria',d:'Quem você passar perde 2 PV a mais nas 3 rodadas seguintes',c:5,g:'‡',bg:'#8e1f36',pvp:'atk'},
   vampiro:{n:'Vampiro',d:'Você recupera 15% do dano que causa',c:6,g:'V',bg:'#5a2a6e',pvp:'atk'},
@@ -436,14 +437,14 @@ const JK={
   cinco:{n:'Cinco Lâminas',d:'+2 de dano por carta na mão, sem contar a primeira',c:5,g:'5',bg:'#7d2a4a',pvp:'atk'},
   armadura:{n:'Armadura',d:'Reduz em 15% todo dano que você leva',c:5,g:'▣',bg:'#476a8a',pvp:'def'},
   bandagem:{n:'Bandagem',d:'Vida abaixo da metade: +3 PV por rodada',c:4,g:'+',bg:'#3f8a6a',pvp:'def'},
-  ultima:{n:'Última Chance',d:'Uma vez por partida, um golpe que te zeraria deixa você com 1 PV',c:5,g:'1',bg:'#5d6f3a',pvp:'def'},
+  ultima:{n:'Última Chance',d:'Uma vez por partida, fica com 1 PV em vez de zerar',c:5,g:'1',bg:'#5d6f3a',pvp:'def'},
   muralha:{n:'Muralha',d:'Se você ficar em último na rodada, leva 20% a menos de dano',c:5,g:'▥',bg:'#4f5f78',pvp:'def'},
-  colete:{n:'Colete',d:'Uso único: na rodada em que você estourar, ninguém te causa dano',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'},
+  colete:{n:'Colete',d:'Uso único: se você estourar, não leva dano na rodada',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'},
   /* cartas de mesa: uso único, mudam a próxima rodada para todo mundo (podem ser desligadas na sala) */
-  tempestade:{n:'Tempestade',d:'Uso único: na próxima rodada, todos os rivais levam 5 de dano',c:4,g:'ϟ',bg:'#4b5aa8',pvp:'mesa'},
-  tregua:{n:'Trégua',d:'Uso único: na próxima rodada, ninguém causa dano',c:3,g:'⊘',bg:'#4f8f86',pvp:'mesa'},
-  teto:{n:'Teto 19',d:'Uso único: na próxima rodada, passar de 19 já estoura para todos',c:3,g:'19',bg:'#8f6a24',pvp:'mesa'},
-  embaralhar:{n:'Embaralhar',d:'Uso único: na próxima rodada, ninguém decide: todos recebem cartas até 17 ou mais',c:3,g:'↻',bg:'#6d4a95',pvp:'mesa'}
+  tempestade:{n:'Tempestade',d:'Na próxima rodada, todos os rivais levam 5 de dano',c:4,g:'ϟ',bg:'#4b5aa8',pvp:'mesa'},
+  tregua:{n:'Trégua',d:'Na próxima rodada, ninguém causa dano',c:3,g:'⊘',bg:'#4f8f86',pvp:'mesa'},
+  teto:{n:'Teto 19',d:'Na próxima rodada, passar de 19 estoura',c:3,g:'19',bg:'#8f6a24',pvp:'mesa'},
+  embaralhar:{n:'Embaralhar',d:'Na próxima rodada, a mesa dá cartas a todos até 17',c:3,g:'↻',bg:'#6d4a95',pvp:'mesa'}
 };
 const JF={
   coringa:x=>x.m(4),
@@ -833,10 +834,12 @@ function collect(){
 }
 function openShop(){S.phase='shop';S.shop={items:genShopItems(),reroll:3};render();showShop()}
 function genShopItems(){
-  /* No PvP a loja só tem as cartas de ataque e defesa. */
+  /* No PvP: 3 cartas de ataque ou defesa e, com as cartas de mesa ligadas, sempre 1 carta de mesa a mais. */
   if(isPvp()){
-    const pool=shuffle(Object.keys(JK).filter(k=>JK[k].pvp&&!has(k)&&(JK[k].pvp!=='mesa'||S.mp.mesa)));
-    return pool.slice(0,3).map(k=>({t:'j',k,sold:false}));
+    const pool=shuffle(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def')&&!has(k)));
+    const items=pool.slice(0,3).map(k=>({t:'j',k,sold:false}));
+    if(S.mp.mesa){const m=shuffle(Object.keys(JK).filter(k=>JK[k].pvp==='mesa'&&!has(k)));if(m.length)items.push({t:'j',k:m[0],sold:false})}
+    return items;
   }
   const pool=shuffle(Object.keys(JK).filter(k=>!has(k)&&!JK[k].pvp));
   const hs=shuffle(Object.keys(HANDS));
@@ -1346,7 +1349,9 @@ function botTotal(c){let t=0,a=0;for(const x of c){t+=baseVal(x);if(x.r==='A')a+
 /* Loja do bot: juros, depois compra cartas sorteadas que couberem no bolso (máximo 5). */
 function botShop(b){
   b.money+=Math.min(2,Math.floor(b.money/10));
-  const offer=Object.keys(JK).filter(k=>JK[k].pvp&&!bHas(b,k)&&(JK[k].pvp!=='mesa'||b.mesa)).sort(()=>Math.random()-.5).slice(0,3);
+  const rnd=a=>a.sort(()=>Math.random()-.5);
+  const offer=rnd(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def')&&!bHas(b,k))).slice(0,3);
+  if(b.mesa){const m=rnd(Object.keys(JK).filter(k=>JK[k].pvp==='mesa'&&!bHas(b,k)));if(m.length)offer.push(m[0])}
   for(const k of offer)if(b.cards.length<5&&JK[k].c<=b.money){b.money-=JK[k].c;b.cards.push(k)}
   b.st.n=b.cards.length;
 }
@@ -1613,7 +1618,7 @@ function showCards(tab){
   let body;
   if(tab==='pvp'){
     const atk=Object.keys(JK).filter(k=>JK[k].pvp==='atk'),def=Object.keys(JK).filter(k=>JK[k].pvp==='def'),mesa=Object.keys(JK).filter(k=>JK[k].pvp==='mesa');
-    body=`<p class="lb-desc">Só aparecem na loja do PvP, 3 por vez. Você guarda até 5.</p><span class="kind atk" style="align-self:flex-start">Ataque · ${atk.length}</span><div class="cl">${atk.map(row).join('')}</div><span class="kind def" style="align-self:flex-start">Defesa · ${def.length}</span><div class="cl">${def.map(row).join('')}</div><span class="kind mesa" style="align-self:flex-start">Mesa · ${mesa.length}</span><p class="lb-desc" style="text-align:left">Uso único: toque nela durante a partida para valer na próxima rodada, para todo mundo. Quem cria a sala pode desligar.</p><div class="cl">${mesa.map(row).join('')}</div>`;
+    body=`<p class="lb-desc">Só aparecem na loja do PvP: 3 de ataque ou defesa por vez, mais 1 de mesa. Você guarda até 5.</p><span class="kind atk" style="align-self:flex-start">Ataque · ${atk.length}</span><div class="cl">${atk.map(row).join('')}</div><span class="kind def" style="align-self:flex-start">Defesa · ${def.length}</span><div class="cl">${def.map(row).join('')}</div><span class="kind mesa" style="align-self:flex-start">Mesa · ${mesa.length}</span><p class="lb-desc" style="text-align:left">Uso único: toque nela durante a partida para valer na próxima rodada, para todo mundo. Quem cria a sala pode desligar.</p><div class="cl">${mesa.map(row).join('')}</div>`;
   }else{
     const jk=Object.keys(JK).filter(k=>!JK[k].pvp);
     body=`<p class="lb-desc">Aparecem no solo e na Sobrevivência. Os coringas agem da esquerda para a direita.</p><span class="kind" style="align-self:flex-start;background:var(--panel-2);color:var(--gold)">Coringas · ${jk.length}</span><div class="cl">${jk.map(row).join('')}</div>
@@ -1682,7 +1687,7 @@ function showShop(){
   /* Loja em linhas compactas: cabe inteira no iPhone SE sem rolar */
   const items=sh.items.map((it,i)=>{
     if(it.t==='j'){const d=JK[it.k];
-      return `<button class="si ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="art" style="--jc:${d.bg}">${d.g}</span><span class="t"><b>${d.n}${d.pvp?` <span class="kind ${d.pvp}">${KIND_TXT[d.pvp]}</span>`:''}</b><span>${d.d}</span></span><span class="pr">${it.sold?'✓':full?'Cheio':'$'+d.c}</span></button>`}
+      return `<button class="si ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="art" style="--jc:${d.bg}">${d.g}</span><span class="t"><b>${d.n}</b><span>${d.d}</span></span><span class="pc"><span class="pr">${it.sold?'✓':full?'Cheio':'$'+d.c}</span>${d.pvp?`<span class="kind ${d.pvp}">${KIND_TXT[d.pvp]}</span>`:''}</span></button>`}
     const h=HANDS[it.k];
     return `<button class="si ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="art planet" style="--jc:${h.pc}"></span><span class="t"><b>${h.p}</b><span>Sobe ${h.n} para nv ${S.levels[it.k]+1} (+${h.lc} Fichas, +${h.lm} Mult)</span></span><span class="pr">${it.sold?'✓':'$3'}</span></button>`}).join('');
   showSheet(`<div class="shophead"><h2>Loja</h2>${clockHTML()}<span class="num money">$${S.money}</span></div>

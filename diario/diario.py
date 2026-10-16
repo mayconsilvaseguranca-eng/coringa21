@@ -1,5 +1,9 @@
 import html
 V=[
+ ("v13.1","16/10 · 07:40","Loja com 4 opções: sempre uma carta de mesa",
+  "A carta de mesa ganha uma vaga própria na loja: 4 opções, uma sempre de mesa.",
+  [("Mudou","Loja do PvP com 4 cartas: 3 de ataque ou defesa e 1 de mesa, sempre. Com as cartas de mesa desligadas na sala, volta a ter 3. Os bots compram com a mesma regra."),
+   ("Mudou","Na loja, a etiqueta (Ataque, Defesa, Mesa) fica embaixo do preço, e algumas descrições ficaram mais curtas, sem mudar as regras. As 4 cartas cabem no iPhone SE sem rolar.")]),
  ("v13","16/10 · 07:20","Cartas de mesa no PvP, com opção de desligar",
   "Colocar no jogo as cartas que mudam a partida para todo mundo e deixar uma opção para desativar.",
   [("Novo","4 cartas de mesa na loja do PvP, de uso único: você toca na carta e ela vale na próxima rodada, para todo mundo. Todos veem quem usou."),
@@ -138,7 +142,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 07:20'
+UPD=AG['atualizado'] if AG else '16/10/2026, 07:40'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
