@@ -234,6 +234,17 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 @keyframes mfCard{0%{transform:translateY(-60vh) rotate(-540deg) scale(.3);opacity:0}60%{opacity:1}100%{transform:none}}
 @keyframes mfPop{from{opacity:0;transform:translateY(10px) scale(.9)}}
 .mesa-on{color:#c9a6ff!important;letter-spacing:.04em}
+.stat.rxbtn{cursor:pointer;justify-content:center;gap:1px;font:inherit;color:inherit}
+.stat.rxbtn .rxi{font-size:19px;line-height:1}
+.stat.rxbtn:active{transform:translateY(2px)}
+#rxpick{position:fixed;left:50%;top:118px;transform:translateX(-50%);z-index:35;display:grid;grid-template-columns:repeat(4,52px);gap:6px;background:var(--panel);border:2px solid var(--edge);border-radius:14px;padding:8px;box-shadow:0 6px 0 var(--edge),0 10px 30px rgba(0,0,0,.5);animation:rise .18s ease-out}
+#rxpick button{width:52px;height:48px;border:0;border-radius:10px;background:var(--panel-2);font-size:28px;cursor:pointer;line-height:1}
+#rxpick button:active{transform:scale(.92)}
+.rxb{position:absolute;bottom:22%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;animation:rxUp 2.6s ease-out forwards;z-index:36}
+.rxb .rxe{font-size:46px;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.4))}
+.rxb .rxn{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;background:rgba(0,0,0,.6);color:var(--ink);border-radius:999px;padding:2px 9px 2px 5px}
+.rxb .rxn .dot{width:11px;height:11px}
+@keyframes rxUp{0%{opacity:0;transform:translate(-50%,20px) scale(.5)}12%{opacity:1;transform:translate(-50%,0) scale(1.15)}20%{transform:translate(-50%,-6px) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-140px) scale(1)}}
 .kind.mesa{background:color-mix(in srgb,var(--violet) 34%,transparent);color:#c9a6ff}
 .cfg{display:grid;grid-template-columns:1fr;gap:6px}
 .cfg .bots{gap:10px;padding:4px 10px}
@@ -383,7 +394,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v15.1';
+const VERSION='v16';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -486,9 +497,9 @@ const JF={
 const jDesc=j=>JK[j.k].d+(j.k==='escalada'?` (agora +${j.v||0})`:'');
 const sellPrice=k=>Math.max(1,Math.floor(JK[k].c/2));
 const COLORS=['#f0453a','#2b86f0','#f5bd3a','#3fbf6a','#a05be0','#ff7ab6','#25c3c3','#ff8a2a','#c9d14a','#e8e8e8'];
-const MAXP=10, LIVES=3, PVP_HP=120, DMG_K=20, PVP_SHOP_EVERY=3, PVP_TURN_MS=45000;
-/* PV do PvP: 120 com 6 ou mais jogadores; mesas menores ganham um pouco mais para a partida durar parecido (~10 rodadas). */
-const hpFor=n=>n>=6?PVP_HP:PVP_HP+12*(6-Math.max(2,n));
+const MAXP=10, LIVES=3, PVP_HP=200, DMG_K=20, PVP_SHOP_EVERY=3, PVP_TURN_MS=45000;
+/* PV do PvP: 200 com 6 ou mais jogadores (até 232 com 2). Na simulação a partida dura ~16 rodadas e quem chega ao fim tem ~4 cartas compradas. */
+const hpFor=n=>n>=6?PVP_HP:PVP_HP+8*(6-Math.max(2,n));
 const r1=x=>Math.round((+x||0)*10)/10;
 
 /* ---------- Armazenamento ---------- */
@@ -631,7 +642,7 @@ function renderHUD(){
     <div class="stat h"><small>${pvp?'Loja em':'Mãos'}</small><span class="num">${pvp?pvpShopIn():S.handsLeft}</span></div>
     <div class="stat s"><small>Trocas</small><span class="num">${S.swapsLeft}</span></div>
     <div class="stat mo"><small>Dinheiro</small><span class="num">$${S.money}</span></div>
-    <div class="stat"><small>Ante</small><span class="num">${S.ante}${pvp?'':'<span class="c-dim">/8</span>'}</span></div>
+    ${pvp?`<button class="stat rxbtn" data-act="rxopen" aria-label="Mandar reação"><span class="rxi">😀</span><small>Reagir</small></button>`:`<div class="stat"><small>Ante</small><span class="num">${S.ante}<span class="c-dim">/8</span></span></div>`}
     <button class="stat menu" data-act="menu" aria-label="Pausa"><span class="pz">❚❚</span><small>Pausa</small></button>`;
   renderStrip();
 }
@@ -748,6 +759,35 @@ function mesaNext(){
   $('#fx').appendChild(el);beep(300,.12,'sawtooth',.04);setTimeout(()=>beep(600,.1,'triangle',.04),160);setTimeout(()=>beep(900,.16,'triangle',.04),320);
   setTimeout(()=>{el.classList.add('out');setTimeout(()=>{el.remove();mesaNext()},RM?10:450)},RM?900:5000);
 }
+/* ---------- Reações no PvP: cada um manda um emoji, todos veem um balão com o nome ---------- */
+const RX=['😂','😡','😱','👏','🔥','😎','🤡','💀'];
+const rxSeen={};let rxLast=0;
+function rxToggle(force){
+  let el=$('#rxpick');
+  if(el&&force!==true){el.remove();return}
+  if(!el){el=document.createElement('div');el.id='rxpick';document.body.appendChild(el)}
+  el.innerHTML=RX.map((e,i)=>`<button data-act="rx" data-i="${i}" aria-label="Reação ${e}">${e}</button>`).join('');
+}
+function rxSend(i){
+  const e=RX[i];if(!e||!S||!S.mp)return;
+  const now=Date.now();if(now-rxLast<1500)return;rxLast=now;
+  S.mp.rx={e:i,t:now};mpSync();rxBubble(MP.name,MP.col,e,true);
+  const el=$('#rxpick');if(el)el.remove();
+}
+function rxCheck(ps){
+  for(const p of ps){if(p.me||!p.st||!p.st.rx)continue;
+    const r=p.st.rx,t=+r.t||0;if(!(t>(rxSeen[p.pid]||0)))continue;
+    const first=rxSeen[p.pid]===undefined;rxSeen[p.pid]=t;
+    if(first&&Date.now()-t>8000)continue; /* reação antiga */
+    if(RX[r.e])rxBubble(p.name,p.col,RX[r.e],false)}
+}
+function rxBubble(name,col,e,me){
+  const el=document.createElement('div');el.className='rxb';
+  el.style.left=(18+Math.random()*64)+'%';
+  el.innerHTML=`<span class="rxe">${e}</span><span class="rxn"><span class="dot" style="--pc:${colOf(col)}"></span>${esc(me?'Você':name)}</span>`;
+  $('#fx').appendChild(el);setTimeout(()=>el.remove(),RM?1500:2600);
+}
+document.addEventListener('pointerdown',ev=>{const pk=$('#rxpick');if(pk&&!pk.contains(ev.target)&&!ev.target.closest('[data-act=rxopen]'))pk.remove()},{capture:true,passive:true});
 function fxBlackjack(){
   beep(523,.12,'square',.05);setTimeout(()=>beep(659,.12,'square',.05),110);setTimeout(()=>beep(784,.12,'square',.05),220);setTimeout(()=>beep(1046,.3,'square',.05),330);
   const fx=$('#fx'),w=document.createElement('div');w.className='bj-fx';
@@ -1300,7 +1340,7 @@ let lastPres='';
 function mpSync(){
   if(!NR||!S||!S.mp)return;
   const st={a:S.ante,b:S.bi,l:S.mp.lives,al:S.mp.alive?1:0,sc:S.roundScore,t:S.stats.total,ph:S.phase,dh:S.mp.dh,n:S.jokers.length};
-  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);delete st.dh;delete st.l;delete st.sc}
+  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);if(S.mp.rx)st.rx=S.mp.rx;delete st.dh;delete st.l;delete st.sc}
   const s=JSON.stringify(st);if(s===lastPres)return;lastPres=s;
   NR.presence({g:S.mp.gid,st}).catch(()=>{});
 }
@@ -1309,6 +1349,7 @@ function mpTick(){
   const ps=gamePlayers();
   if(isPvp()){
     pvpCheckDamage(ps);
+    rxCheck(ps);
     if(S.phase==='pwait'&&S.mp.alive&&!S.busy&&S.mp.sub&&S.mp.sub.r===S.round&&!pvpWaitingNames().length){pvpShowdown();return}
     if(['play','pwait','pshow'].includes(S.phase)){renderActions();renderRivals()}
   }
@@ -1471,6 +1512,7 @@ function botTick(){
         b.money+=(beaten.length?(beaten.length===parts.length?2:1):0)*(bFx(b,'ouro')?2:1);
         if(bFx(b,'empate')&&myV>=0&&parts.some(p=>p.v===myV))b.hpv=r1(b.hpv-5);
         st.dm={...b.sent};
+        if(Math.random()<.3){const e=st.sub.x?(Math.random()<.5?2:7):beaten.length===parts.length&&parts.length?(Math.random()<.5?5:4):!beaten.length?1:0;st.rx={e,t:Date.now()+800}}
         b.sd=b.r;st.sd=b.r;st.ph='pshow';ch=true;
       }
     }else{
@@ -1608,7 +1650,7 @@ function tryJoinPick(id,host){
   MP.msg='';enterRoom(code);
 }
 const MODE_TXT={
-  pvp:{n:'PvP · todos contra todos',d:`Sem dealer. Todos jogam a mesma rodada, cada um com o próprio baralho. Quando todos fecham a mão, quem fez mais causa dano em quem ficou abaixo. Cada um começa com 120 PV (um pouco mais em mesas com menos de 6). Quem zerar sai e o último de pé vence.`},
+  pvp:{n:'PvP · todos contra todos',d:`Sem dealer. Todos jogam a mesma rodada, cada um com o próprio baralho. Quando todos fecham a mão, quem fez mais causa dano em quem ficou abaixo. Cada um começa com 200 PV (um pouco mais em mesas com menos de 6). Quem zerar sai e o último de pé vence.`},
   surv:{n:'Sobrevivência',d:'Cada um tem 3 vidas. Falhar uma blind custa uma vida, e no Duelo de cada ante quem fizer menos pontos perde outra.'}
 };
 const lobbyHP=()=>MP.hpSet||hpFor(Math.max(2,lobbyPlayers().length));
@@ -1665,7 +1707,7 @@ function showHow(back){
     <p>Cada mão é um 21 contra o dealer. <b>Pedir</b> compra carta, <b>Parar</b> passa a vez, <b>Dobrar</b> compra 1 carta e dobra o Mult. Toque numa carta sua e use <b>Trocar</b> para substituí-la.</p>
     <p>Se você ganha, marca <b class="c-chips">Fichas</b> × <b class="c-mult">Mult</b>. As Fichas somam o valor das suas cartas. Derrota e estouro valem 0.</p>
     <p>No solo e na Sobrevivência, depois de cada blind você recebe dinheiro (+$1 por mão sobrando e juros de $1 a cada $5) e vai à <b>loja</b>: coringas mudam a pontuação e planetas sobem o nível das jogadas.</p>
-    <p>No <b>PvP</b> não tem dealer. Todos jogam a mesma rodada e a mesa só avança quando todo mundo fechar a mão. Aí as mãos são reveladas: você pontua se passou alguém, e seus pontos viram dano em cada rival que ficou abaixo. Cada um começa com 120 PV (um pouco mais em mesas com menos de 6). Quem zerar sai e o último de pé vence. A loja abre a cada ${PVP_SHOP_EVERY} rodadas.</p>
+    <p>No <b>PvP</b> não tem dealer. Todos jogam a mesma rodada e a mesa só avança quando todo mundo fechar a mão. Aí as mãos são reveladas: você pontua se passou alguém, e seus pontos viram dano em cada rival que ficou abaixo. Cada um começa com 200 PV (um pouco mais em mesas com menos de 6). Quem zerar sai e o último de pé vence. A loja abre a cada ${PVP_SHOP_EVERY} rodadas.</p>
     <p>Na <b>Sobrevivência</b>, cada um tem 3 vidas. Falhar uma blind custa uma vida, e o chefe vira um <b>Duelo</b> em que quem fizer menos pontos perde outra.</p></div>
     <button class="btn b-go" data-act="${back}">Entendi</button>`,'how');
 }
@@ -1899,6 +1941,8 @@ document.addEventListener('click',e=>{
     case 'toshop':showShop();break;
     case 'sell':{const j=S.jokers[i];if(!j)break;S.money+=sellPrice(j.k);S.jokers.splice(i,1);beep(300,.08);render();if(S.phase==='shop')showShop();else resumeSheet();break}
     case 'mvl':case 'mvr':{const k=act==='mvl'?i-1:i+1;[S.jokers[i],S.jokers[k]]=[S.jokers[k],S.jokers[i]];render();showJoker(k);break}
+    case 'rxopen':rxToggle();break;
+    case 'rx':rxSend(+t.dataset.i);break;
     case 'menu':if(S&&(S.phase==='play'||S.phase==='pwait')&&!S.busy)showMenu();else if(S&&S.phase!=='play')resumeSheet();else if(!S)showStart();break;
     case 'quit':showQuit();break;
     case 'quitok':if(S.mp)eliminate();else gameOver();break;

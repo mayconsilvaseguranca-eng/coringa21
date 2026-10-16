@@ -53,7 +53,7 @@ export default async function () {
     // Abaixo da metade da vida, a Bandagem passa a curar 3 por rodada (conferido no laço abaixo).
     // Golpes até a Última Chance segurar Beto com 1 PV.
     let salvo = false;
-    for (let i = 0; i < 3 && !salvo; i++) {
+    for (let i = 0; i < 6 && !salvo; i++) {
       const r = await round([['2', '♠'], ['3', '♥'], ['4', '♠'], ['5', '♥'], ['7', '♣']], [['10', '♣'], ['7', '♦']]);
       salvo = await B.evaluate(() => !!window.__c21.S.mp.ultimaUsed);
       if (salvo) check(r[1] === 1, `Última Chance: Beto deveria ficar com 1 PV, tem ${r[1]}`);

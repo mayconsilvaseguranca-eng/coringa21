@@ -1,5 +1,11 @@
 import html
 V=[
+ ("v16","16/10 · 17:05","Partidas mais longas e reações",
+  "Partidas um pouco mais longas, até cada um ter umas 4 cartas compradas, e um botão de reações durante a partida.",
+  [("Mudou","Vida inicial do PvP: 200 PV com 6 ou mais jogadores (era 120), até 232 com 2. Na simulação, uma partida de 6 dura umas 16 rodadas (eram 11) e quem chega ao fim tem umas 4 cartas compradas."),
+   ("Novo","Botão Reagir no topo do PvP (no lugar do Ante): 8 reações (😂 😡 😱 👏 🔥 😎 🤡 💀). A reação sobe como um balão com o seu nome na tela de todos."),
+   ("Novo","Os bots também reagem às vezes na revelação: comemoram quando passam todo mundo e se assustam quando estouram."),
+   ("Novo","Teste novo no agente: uma pessoa manda reação e a outra vê.")]),
  ("v15.1","16/10 · 15:40","Versão na tela inicial",
   "Mostrar na tela inicial qual versão o jogo está.",
   [("Novo","A tela inicial mostra a versão embaixo do logo (blackjack roguelike · v15.1), com o mesmo número deste diário. Assim dá para conferir se o celular já pegou a atualização."),
@@ -169,7 +175,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 15:40'
+UPD=AG['atualizado'] if AG else '16/10/2026, 17:05'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

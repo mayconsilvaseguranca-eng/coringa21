@@ -30,7 +30,7 @@ export default async function () {
       return r;
     }
     const h0 = (await hp())[0];
-    check(h0 === 168, `PV iniciais de 2 jogadores deveriam ser 168, são ${h0}`);
+    check(h0 === 232, `PV iniciais de 2 jogadores deveriam ser 232, são ${h0}`);
     const up = x => Math.ceil(Math.round(x * 10) / 10);
     // Blackjack de Ana com Golpe Crítico: 61 × 1,5 = 92 de dano; Escudo absorve 2 (90); Espelho devolve 20% de 90 = 18.
     const r1 = await round([['A', '♠'], ['K', '♥']], [['10', '♣'], ['7', '♦']]);

@@ -17,26 +17,26 @@ export default async function () {
     const seesBots = await B.waitForFunction(() => document.querySelectorAll('#panel .lb-p.isbot').length === 4, null, { timeout: 10000 }).then(() => true, () => false);
     check(seesBots, 'Beto não vê os 4 bots na sala');
     check(await A.evaluate(() => { const p = document.querySelector('#panel'); return p.scrollHeight <= p.clientHeight + 2; }), 'a tela da sala precisa rolar com 6 jogadores');
-    // vida inicial ajustada pelo anfitrião: 120 automático + 2 × 20
+    // vida inicial ajustada pelo anfitrião: 200 automático + 2 × 20
     await A.click('[data-act=hpup]'); await A.click('[data-act=hpup]');
     await A.click('[data-act=startgame]');
     for (const p of [A, B]) await p.waitForFunction(() => window.__c21.S && window.__c21.S.mp, null, { timeout: 10000 });
     check((await A.evaluate(() => window.__c21.S.mp.players.length)) === 6, 'a partida não começou com 6 jogadores');
-    check((await B.evaluate(() => window.__c21.pvpHP())) === 160, 'a vida inicial escolhida na sala não chegou ao Beto');
+    check((await B.evaluate(() => window.__c21.pvpHP())) === 240, 'a vida inicial escolhida na sala não chegou ao Beto');
     for (const p of [A, B]) await p.click('[data-act=pvpgo]');
     await A.waitForTimeout(1200);
     const hands = await Promise.all([A, B].map(p => p.evaluate(() => window.__c21.S.player.map(c => c.r + c.s).join(' '))));
     check(hands[0] !== hands[1], 'Ana e Beto receberam as mesmas cartas');
 
     let alive = 6, rounds = 0;
-    for (let i = 0; i < 900 && alive > 1; i++) {
+    for (let i = 0; i < 1500 && alive > 1; i++) {
       for (const p of [A, B]) await pvpStep(p);
       await A.waitForTimeout(250);
       alive = await A.evaluate(() => window.__c21.gamePlayers().filter(p => p.st && p.st.al).length);
       rounds = await A.evaluate(() => Math.max(...window.__c21.gamePlayers().map(p => +(p.st && p.st.r) || 0)));
     }
     check(alive <= 1, `a partida não terminou (ainda ${alive} vivos na rodada ${rounds})`);
-    check(rounds <= 30, `partida longa demais: ${rounds} rodadas`);
+    check(rounds <= 40, `partida longa demais: ${rounds} rodadas`);
     const botCards = await A.evaluate(() => window.__c21.gamePlayers().filter(p => p.bot || String(p.pid).startsWith('b')).map(p => +(p.st && p.st.n) || 0));
     check(botCards.some(n => n > 0), `nenhum bot comprou carta: ${botCards}`);
     await A.waitForFunction(() => window.__c21.gamePlayers().some(p => p.st && p.st.ph === 'won'), null, { timeout: 10000 }).catch(() => {});
