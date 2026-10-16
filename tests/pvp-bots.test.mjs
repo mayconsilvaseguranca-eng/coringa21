@@ -4,10 +4,15 @@ import { setup, check, createRoom, joinRoom, pvpStep } from './lib.mjs';
 export default async function () {
   const t = await setup();
   try {
-    const A = await t.page('Ana'), B = await t.page('Beto');
+    const A = await t.page('Ana');
     const code = await createRoom(A, 'Ana', 'pvp');
+    // Beto entra pelo link de convite
+    const link = await A.textContent('#share');
+    check(link.includes('?sala=' + code), 'o link de convite não tem o código da sala: ' + link);
+    const B = await t.page('Beto', 'iPhone 13', '&sala=' + code);
+    check((await B.inputValue('#codein')) === code, 'o link de convite não preencheu o código');
     for (let i = 0; i < 4; i++) await A.click('[data-act=addbot]');
-    await joinRoom(B, 'Beto', code);
+    await B.fill('#nick', 'Beto'); await B.click('[data-act=join]'); await B.waitForSelector('.code');
     await A.waitForFunction(() => document.querySelectorAll('#panel .li').length >= 6, null, { timeout: 8000 });
     const lobby = await B.$$eval('#panel .li', els => els.map(e => e.textContent));
     check(lobby.filter(x => x.includes('bot')).length === 4, 'Beto não vê os 4 bots na sala');

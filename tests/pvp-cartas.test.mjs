@@ -12,11 +12,13 @@ export default async function () {
     for (const p of [A, B]) await p.waitForFunction(() => window.__c21.S && window.__c21.S.mp);
     await A.evaluate(() => { window.__c21.S.jokers = [{ k: 'critico', v: 0 }, { k: 'sangria', v: 0 }, { k: 'vampiro', v: 0 }]; });
     await B.evaluate(() => { window.__c21.S.jokers = [{ k: 'escudo', v: 0 }, { k: 'espelho', v: 0 }, { k: 'esquiva', v: 0 }]; });
+    // baralho só com 2 para nenhuma mão inicial virar blackjack sozinha antes do roteiro
+    for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.deck = Array.from({ length: 80 }, (_, i) => ({ r: '2', s: '♣', id: 5000 + i })); });
     for (const p of [A, B]) await p.click('[data-act=pvpgo]');
     const hp = () => Promise.all([A, B].map(p => p.evaluate(() => window.__c21.pvpHP())));
     async function round(ha, hb) {
       for (const [p, h] of [[A, ha], [B, hb]]) {
-        await p.waitForFunction(() => window.__c21.S.phase === 'play' && !window.__c21.S.busy, null, { timeout: 15000 }).catch(async e => { throw new Error('esperando a vez: ' + await p.evaluate(() => JSON.stringify({ ph: window.__c21.S.phase, busy: window.__c21.S.busy, r: window.__c21.S.round, hp: window.__c21.pvpHP() }))) });
+        await p.waitForFunction(() => window.__c21.S.phase === 'play' && !window.__c21.S.busy, null, { timeout: 15000 }).catch(async e => { throw new Error('esperando a vez ' + (p === A ? 'Ana' : 'Beto') + ': ' + await p.evaluate(() => JSON.stringify({ ph: window.__c21.S.phase, busy: window.__c21.S.busy, r: window.__c21.S.round, hp: window.__c21.pvpHP(), msg: window.__c21.S.msg, cards: window.__c21.S.player.map(c=>c.r+c.s).join(' ') }))) });
         await p.evaluate(h => { const S = window.__c21.S; S.player = h.map((x, i) => ({ r: x[0], s: x[1], id: 9000 + i + Math.random() })); window.__c21.pvpSubmit(); }, h);
       }
       for (const p of [A, B]) await p.waitForFunction(() => window.__c21.S.phase === 'pshow' && !window.__c21.S.busy, null, { timeout: 15000 }).catch(async e => { throw new Error('esperando revelação: ' + await p.evaluate(() => JSON.stringify({ ph: window.__c21.S.phase, busy: window.__c21.S.busy, r: window.__c21.S.round, w: document.querySelector('#actions').textContent }))) });

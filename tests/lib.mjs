@@ -9,11 +9,11 @@ export async function setup() {
   const url = `http://127.0.0.1:${port}/?broker=ws://127.0.0.1:${port}/mqtt&test=1`;
   const errors = [];
   const pages = [];
-  async function page(name, device = 'iPhone 13') {
+  async function page(name, device = 'iPhone 13', extra = '') {
     const ctx = await browser.newContext({ ...devices[device], reducedMotion: 'reduce' });
     const p = await ctx.newPage();
     p.on('pageerror', e => errors.push(`${name}: ${e.message}`));
-    await p.goto(url);
+    await p.goto(url + extra);
     pages.push(p);
     return p;
   }

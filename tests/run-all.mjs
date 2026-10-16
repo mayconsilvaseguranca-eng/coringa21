@@ -15,9 +15,11 @@ for (const name of TESTS) {
     } catch (e) {
       fails++;
       report.push(`✘ ${name} #${i}: ${e.message}`);
+      if (process.env.GITHUB_ACTIONS) console.log(`::error title=Teste ${name} falhou::${String(e.message).replace(/\n/g, ' ')}`);
     }
     console.log(report[report.length - 1]);
   }
 }
 console.log(`\n${report.length - fails}/${report.length} execuções passaram.`);
+if (process.env.GITHUB_STEP_SUMMARY) { const fs = await import('node:fs'); fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Testes do Família 21\n\n${report.map(r => '- ' + r).join('\n')}\n\n**${report.length - fails}/${report.length} execuções passaram.**\n`); }
 process.exit(fails ? 1 : 0);

@@ -146,7 +146,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .row > *{flex:1;min-width:0}
 .logo{text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;padding-top:6px}
 .logo .l1{font-family:var(--font-px);font-size:52px;line-height:.9;color:var(--ink);text-shadow:3px 3px 0 var(--mult),6px 6px 0 var(--edge)}
-.logo .l2{font-family:var(--font-px);font-size:88px;line-height:.85;color:var(--gold);text-shadow:4px 4px 0 var(--edge);animation:float 2.4s ease-in-out infinite}
+.logo .l2{font-family:var(--font);font-weight:800;font-size:92px;line-height:.9;letter-spacing:-.02em;color:var(--gold);text-shadow:4px 4px 0 var(--edge);animation:float 2.4s ease-in-out infinite}
 .logo .l3{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);margin-top:6px}
 @keyframes float{50%{transform:translateY(-6px) rotate(-3deg)}}
 .list{display:flex;flex-direction:column;gap:6px}
@@ -727,6 +727,7 @@ function pvpParts(){return gamePlayers().filter(p=>!p.me&&p.st&&p.st.al)}
 function pvpWaitingNames(){return pvpParts().filter(p=>!(p.st.sub&&p.st.sub.r===S.round)).map(p=>p.name)}
 function pvpStartRound(){
   if(!S.mp.alive)return;
+  S.mp.hk=Math.max(S.mp.hk||0,S.round||0);
   S.round=(S.round||0)+1;
   S.ante=1+Math.floor((S.round-1)/(PVP_SHOP_EVERY*2));S.bi=0;
   if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=3+(has('trocador')?2:0)}
@@ -790,9 +791,26 @@ function pvpReadyNext(){
   if(!S.pv)return true;
   return S.pv.parts.every(p=>{const g=gamePlayers().find(x=>x.pid===p.pid);return !g||!g.st||!g.st.al||(+g.st.sd||0)>=S.pv.r});
 }
+/* Desempate: se todos os que restam zeram a vida na mesma rodada, sobrevive quem ficou com a vida menos negativa
+   (depois mais pontos no total, depois o identificador). Cada aparelho decide só por si, com as mesmas contas. */
+function tiebreak(me,round,rivals){
+  if(rivals.some(p=>(+p.st.hk||0)<round))return 'wait';
+  if(rivals.some(p=>(+p.st.hpr||0)>0))return 'die';
+  const key=x=>[+x.hpr||0,+x.t||0,x.pid];
+  const better=(a,b)=>{const x=key(a),y=key(b);for(let i=0;i<2;i++)if(x[i]!==y[i])return x[i]>y[i];return x[2]>y[2]};
+  return rivals.every(p=>better(me,{hpr:p.st.hpr,t:p.st.t,pid:p.pid}))?'live':'die';
+}
 function pvpNext(){
   if(!S.mp.alive||S.phase!=='pshow')return;
-  if(pvpHP()<=0){eliminate();return}
+  if(pvpReadyNext()&&(S.mp.hk||0)<S.round){S.mp.hk=S.round;mpSync()}
+  if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();
+  if(S.mp.hp<=0){
+    const rivals=gamePlayers().filter(p=>!p.me&&p.st&&p.st.al);
+    const r=rivals.length?tiebreak({hpr:S.mp.hp,t:S.stats.total,pid:MP.pid},S.round,rivals):'die';
+    if(r==='wait'){const b=$('#pvpnext');if(b){b.disabled=true;b.innerHTML='Todos zeraram · desempatando…'}return}
+    if(r==='die'){eliminate();return}
+    S.mp.hp=1;S.msg='Todos zeraram e você venceu o desempate!';pop($('#blindBox'),'Desempate: você ficou com 1 PV','info');
+  }
   if(S.round%PVP_SHOP_EVERY===0){
     const interest=interestNow();S.cash={reward:0,hands:0,interest,bonus:0,total:interest};
     S.phase='cash';S.deadline=Date.now()+30000;render();showCash();return}
@@ -806,6 +824,7 @@ function pvpTimer(){
     if(!S.msg&&S.deadline){const m=$('#msg');m.textContent=`Sua vez · ${Math.max(0,Math.ceil((S.deadline-now)/1000))}s`}
   }else if(S.phase==='pshow'){
     const ok=pvpReadyNext();
+    if(ok&&(S.mp.hk||0)<S.round){S.mp.hk=S.round;render()}
     if(openSheet==='pvpres'){const b=$('#pvpnext');if(b){b.disabled=!ok;const left=Math.max(0,Math.ceil(((S.pv?S.pv.at:now)+15000-now)/1000));b.innerHTML=ok?`Próxima rodada<small>${left}s</small>`:'Esperando a mesa aplicar o dano…'}}
     if(ok&&S.pv&&now>S.pv.at+15000)pvpNext();
   }else if(S.phase==='cash'&&S.deadline&&now>S.deadline){collect()}
@@ -1028,7 +1047,7 @@ let lastPres='';
 function mpSync(){
   if(!NR||!S||!S.mp)return;
   const st={a:S.ante,b:S.bi,l:S.mp.lives,al:S.mp.alive?1:0,sc:S.roundScore,t:S.stats.total,ph:S.phase,dh:S.mp.dh,n:S.jokers.length};
-  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;delete st.dh;delete st.l;delete st.sc}
+  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;delete st.dh;delete st.l;delete st.sc}
   const s=JSON.stringify(st);if(s===lastPres)return;lastPres=s;
   NR.presence({g:S.mp.gid,st}).catch(()=>{});
 }
@@ -1121,8 +1140,8 @@ function botTick(){
     const st=b.st;if(!st.al||st.ph==='won')continue;
     const all=roomPlayers().filter(p=>p.g===b.g&&b.players.includes(p.pid)&&p.pid!==b.pid);
     const recv=all.reduce((a,p)=>a+(p.st&&p.st.dm&&typeof p.st.dm==='object'?Math.max(0,+p.st.dm[b.pid]||0):0),0);
-    const hp=Math.max(0,Math.ceil(r1(b.maxHp-recv)));
-    let ch=false;if(hp!==st.hp){st.hp=hp;ch=true}
+    const hpr=r1(b.maxHp+(b.adj||0)-recv);const hp=Math.max(0,Math.ceil(hpr));
+    let ch=false;if(st.hpr!==hpr){st.hpr=hpr;ch=true}if(hp!==st.hp){st.hp=hp;ch=true}
     const others=all.filter(p=>p.st&&p.st.al);
     if(!st.sub||st.sub.r<b.r){
       if(now>=b.nextAt){
@@ -1151,8 +1170,15 @@ function botTick(){
       }
     }else{
       if(others.every(p=>(+p.st.sd||0)>=b.r)){
-        if(hp<=0){st.al=0;st.ph='out'}else{b.r++;st.r=b.r;st.a=1+Math.floor((b.r-1)/(PVP_SHOP_EVERY*2));st.ph='play';b.nextAt=now+1500+Math.random()*3500}
-        ch=true;
+        if((st.hk||0)<b.r){st.hk=b.r;ch=true}
+        let go=true;
+        if(hpr<=0){
+          const r=others.length?tiebreak({hpr,t:st.t||0,pid:b.pid},b.r,others):'die';
+          if(r==='wait')go=false;
+          else if(r==='die'){st.al=0;st.ph='out';go=false;ch=true}
+          else{b.adj=(b.adj||0)+(1-hpr);st.hpr=1;st.hp=1}
+        }
+        if(go){b.r++;st.r=b.r;st.a=1+Math.floor((b.r-1)/(PVP_SHOP_EVERY*2));st.ph='play';b.nextAt=now+1500+Math.random()*3500;ch=true}
       }
     }
     if(st.al&&all.length&&all.every(p=>p.st&&!p.st.al)){st.ph='won';ch=true}
@@ -1220,7 +1246,7 @@ function showStart(){
 }
 function showMPHome(){
   const nickEl=$('#nick'),codeEl=$('#codein');
-  const nick=nickEl?nickEl.value:MP.name, code=codeEl?codeEl.value:'';
+  const nick=nickEl?nickEl.value:MP.name, code=codeEl?codeEl.value:(MP.prefill||'');
   let body;
   if(!roomReady)body=`<p style="text-align:center">Conectando…</p>`;
   else if(!ROOM)body=`<div class="note warn">Este navegador não consegue abrir salas online. Tente pelo Chrome ou Safari atualizados.</div>`;
@@ -1277,8 +1303,9 @@ function showLobby(){
   showSheet(`<h2>Sala</h2>
   <div class="code">${esc((MP.code||'').toUpperCase())}</div>
   <div class="net ${NR&&NR.connected()?'':'bad'}">${NR&&NR.connected()?'● conectado':'● reconectando…'}</div>
-  <button class="btn b-dim" data-act="copycode">Copiar convite</button>
-  <p style="font-size:13.5px;text-align:center">Seus amigos abrem este mesmo link, tocam em Multiplayer e digitam o código. Ninguém precisa de conta.</p>
+  <button class="btn b-go" data-act="copycode">Convidar amigos<small>manda um link que entra direto nesta sala</small></button>
+  <p id="share" class="note" style="font-size:12.5px;text-align:center;word-break:break-all">${esc(inviteLink())}</p>
+  <p style="font-size:13.5px;text-align:center">Quem abrir o link do convite cai direto aqui. Também dá para entrar pela lista de salas com o código. Ninguém precisa de conta.</p>
   ${MP.msg?`<div class="note warn">${esc(MP.msg)}</div>`:''}
   <div class="list">${lp.map((p,i)=>`<div class="li ${p.me?'me':''} ${i>=MAXP?'out':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span><span class="grow"><b>${esc(p.name)}</b>${p.me?' <span class="c-dim">(você)</span>':''}</span><span class="c-dim" style="font-size:12.5px">${i===0?'anfitrião':i>=MAXP?'sala cheia':p.bot?'bot':'pronto'}</span></div>`).join('')||'<p>Conectando…</p>'}
   ${playing.length?`<div class="li out"><span class="grow">${playing.length} pessoa${playing.length>1?'s':''} em uma partida em andamento</span></div>`:''}</div>
@@ -1481,7 +1508,7 @@ document.addEventListener('click',e=>{
     case 'mode':MP.mode=t.dataset.m==='surv'?'surv':'pvp';store.set('c21-mode',MP.mode);if(MP.mode!=='pvp')clearBots();if(NR)NR.presence({lm:MP.mode});showLobby();break;
     case 'addbot':addBot();showLobby();break;
     case 'rmbot':removeBot();showLobby();break;
-    case 'copycode':copyText(`Bora jogar Família 21! Abre ${location.href.split(/[?#]/)[0]} , toca em Multiplayer e entra na sala ${(MP.code||'').toUpperCase()}`,t);break;
+    case 'copycode':shareInvite(t);break;
     case 'leaveroom':leaveRoom();break;
     case 'lobby':backToLobby();break;
     case 'mpresume':{const sv=store.get(SAVE_MP);if(sv&&sv.S&&sv.S.mp){MP.started.add(sv.S.mp.gid);S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;lastPres='';resume()}break}
@@ -1518,6 +1545,12 @@ function buy(i){
   if(it.t==='j'){const c=JK[it.k].c;if(S.money<c||S.jokers.length>=5)return;S.money-=c;S.jokers.push({k:it.k,v:0})}
   else{if(S.money<3)return;S.money-=3;S.levels[it.k]++}
   it.sold=true;beep(880,.08);setTimeout(()=>beep(1180,.1),90);render();showShop();
+}
+const inviteLink=()=>location.origin+location.pathname+'?sala='+encodeURIComponent((MP.code||'').toUpperCase());
+function shareInvite(btn){
+  const url=inviteLink(),text=`Bora jogar Família 21 comigo! Toca no link para entrar direto na minha sala (${(MP.code||'').toUpperCase()}):`;
+  if(navigator.share&&/^https?:/.test(location.protocol)){navigator.share({title:'Família 21',text,url}).then(()=>{btn.textContent='Convite enviado!'},()=>copyText(text+' '+url,btn));return}
+  copyText(text+' '+url,btn);
 }
 function copyText(txt,btn){
   const ok=()=>{btn.textContent='Copiado!'};
@@ -1583,7 +1616,13 @@ function render0(){
   let last=0;(function loop(ts){if(ts-last>60){frame(ts);last=ts}requestAnimationFrame(loop)})(0);
 })();
 
-render0();showStart();
+render0();
+const linkRoom=(QS.get('sala')||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8);
+if(linkRoom&&ROOM){
+  try{history.replaceState(null,'',location.pathname+(QS.get('broker')?'?broker='+encodeURIComponent(QS.get('broker'))+(QS.get('test')?'&test=1':''):''))}catch(e){}
+  MP.prefill=linkRoom.toUpperCase();MP.msg=`Você foi convidado para a sala ${linkRoom.toUpperCase()}. Escolha um apelido e toque em Entrar na sala.`;
+  showMPHome();
+}else showStart();
 if(QS.get('test')==='1')window.__c21={get S(){return S},set S(v){S=v},MP,get NR(){return NR},render,startBlind,duelFinished,mpTick,pvpHP:()=>pvpHP(),pvpSubmit,pvpNext,pvpStartRound,pvpReadyNext,showBoard,roomPlayers,gamePlayers,leaveShop,openShop,resolve};
 })();
 </script>
