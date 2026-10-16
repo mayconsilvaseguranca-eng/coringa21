@@ -37,6 +37,8 @@ export default async function () {
     }
     check(alive <= 1, `a partida não terminou (ainda ${alive} vivos na rodada ${rounds})`);
     check(rounds <= 30, `partida longa demais: ${rounds} rodadas`);
+    const botCards = await A.evaluate(() => window.__c21.gamePlayers().filter(p => p.bot || String(p.pid).startsWith('b')).map(p => +(p.st && p.st.n) || 0));
+    check(botCards.some(n => n > 0), `nenhum bot comprou carta: ${botCards}`);
     await A.waitForFunction(() => window.__c21.gamePlayers().some(p => p.st && p.st.ph === 'won'), null, { timeout: 10000 }).catch(() => {});
     const final = await A.evaluate(() => window.__c21.gamePlayers().map(p => ({ n: p.name, ph: p.st && p.st.ph, hp: p.st && p.st.hp })));
     check(final.filter(x => x.ph === 'won').length === 1, 'não houve exatamente um vencedor: ' + JSON.stringify(final));

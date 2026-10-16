@@ -1,5 +1,14 @@
 import html
 V=[
+ ("v12.2","16/10 · 06:10","Bots com cartas, loja sem rolar e sua posição no PvP",
+  "Deixar os bots menos fáceis, fazer a loja caber no iPhone SE e mostrar se estou em primeiro ou em último pela vida.",
+  [("Novo","Bots compram cartas de ataque e defesa na loja, com o mesmo dinheiro das pessoas, e usam todas elas. Também jogam melhor: param no 17 e dobram com 10 ou 11."),
+   ("Mudou","Na simulação, 2 pessoas contra 4 bots venciam 73% a 76% das partidas. Agora vencem 38% a 43% (o empate justo seria 33%)."),
+   ("Novo","Sua posição no PvP pela vida, no quadro de cima: dourada em 1º, vermelha em último. Aparece também no resultado de cada rodada."),
+   ("Mudou","A faixa de jogadores no topo rola sozinha até você."),
+   ("Mudou","Loja em linhas compactas, com o preço em cada carta. Cabe inteira no iPhone SE, no PvP e no solo."),
+   ("Corrigido","Um Espelho podia devolver dano depois do desempate e eliminar até o último jogador vivo, deixando a partida sem vencedor. Agora quem sobra vence."),
+   ("Novo","Dois testes novos no agente: a loja precisa caber no iPhone SE, e os bots precisam comprar cartas.")]),
  ("v12.1","16/10 · 05:40","Cartas do PvP rebalanceadas e Espelho corrigido",
   "Testar as cartas do PvP várias vezes e ver se precisam de rebalanceamento.",
   [("Mudou","Muralha: em último na rodada, leva 20% a menos de dano (antes: no máximo 10). Era a carta mais forte do jogo: vencia 52% das partidas de 6 e 98% dos duelos 1 contra 1."),
@@ -120,7 +129,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 05:10'
+UPD=AG['atualizado'] if AG else '16/10/2026, 06:10'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

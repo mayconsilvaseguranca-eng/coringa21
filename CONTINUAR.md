@@ -21,6 +21,7 @@ Blackjack roguelike (estilo Balatro) para celular, para o Maycon e a família. T
 - Multiplayer sem conta: cliente MQTT próprio sobre WebSocket (brokers públicos EMQX/HiveMQ). `?broker=` troca o broker e `?test=1` expõe `window.__c21` para os testes.
 - PvP sem dealer: todos enviam a mão; na revelação, cada um causa dano em quem ficou abaixo. Constantes em `index.html`: `PVP_HP=120`, `DMG_K=20`, loja a cada 3 rodadas (120 s), 45 s por jogada. A vida inicial é ajustável na sala.
 - Cartas de PvP: 16 em `JK` com `pvp:'atk'|'def'`. Ataque em `pvpShowdown`, defesa em `pvpCheckDamage`, efeitos de início de rodada em `pvpStartRound`. Bônus de ataque valem sobre o dano final (depois de `pvpMinHit`). Rebalanceadas na v12.1 com o simulador.
-- Os bots não compram cartas e ganham +5% de dano por rodada (até +50%). Pessoas com cartas vencem os bots com folga (simulação: 2 pessoas contra 4 bots vencem 72%).
+- Bots (`botTick`, `botDefend`, `botShop`): compram cartas na loja e usam as mesmas regras das pessoas, param no 17, dobram com 10/11 e ganham +5% de dano por rodada (até +50%). Simulação: 2 pessoas contra 4 bots vencem ~40%.
+- Posição no PvP: `pvpRank()` (pela vida), mostrada no quadro de cima e no resultado da rodada.
 - Tela "Cartas" (`showCards`) lista as cartas de PvP e as do solo.
 - Bots rodam no aparelho de quem criou a sala.

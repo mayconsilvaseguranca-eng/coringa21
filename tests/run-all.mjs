@@ -1,6 +1,6 @@
 // Agente de testes do Coringa 21: roda cada teste várias vezes e falha se qualquer rodada quebrar.
 // Uso: node tests/run-all.mjs [vezes]   (padrão: 3)
-const TESTS = ['solo', 'cartas-tela', 'pvp-bots', 'pvp-cartas', 'pvp-cartas2', 'espelho', 'sobrevivencia'];
+const TESTS = ['solo', 'cartas-tela', 'loja', 'pvp-bots', 'pvp-cartas', 'pvp-cartas2', 'espelho', 'sobrevivencia'];
 const RUNS = +process.argv[2] || +process.env.RUNS || 3;
 
 let fails = 0;
