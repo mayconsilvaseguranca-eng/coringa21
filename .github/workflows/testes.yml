@@ -1,0 +1,29 @@
+name: Testes do jogo
+
+# Roda a cada atualização do jogo e também pode ser disparado à mão na aba Actions.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      vezes:
+        description: Quantas vezes rodar cada teste
+        default: "3"
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar o navegador de testes
+        working-directory: tests
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Rodar os testes
+        working-directory: tests
+        run: node run-all.mjs ${{ github.event.inputs.vezes || '3' }}

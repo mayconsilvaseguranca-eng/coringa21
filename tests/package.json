@@ -1,0 +1,11 @@
+{
+  "name": "coringa21-testes",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node run-all.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.56.0"
+  }
+}
