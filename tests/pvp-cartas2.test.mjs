@@ -36,18 +36,19 @@ export default async function () {
       return r;
     }
     const h0 = (await hp())[0];
-    // Ana fecha 20 contra 18: 15 de dano + Lâmina 3 + Precisão 4 = 22; Armadura tira 15% → 19.
+    // Ana fecha 20 contra 18: 15 de dano + Lâmina 3 + Cinco Lâminas 2 (1 carta além da primeira) + Precisão 7 = 27; Armadura tira 15% → 23.
     const r1 = await round([['K', '♠'], ['Q', '♥']], [['10', '♣'], ['8', '♦']]);
-    check(r1[1] === h0 - 19, `Lâmina/Precisão/Armadura: Beto deveria ter ${h0 - 19} PV, tem ${r1[1]}`);
+    check(r1[1] === h0 - 23, `Lâmina/Precisão/Armadura: Beto deveria ter ${h0 - 23} PV, tem ${r1[1]}`);
     check(r1[0] === h0, `Ana não deveria levar dano, tem ${r1[0]}`);
-    // Bandagem cura 3 no começo; Beto estoura e o Colete anula o dano.
+    // Bandagem não cura acima da metade da vida; Beto estoura e o Colete anula o dano.
     const r2 = await round([['10', '♠'], ['6', '♥']], [['K', '♣'], ['Q', '♦'], ['5', '♠']]);
-    check(r2[1] === h0 - 16, `Bandagem/Colete: Beto deveria ter ${h0 - 16} PV, tem ${r2[1]}`);
-    // Colete é de uso único; Cinco Lâminas dobra o dano.
+    check(r2[1] === h0 - 23, `Bandagem/Colete: Beto deveria ter ${h0 - 23} PV, tem ${r2[1]}`);
+    // Colete é de uso único. Cinco cartas com 20: 55 + Lâmina 3 + Cinco Lâminas 8 + Precisão 7 = 73; Armadura → 62.
     const r3 = await round([['2', '♠'], ['3', '♥'], ['4', '♠'], ['5', '♥'], ['6', '♣']], [['10', '♣'], ['7', '♦']]);
     const sem = await B.evaluate(() => window.__c21.S.jokers.some(j => j.k === 'colete'));
     check(!sem, 'o Colete deveria sumir depois de usado');
-    check(r3[1] <= h0 - 13 - 60, `Cinco Lâminas: dano baixo demais, Beto tem ${r3[1]}`);
+    check(r3[1] === h0 - 85, `Cinco Lâminas: Beto deveria ter ${h0 - 85} PV, tem ${r3[1]}`);
+    // Abaixo da metade da vida, a Bandagem passa a curar 3 por rodada (conferido no laço abaixo).
     // Golpes até a Última Chance segurar Beto com 1 PV.
     let salvo = false;
     for (let i = 0; i < 3 && !salvo; i++) {

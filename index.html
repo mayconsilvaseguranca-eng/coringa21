@@ -382,21 +382,21 @@ const JK={
   sangue:{n:'Sangue Quente',d:'+15 Fichas por carta de ♥ ou ♦',c:4,g:'♥',bg:'#a8243a'},
   escalada:{n:'Escalada',d:'Ganha +1 Mult a cada mão vencida',c:7,g:'▲',bg:'#3b8a7a'},
   ganancia:{n:'Ganância',d:'+1 Mult para cada $5 que você tem',c:5,g:'¢',bg:'#8c7a16'},
-  escudo:{n:'Escudo',d:'Absorve os primeiros 4 de dano que você levar em cada rodada',c:5,g:'◈',bg:'#3d6f9e',pvp:'def'},
-  espelho:{n:'Espelho',d:'Devolve 20% do dano que você leva para quem te bateu',c:5,g:'◐',bg:'#6b7fa0',pvp:'def'},
+  escudo:{n:'Escudo',d:'Absorve os primeiros 2 de dano que você levar em cada rodada',c:5,g:'◈',bg:'#3d6f9e',pvp:'def'},
+  espelho:{n:'Espelho',d:'Devolve 20% do dano que você leva para quem te bateu',c:4,g:'◐',bg:'#6b7fa0',pvp:'def'},
   esquiva:{n:'Esquiva',d:'Você não leva dano de rivais que fecharam a mão com 17 ou menos',c:4,g:'≈',bg:'#2f8a7e',pvp:'def'},
-  critico:{n:'Golpe Crítico',d:'Seu blackjack causa 50% a mais de dano',c:5,g:'✸',bg:'#c43d2b',pvp:'atk'},
+  critico:{n:'Golpe Crítico',d:'Fechar com 21 causa 50% a mais de dano',c:4,g:'✸',bg:'#c43d2b',pvp:'atk'},
   sangria:{n:'Sangria',d:'Quem você passar perde 2 PV a mais nas 3 rodadas seguintes',c:5,g:'‡',bg:'#8e1f36',pvp:'atk'},
-  vampiro:{n:'Vampiro',d:'Você recupera 25% do dano que causa',c:6,g:'V',bg:'#5a2a6e',pvp:'atk'},
+  vampiro:{n:'Vampiro',d:'Você recupera 15% do dano que causa',c:6,g:'V',bg:'#5a2a6e',pvp:'atk'},
   lamina:{n:'Lâmina',d:'+3 de dano em cada rival que você passar',c:4,g:'†',bg:'#b0352c',pvp:'atk'},
-  duplo:{n:'Golpe Duplo',d:'Se você passar 3 ou mais rivais, cada um leva +50% de dano',c:5,g:'II',bg:'#9a3d1c',pvp:'atk'},
-  precisao:{n:'Precisão',d:'Fechar com exatamente 20 dá +4 de dano em cada rival que você passar',c:4,g:'◎',bg:'#a8562a',pvp:'atk'},
-  furia:{n:'Fúria',d:'Com menos de 30 PV, você causa 40% a mais de dano',c:5,g:'!',bg:'#c22d4f',pvp:'atk'},
-  cinco:{n:'Cinco Lâminas',d:'Vencer com 5 cartas causa o dobro de dano',c:5,g:'5',bg:'#7d2a4a',pvp:'atk'},
+  duplo:{n:'Golpe Duplo',d:'Se você passar 2 ou mais rivais, cada um leva +50% de dano',c:5,g:'II',bg:'#9a3d1c',pvp:'atk'},
+  precisao:{n:'Precisão',d:'Fechar com exatamente 20 dá +7 de dano em cada rival que você passar',c:4,g:'◎',bg:'#a8562a',pvp:'atk'},
+  furia:{n:'Fúria',d:'Com menos de 40 PV, você causa o dobro de dano',c:5,g:'!',bg:'#c22d4f',pvp:'atk'},
+  cinco:{n:'Cinco Lâminas',d:'+2 de dano por carta na mão, sem contar a primeira',c:5,g:'5',bg:'#7d2a4a',pvp:'atk'},
   armadura:{n:'Armadura',d:'Reduz em 15% todo dano que você leva',c:5,g:'▣',bg:'#476a8a',pvp:'def'},
-  bandagem:{n:'Bandagem',d:'Recupera 3 PV no começo de cada rodada',c:4,g:'+',bg:'#3f8a6a',pvp:'def'},
+  bandagem:{n:'Bandagem',d:'Vida abaixo da metade: +3 PV por rodada',c:4,g:'+',bg:'#3f8a6a',pvp:'def'},
   ultima:{n:'Última Chance',d:'Uma vez por partida, um golpe que te zeraria deixa você com 1 PV',c:5,g:'1',bg:'#5d6f3a',pvp:'def'},
-  muralha:{n:'Muralha',d:'Se você ficar em último na rodada, leva no máximo 10 de dano',c:5,g:'▥',bg:'#4f5f78',pvp:'def'},
+  muralha:{n:'Muralha',d:'Se você ficar em último na rodada, leva 20% a menos de dano',c:5,g:'▥',bg:'#4f5f78',pvp:'def'},
   colete:{n:'Colete',d:'Uso único: na rodada em que você estourar, ninguém te causa dano',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'}
 };
 const JF={
@@ -846,7 +846,7 @@ function pvpWaitingNames(){return pvpParts().filter(p=>!(p.st.sub&&p.st.sub.r===
 function pvpStartRound(){
   if(!S.mp.alive)return;
   if(S.mp.coleteR&&S.mp.coleteR<=(S.round||0)){S.jokers=S.jokers.filter(j=>j.k!=='colete');S.mp.coleteR=0}
-  if(has('bandagem')&&(S.round||0)>0&&S.mp.hp!=null&&S.mp.hp<(S.mp.maxHp||PVP_HP)){pvpHeal(3);setTimeout(()=>pop($('#blindBox'),'Bandagem: +3 PV','info'),300)}
+  if(has('bandagem')&&(S.round||0)>0&&S.mp.hp!=null&&S.mp.hp<(S.mp.maxHp||PVP_HP)/2){pvpHeal(3);setTimeout(()=>pop($('#blindBox'),'Bandagem: +3 PV','info'),300)}
   S.mp.hk=Math.max(S.mp.hk||0,S.round||0);
   S.round=(S.round||0)+1;
   S.ante=Math.min(8,1+Math.floor((S.round-1)/(PVP_SHOP_EVERY*2)));S.bi=0;
@@ -893,17 +893,18 @@ async function pvpShowdown(){
   if(bled)extra.push(`Sangria: ${bled} de dano`);
   if(pts>0&&beaten.length){
     dmg=Math.round(pts/ANTE_BASE[0]*DMG_K);
-    if(type==='bj'&&has('critico')){dmg=Math.round(dmg*1.5);extra.push('Golpe Crítico: dano ×1,5')}
-    if(type==='five'&&has('cinco')){dmg=Math.round(dmg*2);extra.push('Cinco Lâminas: dano em dobro')}
-    if(has('furia')&&pvpHP()<30){dmg=Math.round(dmg*1.4);extra.push('Fúria: +40% de dano')}
     per=Math.max(1,Math.round(dmg/Math.max(1,parts.length)),pvpMinHit(S.round));
-    if(has('duplo')&&beaten.length>=3){per=Math.round(per*1.5);extra.push('Golpe Duplo: +50% em cada rival')}
+    /* bônus de carta valem sobre o dano final (depois do dano mínimo da rodada) */
+    if(t===21&&has('critico')){per=Math.round(per*1.5);extra.push('Golpe Crítico: dano ×1,5')}
+    if(has('furia')&&pvpHP()<40){per=per*2;extra.push('Fúria: dano em dobro')}
+    if(has('duplo')&&beaten.length>=2){per=Math.round(per*1.5);extra.push('Golpe Duplo: +50% em cada rival')}
     if(has('lamina')){per+=3;extra.push('Lâmina: +3 em cada rival')}
-    if(has('precisao')&&t===20){per+=4;extra.push('Precisão: fechou com 20, +4 em cada rival')}
+    if(has('cinco')){const k=2*(S.player.length-1);per+=k;extra.push(`Cinco Lâminas: +${k} em cada rival`)}
+    if(has('precisao')&&t===20){per+=7;extra.push('Precisão: fechou com 20, +7 em cada rival')}
     for(const b of beaten)S.mp.sent[b.pid]=r1((S.mp.sent[b.pid]||0)+per);
     S.mp.dealt=r1((S.mp.dealt||0)+per*beaten.length+bled);
     if(has('sangria'))for(const b of beaten)S.mp.bleed[b.pid]={from:S.round,to:S.round+3};
-    if(has('vampiro')){const h=Math.max(1,Math.round(per*beaten.length*0.25));pvpHeal(h);extra.push(`Vampiro: +${fmt(h)} PV`)}
+    if(has('vampiro')){const h=Math.max(1,Math.round(per*beaten.length*0.15));pvpHeal(h);extra.push(`Vampiro: +${fmt(h)} PV`)}
     pop($('#rs'),`⚔ ${fmt(per)} em ${beaten.length===1?beaten[0].name:beaten.length+' rivais'}`,'mult');beep(220,.12,'sawtooth',.05);
   }else if(bled)S.mp.dealt=r1((S.mp.dealt||0)+bled);
   /* dinheiro do PvP: $1 se passou alguém, $2 se teve a maior mão da mesa */
@@ -988,10 +989,11 @@ function pvpCheckDamage(ps){
     if(has('muralha')&&d>0&&mySub){
       const others=ps.filter(x=>!x.me&&x.st&&x.st.sub&&x.st.sub.r===S.round);
       const last=others.length&&others.every(x=>handVal(x.st.sub)>=handVal(mySub));
-      if(last){if(S.mp.mwR!==S.round){S.mp.mwR=S.round;S.mp.mwLeft=10}d=Math.min(d,S.mp.mwLeft);S.mp.mwLeft-=d}
+      if(last)d=Math.round(d*0.8);
     }
-    if(has('escudo')&&d>0){if(S.mp.shR!==S.round){S.mp.shR=S.round;S.mp.shLeft=4}const a=Math.min(S.mp.shLeft||0,d);d-=a;S.mp.shLeft-=a}
-    if(has('espelho')&&d>0&&S.mp.alive){const back=Math.max(1,Math.round(d*0.2));S.mp.sent[p.pid]=r1((S.mp.sent[p.pid]||0)+back);reflected+=back}
+    if(has('escudo')&&d>0){if(S.mp.shR!==S.round){S.mp.shR=S.round;S.mp.shLeft=2}const a=Math.min(S.mp.shLeft||0,d);d-=a;S.mp.shLeft-=a}
+    /* sem mínimo de 1: com o mínimo, dois Espelhos devolviam 1 de dano um ao outro sem parar */
+    if(has('espelho')&&d>0&&S.mp.alive){const back=Math.round(d*0.2);if(back>0){S.mp.sent[p.pid]=r1((S.mp.sent[p.pid]||0)+back);reflected+=back}}
     blocked+=raw-d;
     if(d>0){S.mp.hp=r1(S.mp.hp-d);gained+=d;who.push(p.name)}
     if(S.mp.hp<=0&&has('ultima')&&!S.mp.ultimaUsed){S.mp.ultimaUsed=1;S.mp.hp=1;setTimeout(()=>pop($('#blindBox'),'Última Chance: ficou com 1 PV','info'),400)}

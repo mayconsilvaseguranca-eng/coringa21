@@ -1,0 +1,141 @@
+{
+ "titulo": "Testando o balanceamento das 16 cartas do PvP",
+ "hora": "05:40",
+ "atualizado": "16/10/2026, 05:40",
+ "pedido": "Testar as cartas do PvP várias vezes e ver se precisam de rebalanceamento.",
+ "passos": [
+  {
+   "s": "feito",
+   "t": "Li o código de cada carta (ataque, defesa e início de rodada)"
+  },
+  {
+   "s": "feito",
+   "t": "Montei um simulador com as regras exatas do jogo, que joga milhares de partidas em segundos"
+  },
+  {
+   "s": "feito",
+   "t": "1ª bateria: 10.000 partidas por carta, em mesas de 6, 4 e 2 jogadores (480 mil partidas)"
+  },
+  {
+   "s": "feito",
+   "t": "Bateria com loja de verdade: todos compram cartas aleatórias (16 mil partidas). Confirmou o mesmo padrão"
+  },
+  {
+   "s": "feito",
+   "t": "Testei 40 variações de números, 18 mil partidas cada, até cada carta ficar na faixa certa"
+  },
+  {
+   "s": "feito",
+   "t": "Bateria final: 16 cartas × 3 mesas × 10.000 partidas, mais 16 mil partidas com loja. Todas na faixa certa"
+  },
+  {
+   "s": "feito",
+   "t": "Apliquei no jogo, corrigi o bug do Espelho e criei um teste para ele (rodou no navegador: na versão antiga falha, na nova passa)"
+  },
+  {
+   "s": "agora",
+   "t": "Enviando ao GitHub e atualizando a prévia. Os 7 testes passaram 2 vezes aqui"
+  }
+ ],
+ "achados": [
+  "Muralha está muito forte: com ela desde o começo, você vence 52% das partidas de 6 (o normal é 17%) e 98% dos duelos 1 contra 1.",
+  "Escudo, Bandagem e Vampiro também estão fortes demais (vencem 38% a 45% numa mesa de 6).",
+  "Cinco Lâminas, Fúria, Golpe Crítico e Precisão quase não fazem diferença (+5% a +23%).",
+  "Golpe Duplo não faz nada no 1 contra 1, porque só funciona passando 3 rivais.",
+  "Bug: se dois jogadores têm Espelho, eles ficam devolvendo 1 de dano um para o outro sem parar até alguém morrer.",
+  "Os bots causam até 50% a mais de dano que as pessoas nas rodadas longas. As regras deles não batem com as suas.",
+  "Os ataques que multiplicam o dano (Crítico, Cinco Lâminas, Fúria) eram aplicados antes do dano mínimo da rodada. Numa mesa grande, o mínimo quase sempre ganhava e o bônus sumia. Vou aplicar o bônus no dano final.",
+  "Numa mesa grande, defesa vale mais que ataque: quem ataca machuca todos, e um terceiro aproveita. No 1 contra 1 é o contrário. Por isso cada carta foi testada nas três mesas."
+ ],
+ "tabela": {
+  "titulo": "Chance de vencer com a carta desde a 1ª rodada (mesa de 6 · 4 · 2 jogadores)",
+  "cab": [
+   "Carta",
+   "Antes",
+   "Depois"
+  ],
+  "linhas": [
+   [
+    "Muralha",
+    "52% · 74% · 98%",
+    "26% · 38% · 63%"
+   ],
+   [
+    "Escudo",
+    "44% · 50% · 60%",
+    "28% · 36% · 55%"
+   ],
+   [
+    "Bandagem",
+    "40% · 50% · 63%",
+    "27% · 37% · 57%"
+   ],
+   [
+    "Vampiro",
+    "37% · 45% · 59%",
+    "29% · 37% · 55%"
+   ],
+   [
+    "Armadura",
+    "29% · 42% · 59%",
+    "29% · 42% · 59%"
+   ],
+   [
+    "Sangria",
+    "28% · 37% · 57%",
+    "28% · 37% · 57%"
+   ],
+   [
+    "Colete",
+    "28% · 36% · 57%",
+    "28% · 36% · 57%"
+   ],
+   [
+    "Última Chance",
+    "27% · 37% · 59%",
+    "27% · 37% · 59%"
+   ],
+   [
+    "Lâmina",
+    "27% · 35% · 57%",
+    "27% · 35% · 57%"
+   ],
+   [
+    "Golpe Duplo",
+    "25% · 33% · 50%",
+    "27% · 39% · 50%"
+   ],
+   [
+    "Esquiva",
+    "22% · 30% · 54%",
+    "22% · 30% · 54%"
+   ],
+   [
+    "Espelho",
+    "22% · 33% · 61%",
+    "22% · 33% · 61%"
+   ],
+   [
+    "Precisão",
+    "21% · 30% · 54%",
+    "25% · 34% · 56%"
+   ],
+   [
+    "Golpe Crítico",
+    "21% · 31% · 57%",
+    "23% · 34% · 61%"
+   ],
+   [
+    "Fúria",
+    "20% · 29% · 53%",
+    "25% · 36% · 58%"
+   ],
+   [
+    "Cinco Lâminas",
+    "18% · 27% · 52%",
+    "25% · 34% · 56%"
+   ]
+  ],
+  "nota": "Sem carta: 17% · 26% · 50%. 30 mil partidas por carta em cada coluna."
+ }
+}

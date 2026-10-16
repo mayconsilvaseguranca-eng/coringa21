@@ -1,0 +1,18 @@
+import { setup, createRoom } from './lib.mjs';
+const t = await setup();
+const A = await t.page('Ana','iPhone SE');
+await createRoom(A, 'Ana', 'pvp');
+await A.click('[data-act=addbot]').catch(()=>{});
+await A.waitForTimeout(800);
+await A.click('[data-act=startgame]');
+await A.waitForFunction(() => window.__c21.S && window.__c21.S.mp);
+await A.waitForTimeout(1500);
+await A.evaluate(() => { const c=window.__c21,S=c.S; const keep=['cinco','bandagem','critico'];
+  S.jokers=Object.keys(c.JK).filter(k=>c.JK[k].pvp&&!keep.includes(k)).map(k=>({k,v:0}));
+  S.money=30;S.phase='cash';S.cash={reward:0,hands:0,interest:0,bonus:0,total:0};
+  const b=document.createElement('button');b.dataset.act='collect';document.body.appendChild(b);b.click(); });
+await A.waitForTimeout(800);
+await A.evaluate(() => { const S=window.__c21.S; S.jokers=S.jokers.slice(0,2); window.__c21.render(); document.querySelector('[data-act=leave]'); });
+await A.screenshot({ path: '/tmp/claude-0/-home-claude/a5f02f59-77f7-5393-87ae-057af14610d1/scratchpad/loja.png' });
+console.log(await A.evaluate(()=>({ph:window.__c21.S.phase,items:window.__c21.S.shop&&window.__c21.S.shop.items.map(i=>i.k),sw:document.documentElement.scrollWidth,vw:innerWidth})));
+await t.close();

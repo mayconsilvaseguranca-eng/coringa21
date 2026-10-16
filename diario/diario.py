@@ -1,5 +1,16 @@
 import html
 V=[
+ ("v12.1","16/10 · 05:40","Cartas do PvP rebalanceadas e Espelho corrigido",
+  "Testar as cartas do PvP várias vezes e ver se precisam de rebalanceamento.",
+  [("Mudou","Muralha: em último na rodada, leva 20% a menos de dano (antes: no máximo 10). Era a carta mais forte do jogo: vencia 52% das partidas de 6 e 98% dos duelos 1 contra 1."),
+   ("Mudou","Escudo absorve 2 por rodada (era 4). Vampiro cura 15% (era 25%). Bandagem cura 3 só quando você está abaixo da metade da vida."),
+   ("Mudou","Golpe Crítico vale para qualquer 21, não só blackjack, e custa $4. Fúria: abaixo de 40 PV, dano em dobro. Precisão: +7 fechando com 20. Golpe Duplo: a partir de 2 rivais passados."),
+   ("Mudou","Cinco Lâminas: +2 de dano por carta na mão, sem contar a primeira. Antes só valia com 5 cartas e quase nunca acontecia. Espelho custa $4."),
+   ("Corrigido","Os bônus que multiplicam o dano agora valem sobre o dano final. Antes eram aplicados antes do dano mínimo da rodada, e numa mesa grande sumiam."),
+   ("Corrigido","Dois jogadores com Espelho ficavam devolvendo 1 de dano um ao outro sem parar, até alguém morrer."),
+   ("Novo","Simulador de balanceamento (tests/balanceamento.mjs): joga milhares de partidas com as regras do jogo. Numa mesa de 6, cada carta agora dá entre 22% e 29% de chance de vitória, contra 17% sem carta. Antes ia de 18% a 52%."),
+   ("Novo","Teste novo no agente: Espelho contra Espelho, para o bug não voltar."),
+   ("Novo","Seção Agora mesmo neste diário: mostra o que está sendo feito enquanto o trabalho acontece.")]),
  ("v12","16/10 · 05:10","10 cartas novas no PvP e a tela Cartas",
   "Adicionar todas as cartas simples de PvP, guardar as ideias avançadas no diário e criar uma aba com todas as cartas do jogo.",
   [("Novo","5 cartas de ataque: Lâmina (+3 de dano em cada rival que você passar), Golpe Duplo (+50% se passar 3 ou mais), Precisão (+4 fechando com 20), Fúria (+40% com menos de 30 PV) e Cinco Lâminas (dobro de dano vencendo com 5 cartas)."),
@@ -105,6 +116,29 @@ def card(v,open_):
   <div class="vbody"><p class="ask"><b>Seu pedido</b>{html.escape(ask)}</p>{groups}</div>
 </details>'''
 cards="\n".join(card(v,i==0) for i,v in enumerate(V))
+# Trabalho em andamento: diario/agora.json (apague o arquivo quando terminar)
+import json,os
+_ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
+AG=json.load(open(_ag)) if os.path.exists(_ag) else None
+UPD=AG['atualizado'] if AG else '16/10/2026, 05:10'
+def live():
+  if not AG: return ''
+  ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
+  steps=''.join(f'<li class="{ic[x["s"]][1]}"><span class="ic">{ic[x["s"]][0]}</span><span>{html.escape(x["t"])}</span></li>' for x in AG['passos'])
+  fx=''.join(f'<li>{html.escape(t)}</li>' for t in AG.get('achados',[]))
+  tb=''
+  if AG.get('tabela'):
+    T=AG['tabela'];tb=f'<div class="tblw"><p class="tcap">{html.escape(T["titulo"])}</p><table><thead><tr>'+''.join(f'<th>{html.escape(h)}</th>' for h in T['cab'])+'</tr></thead><tbody>'+''.join('<tr>'+''.join(f'<td>{html.escape(str(c))}</td>' for c in r)+'</tr>' for r in T['linhas'])+'</tbody></table>'+(f'<p class="tnote">{html.escape(T["nota"])}</p>' if T.get('nota') else '')+'</div>'
+  return f'''<section>
+    <h2><span class="pulse"></span>Agora mesmo</h2>
+    <div class="live">
+      <div class="top"><div><b>{html.escape(AG['titulo'])}</b><small>Atualizado às {html.escape(AG['hora'])} · recarregue a página para ver o mais novo</small></div></div>
+      <p class="ask"><b>Seu pedido</b>{html.escape(AG['pedido'])}</p>
+      <ul class="steps">{steps}</ul>
+      {f'<div class="grp"><span class="tag t-chg">O que já descobri</span><ul>{fx}</ul></div>' if fx else ''}
+      {tb}
+    </div>
+  </section>'''
 last=V[0]
 page=f'''<title>Diário do Família 21</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -170,13 +204,30 @@ section{{display:flex;flex-direction:column;gap:12px}}
 .limits{{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}}
 .limits li{{color:var(--dim);font-size:15px}}
 footer{{font-size:13px;color:var(--dim);border-top:1px solid var(--line);padding-top:14px}}
+.live{{background:var(--panel);border:2px solid color-mix(in srgb,var(--ok) 55%,var(--edge));border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 4px 0 var(--edge)}}
+.live .top b{{display:block;font-size:18px;line-height:1.25}}
+.live .top small{{color:var(--dim);font-size:13.5px}}
+.pulse{{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ok);margin-right:8px;vertical-align:middle;animation:pl 1.4s ease-in-out infinite}}
+@keyframes pl{{50%{{opacity:.25}}}}
+.steps{{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}}
+.steps li{{display:flex;gap:10px;font-size:15px;line-height:1.45}}
+.steps .ic{{flex:0 0 18px;font-weight:800;text-align:center}}
+.st-ok{{color:var(--dim)}}.st-ok .ic{{color:var(--ok)}}
+.st-now{{color:var(--ink);font-weight:600}}.st-now .ic{{color:var(--gold)}}
+.st-todo{{color:var(--dim);opacity:.7}}
+.tblw{{display:flex;flex-direction:column;gap:6px;overflow-x:auto}}
+.tcap{{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}}
+.tnote{{font-size:13px;color:var(--dim)}}
+table{{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}}
+th{{text-align:left;font-size:12px;color:var(--dim);font-weight:700;padding:4px 6px;border-bottom:1px solid var(--line)}}
+td{{padding:5px 6px;border-bottom:1px solid var(--line)}}
 @media (max-width:420px){{.links{{grid-template-columns:1fr}}}}
 @media (prefers-reduced-motion:reduce){{*{{transition:none!important}}}}
 </style>
 
 <div class="wrap">
   <header>
-    <span class="eyebrow">Diário do projeto · atualizado em 16/10/2026, 05:10</span>
+    <span class="eyebrow">Diário do projeto · atualizado em {UPD}</span>
     <h1>Família <span>21</span></h1>
     <p class="lead">Cada vez que o jogo muda, aparece aqui. A última atualização fica em destaque; as anteriores ficam fechadas logo abaixo, é só tocar para abrir.</p>
   </header>
@@ -185,6 +236,8 @@ footer{{font-size:13px;color:var(--dim);border-top:1px solid var(--line);padding
     <div class="lnk"><small>Site do jogo</small><a href="https://mayconsilvaseguranca-eng.github.io/coringa21/" target="_blank" rel="noopener">mayconsilvaseguranca-eng.github.io/coringa21</a></div>
     <div class="lnk"><small>Como atualiza</small><b>Sozinho, 1 ou 2 minutos depois de cada mudança. Os testes rodam a cada envio.</b></div>
   </div>
+
+  {live()}
 
   <section>
     <h2>Última atualização</h2>
