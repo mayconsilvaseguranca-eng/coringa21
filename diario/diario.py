@@ -1,5 +1,9 @@
 import html
 V=[
+ ("v14.1","16/10 · 15:20","Embaralhar saiu",
+  "Tirar a carta de mesa Embaralhar e dar outras ideias de carta de mesa.",
+  [("Mudou","A carta de mesa Embaralhar saiu do jogo. A mesa agora sorteia entre Tempestade, Trégua e Teto 19, sem repetir a anterior."),
+   ("Novo","10 ideias novas de cartas de mesa na seção Possíveis ideias deste diário. Ainda não estão no jogo.")]),
  ("v14","16/10 · 15:10","Carta de mesa sorteada a cada 3 rodadas",
   "A carta de mesa vale durante as rodadas: sempre uma ativa, sorteada, por 3 rodadas (até a próxima loja), e a animação fica 5 segundos.",
   [("Mudou","As cartas de mesa não se compram mais. A mesa sempre tem uma valendo para todos: sorteada no começo da partida e trocada por outra a cada loja (a cada 3 rodadas), sem repetir a anterior."),
@@ -155,7 +159,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 15:10'
+UPD=AG['atualizado'] if AG else '16/10/2026, 15:20'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
@@ -302,7 +306,7 @@ td{{padding:5px 6px;border-bottom:1px solid var(--line)}}
     <p class="sec-note">Ainda não estão no jogo. Ficam guardadas para um futuro modo PvP Avançado, com cartas que escolhem um alvo ou mexem na mesa.</p>
     <div class="grid">
       <div class="box"><h3>Cartas com alvo</h3><ul><li><b>Mira:</b> todo o seu dano da rodada vai para um rival escolhido</li><li><b>Maldição:</b> um rival escolhido causa metade do dano na próxima rodada</li><li><b>Gelo:</b> um rival não pode pedir carta na próxima rodada</li><li><b>Roubo:</b> tira $3 de um rival</li><li><b>Troca de Mão:</b> troca uma carta sua com uma carta de um rival</li><li><b>Espião:</b> vê as cartas de um rival antes de jogar</li></ul></div>
-      <div class="box"><h3>Cartas de mesa</h3><ul><li><b>Tempestade:</b> todos levam 5 de dano</li><li><b>Trégua:</b> ninguém causa dano na próxima rodada</li><li><b>Teto 19:</b> na próxima rodada, passar de 19 já estoura</li><li><b>Embaralhar:</b> todos recebem cartas novas</li></ul></div>
+      <div class="box"><h3>Novas cartas de mesa (3 rodadas)</h3><ul><li><b>Maré Alta:</b> todo dano +50%</li><li><b>Céu Aberto:</b> só estoura acima de 23</li><li><b>Febre do Ouro:</b> o dinheiro das rodadas vem em dobro</li><li><b>Azarão:</b> quem tem menos vida causa o dobro de dano</li><li><b>Coroa Pesada:</b> quem tem mais vida leva +50% de dano</li><li><b>Empate Sangrento:</b> quem empatar com alguém leva 5 de dano</li><li><b>Mão Curta:</b> no máximo 3 cartas na mão</li><li><b>Silêncio:</b> as cartas de ataque e defesa param de funcionar</li><li><b>Hospital:</b> todos recuperam 4 PV por rodada</li><li><b>Ás de Ferro:</b> Ases valem só 1</li></ul></div>
       <div class="box"><h3>Baralho especial</h3><ul><li><b>Carta Bomba:</b> quem tirar leva 10 de dano</li><li><b>Curinga Vermelho:</b> vale o que você quiser de 1 a 11</li><li><b>Carta Ouro:</b> dá $2 a quem tirar</li></ul></div>
     </div>
   </section>

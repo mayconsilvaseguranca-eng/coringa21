@@ -457,8 +457,7 @@ const JK={
   /* cartas de mesa: sempre uma valendo para todos, sorteada a cada 3 rodadas (troca na loja). Podem ser desligadas na sala. */
   tempestade:{n:'Tempestade',d:'No começo de cada rodada, todos levam 5 de dano',c:4,g:'ϟ',bg:'#4b5aa8',pvp:'mesa'},
   tregua:{n:'Trégua',d:'Todo dano cai pela metade',c:3,g:'⊘',bg:'#4f8f86',pvp:'mesa'},
-  teto:{n:'Teto 19',d:'Passar de 19 estoura',c:3,g:'19',bg:'#8f6a24',pvp:'mesa'},
-  embaralhar:{n:'Embaralhar',d:'Ninguém decide: a mesa dá cartas a todos até 17',c:3,g:'↻',bg:'#6d4a95',pvp:'mesa'}
+  teto:{n:'Teto 19',d:'Passar de 19 estoura',c:3,g:'19',bg:'#8f6a24',pvp:'mesa'}
 };
 const JF={
   coringa:x=>x.m(4),
@@ -507,11 +506,11 @@ const isDuel=()=>!!(S&&S.mp&&S.mp.mode!=='pvp'&&S.bi===2);
 const KIND_TXT={atk:'Ataque',def:'Defesa',mesa:'Mesa'};
 /* efeitos de mesa de uma rodada: eventos {k,r} publicados por qualquer jogador da partida */
 /* Carta de mesa da rodada R: sorteada pela partida (igual em todos os aparelhos), troca a cada loja e nunca repete a anterior. */
-const MESA_K=['tempestade','tregua','teto','embaralhar'];
+const MESA_K=['tempestade','tregua','teto'];
 function mesaCardFor(gid,R,seq){
   if(!(R>=1))return null;const per=Math.floor((R-1)/PVP_SHOP_EVERY);
   if(Array.isArray(seq)&&seq.length)return seq[per%seq.length];
-  let prev=-1;for(let i=0;i<=per;i++){let n=hashStr(String(gid)+':mesa:'+i)%(prev<0?4:3);if(prev>=0&&n>=prev)n++;prev=n}
+  let prev=-1;for(let i=0;i<=per;i++){let n=hashStr(String(gid)+':mesa:'+i)%(prev<0?MESA_K.length:MESA_K.length-1);if(prev>=0&&n>=prev)n++;prev=n}
   return MESA_K[prev];
 }
 function mesaFx(R){if(!S||!S.mp||!S.mp.mesa)return [];const k=mesaCardFor(S.mp.gid,R,S.mp.mesaSeq);return k?[{k}]:[]}
@@ -952,11 +951,6 @@ async function pvpDeal(){
   S.busy=true;S.player=[];S.dealer=[];S.doubled=false;S.sel=null;S.msg='';seen.clear();S.deadline=0;render();
   for(let k=0;k<2;k++){S.player.push(draw());beep(520+Math.random()*120,.04);render();await sleep(220)}
   S.deadline=Date.now()+PVP_TURN_MS;
-  if(fxOn('embaralhar')){
-    /* Embaralhar: a mesa dá cartas até 17 (ou o teto − 4) e fecha a mão sozinha */
-    S.msg='Embaralhar: a mesa joga por todos';render();await sleep(700);
-    while(total(S.player)<capNow()-4&&S.player.length<5){S.player.push(draw());beep(520,.04);render();await sleep(380)}
-    S.msg=total(S.player)>capNow()?'Estourou':`A mesa fechou com ${total(S.player)}`;render();await sleep(600);pvpSubmit();return}
   if(total(S.player)>capNow()){S.msg=`Passou de ${capNow()}: estourou`;render();await sleep(700);pvpSubmit();return}
   if(total(S.player)===21){S.msg='Blackjack!';render();fxBlackjack();await sleep(1300);pvpSubmit();return}
   S.busy=false;render();
@@ -1420,10 +1414,10 @@ function botTick(){
     if(!st.sub||st.sub.r<b.r){
       if(now>=b.nextAt){
         if(b.deck.length<15)b.deck=botDeck();
-        /* para no 17 e dobra com 10 ou 11 (como uma pessoa atenta); com Teto 19 para no 15; com Embaralhar não decide */
-        const cap=b.fx.some(e=>e.k==='teto')?19:21,auto=b.fx.some(e=>e.k==='embaralhar');
+        /* para no 17 e dobra com 10 ou 11 (como uma pessoa atenta); com Teto 19 para no 15 */
+        const cap=b.fx.some(e=>e.k==='teto')?19:21;
         const c=[b.deck.pop(),b.deck.pop()];let dbl=false;const t2=botTotal(c);
-        if(!auto&&cap===21&&(t2===10||t2===11)){dbl=true;c.push(b.deck.pop())}
+        if(cap===21&&(t2===10||t2===11)){dbl=true;c.push(b.deck.pop())}
         else while(botTotal(c)<cap-4&&c.length<5)c.push(b.deck.pop());
         const t=botTotal(c);
         st.sub={r:b.r,t:Math.min(t,99),c:c.map(cardStr),bj:c.length===2&&t===21&&cap===21?1:0,f:c.length>=5&&t<=cap?1:0,x:t>cap?1:0};
