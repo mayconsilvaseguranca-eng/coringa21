@@ -10,7 +10,8 @@ Blackjack roguelike (estilo Balatro) para celular, para o Maycon e a família. T
 - **Artifacts no claude.ai:** Diário https://claude.ai/artifact/TSseWZp3NGpDos8mQB4XTh · Prévia do jogo https://claude.ai/artifact/PrEx9BMW4hoLBVFtz1tzn9 (gerada de `index.html` com `python3 tests/previa.py index.html previa.html`: tira doctype/html/head/body, meta charset/viewport, `ROOM=typeof WebSocket!=='undefined';` → `ROOM=false;`, e trocar o aviso "Este navegador não consegue abrir salas online…" pelo aviso de prévia apontando para o site).
 
 ## Como trabalhar (preferências do Maycon)
-- Toda mudança: editar `index.html`, rodar os testes, commit + push, atualizar o diário e a prévia.
+- Toda mudança: editar `index.html`, rodar os testes, commit + push, atualizar o diário (uma vez, no fim).
+- Não atualizar a prévia do claude.ai: o Maycon testa o PvP pelo site, e na prévia o multiplayer não funciona. Só se ele pedir.
 - Tudo cabe numa tela de celular sem rolar (testar no iPhone SE). Números legíveis: fonte Rubik; fonte pixel só na palavra FAMÍLIA do logo.
 - PvP é o modo principal. Dano e vida sempre inteiros. Ritmo mais lento (`PACE=1.6`).
 - Fim de partida: "Voltar para a sala" e "Voltar ao menu" (sem "Jogar de novo").
