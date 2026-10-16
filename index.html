@@ -277,6 +277,14 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .turnpill i{position:absolute;left:0;bottom:0;height:4px;background:rgba(0,0,0,.35);transition:width 1s linear}
 .turnpill.late{background:var(--mult);color:#fff;animation:pulse 1s ease-in-out infinite}
 @keyframes pulse{50%{transform:scale(1.06)}}
+.cl{display:flex;flex-direction:column;gap:6px}
+.cc{display:flex;align-items:center;gap:10px;background:var(--panel-2);border-radius:10px;padding:8px 10px}
+.cc .art{width:38px;height:48px;border-radius:7px;display:grid;place-items:center;font-size:18px;font-weight:800;border:2px solid var(--edge);background:var(--jc);flex:0 0 auto;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.cc .art.planet{width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffffff55,transparent 45%),var(--jc)}
+.cct{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.cct b{font-size:14.5px;font-weight:800}
+.cct span{font-size:12.5px;color:var(--ink-dim);line-height:1.3}
+.ccp{font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
 .roombtn{border:0;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
 .roombtn:disabled{opacity:.5;cursor:default}
 .roombtn:not(:disabled):active{transform:translateY(2px)}
@@ -379,7 +387,17 @@ const JK={
   esquiva:{n:'Esquiva',d:'Você não leva dano de rivais que fecharam a mão com 17 ou menos',c:4,g:'≈',bg:'#2f8a7e',pvp:'def'},
   critico:{n:'Golpe Crítico',d:'Seu blackjack causa 50% a mais de dano',c:5,g:'✸',bg:'#c43d2b',pvp:'atk'},
   sangria:{n:'Sangria',d:'Quem você passar perde 2 PV a mais nas 3 rodadas seguintes',c:5,g:'‡',bg:'#8e1f36',pvp:'atk'},
-  vampiro:{n:'Vampiro',d:'Você recupera 25% do dano que causa',c:6,g:'V',bg:'#5a2a6e',pvp:'atk'}
+  vampiro:{n:'Vampiro',d:'Você recupera 25% do dano que causa',c:6,g:'V',bg:'#5a2a6e',pvp:'atk'},
+  lamina:{n:'Lâmina',d:'+3 de dano em cada rival que você passar',c:4,g:'†',bg:'#b0352c',pvp:'atk'},
+  duplo:{n:'Golpe Duplo',d:'Se você passar 3 ou mais rivais, cada um leva +50% de dano',c:5,g:'II',bg:'#9a3d1c',pvp:'atk'},
+  precisao:{n:'Precisão',d:'Fechar com exatamente 20 dá +4 de dano em cada rival que você passar',c:4,g:'◎',bg:'#a8562a',pvp:'atk'},
+  furia:{n:'Fúria',d:'Com menos de 30 PV, você causa 40% a mais de dano',c:5,g:'!',bg:'#c22d4f',pvp:'atk'},
+  cinco:{n:'Cinco Lâminas',d:'Vencer com 5 cartas causa o dobro de dano',c:5,g:'5',bg:'#7d2a4a',pvp:'atk'},
+  armadura:{n:'Armadura',d:'Reduz em 15% todo dano que você leva',c:5,g:'▣',bg:'#476a8a',pvp:'def'},
+  bandagem:{n:'Bandagem',d:'Recupera 3 PV no começo de cada rodada',c:4,g:'+',bg:'#3f8a6a',pvp:'def'},
+  ultima:{n:'Última Chance',d:'Uma vez por partida, um golpe que te zeraria deixa você com 1 PV',c:5,g:'1',bg:'#5d6f3a',pvp:'def'},
+  muralha:{n:'Muralha',d:'Se você ficar em último na rodada, leva no máximo 10 de dano',c:5,g:'▥',bg:'#4f5f78',pvp:'def'},
+  colete:{n:'Colete',d:'Uso único: na rodada em que você estourar, ninguém te causa dano',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'}
 };
 const JF={
   coringa:x=>x.m(4),
@@ -827,6 +845,8 @@ function pvpParts(){return gamePlayers().filter(p=>!p.me&&p.st&&p.st.al)}
 function pvpWaitingNames(){return pvpParts().filter(p=>!(p.st.sub&&p.st.sub.r===S.round)).map(p=>p.name)}
 function pvpStartRound(){
   if(!S.mp.alive)return;
+  if(S.mp.coleteR&&S.mp.coleteR<=(S.round||0)){S.jokers=S.jokers.filter(j=>j.k!=='colete');S.mp.coleteR=0}
+  if(has('bandagem')&&(S.round||0)>0&&S.mp.hp!=null&&S.mp.hp<(S.mp.maxHp||PVP_HP)){pvpHeal(3);setTimeout(()=>pop($('#blindBox'),'Bandagem: +3 PV','info'),300)}
   S.mp.hk=Math.max(S.mp.hk||0,S.round||0);
   S.round=(S.round||0)+1;
   S.ante=Math.min(8,1+Math.floor((S.round-1)/(PVP_SHOP_EVERY*2)));S.bi=0;
@@ -874,7 +894,12 @@ async function pvpShowdown(){
   if(pts>0&&beaten.length){
     dmg=Math.round(pts/ANTE_BASE[0]*DMG_K);
     if(type==='bj'&&has('critico')){dmg=Math.round(dmg*1.5);extra.push('Golpe Crítico: dano ×1,5')}
+    if(type==='five'&&has('cinco')){dmg=Math.round(dmg*2);extra.push('Cinco Lâminas: dano em dobro')}
+    if(has('furia')&&pvpHP()<30){dmg=Math.round(dmg*1.4);extra.push('Fúria: +40% de dano')}
     per=Math.max(1,Math.round(dmg/Math.max(1,parts.length)),pvpMinHit(S.round));
+    if(has('duplo')&&beaten.length>=3){per=Math.round(per*1.5);extra.push('Golpe Duplo: +50% em cada rival')}
+    if(has('lamina')){per+=3;extra.push('Lâmina: +3 em cada rival')}
+    if(has('precisao')&&t===20){per+=4;extra.push('Precisão: fechou com 20, +4 em cada rival')}
     for(const b of beaten)S.mp.sent[b.pid]=r1((S.mp.sent[b.pid]||0)+per);
     S.mp.dealt=r1((S.mp.dealt||0)+per*beaten.length+bled);
     if(has('sangria'))for(const b of beaten)S.mp.bleed[b.pid]={from:S.round,to:S.round+3};
@@ -957,10 +982,19 @@ function pvpCheckDamage(ps){
     S.mp.recv[p.pid]=v;let d=Math.round(v-old);const raw=d;
     const sub=p.st.sub;
     if(has('esquiva')&&sub&&!sub.x&&(+sub.t||0)<=17)d=0;
+    const mySub=S.mp.sub&&S.mp.sub.r===S.round?S.mp.sub:null;
+    if(has('colete')&&mySub&&mySub.x&&d>0){d=0;S.mp.coleteR=S.round}
+    if(has('armadura')&&d>0)d=Math.max(0,Math.round(d*0.85));
+    if(has('muralha')&&d>0&&mySub){
+      const others=ps.filter(x=>!x.me&&x.st&&x.st.sub&&x.st.sub.r===S.round);
+      const last=others.length&&others.every(x=>handVal(x.st.sub)>=handVal(mySub));
+      if(last){if(S.mp.mwR!==S.round){S.mp.mwR=S.round;S.mp.mwLeft=10}d=Math.min(d,S.mp.mwLeft);S.mp.mwLeft-=d}
+    }
     if(has('escudo')&&d>0){if(S.mp.shR!==S.round){S.mp.shR=S.round;S.mp.shLeft=4}const a=Math.min(S.mp.shLeft||0,d);d-=a;S.mp.shLeft-=a}
     if(has('espelho')&&d>0&&S.mp.alive){const back=Math.max(1,Math.round(d*0.2));S.mp.sent[p.pid]=r1((S.mp.sent[p.pid]||0)+back);reflected+=back}
     blocked+=raw-d;
     if(d>0){S.mp.hp=r1(S.mp.hp-d);gained+=d;who.push(p.name)}
+    if(S.mp.hp<=0&&has('ultima')&&!S.mp.ultimaUsed){S.mp.ultimaUsed=1;S.mp.hp=1;setTimeout(()=>pop($('#blindBox'),'Última Chance: ficou com 1 PV','info'),400)}
   }
   if(blocked>0.05&&S.mp.alive){pop($('#rack'),`Defesa: −${fmt(r1(blocked))} de dano`,'info');beep(700,.08,'triangle')}
   if(reflected>0.05&&S.mp.alive)setTimeout(()=>pop($('#rs'),`Espelho: ${fmt(r1(reflected))} de volta`,'info'),300);
@@ -1331,7 +1365,7 @@ function renderStrip(){
 
 /* ---------- Telas ---------- */
 const MENU_SHEETS=['start','mphome','lobby','joinpick'];
-function showSheet(html,name){document.body.classList.toggle('menu',MENU_SHEETS.includes(name)||(!S&&['how','hands'].includes(name)));$('#panel').classList.remove('compact');$('#panel').innerHTML=html;$('#sheet').hidden=false;openSheet=name||'x'}
+function showSheet(html,name){document.body.classList.toggle('menu',MENU_SHEETS.includes(name)||(!S&&['how','hands','cards'].includes(name)));$('#panel').classList.remove('compact');$('#panel').innerHTML=html;$('#sheet').hidden=false;openSheet=name||'x'}
 function hideSheet(){$('#sheet').hidden=true;openSheet=null;document.body.classList.remove('menu')}
 function bestLine(){const b=store.get(BEST);return b?`Seu recorde solo: Ante ${b.ante} · ${b.blinds} blinds · melhor mão ${fmt(b.hand)}`:'Ainda sem recorde solo neste aparelho'}
 function todayStr(){const d=new Date();return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`}
@@ -1346,7 +1380,7 @@ function showStart(){
     <button class="btn b-swap" data-act="daily">Desafio do dia<small>${todayStr()}</small></button></div>
     <button class="btn b-go" data-act="gameinvite">Convidar para o jogo<small>gera um link novo de convite</small></button>
     ${musicSlider()}
-    <div class="row"><button class="btn b-dim sm" data-act="how">Como jogar</button><button class="btn b-dim sm" data-act="mute">Efeitos: ${muted?'off':'on'}</button></div>
+    <div class="row"><button class="btn b-dim sm" data-act="cardsh">Cartas</button><button class="btn b-dim sm" data-act="how">Como jogar</button><button class="btn b-dim sm" data-act="mute">Efeitos: ${muted?'off':'on'}</button></div>
     <div class="best">${bestLine()}</div>`,'start');
   $('#panel').classList.add('compact');
 }
@@ -1421,6 +1455,24 @@ function showLobby(){
   ${canResume?`<button class="btn b-swap" data-act="mpresume">Voltar à partida em andamento</button>`:''}
   <div class="row">${amHost?`<button class="btn b-go" data-act="startgame" style="flex:2">Começar<small>${Math.min(lp.length,MAXP)} jogador${lp.length===1?'':'es'}</small></button>`:`<div class="note" style="flex:2;text-align:center;font-size:13px">Esperando ${host?esc(host.name):'o anfitrião'} começar…</div>`}<button class="btn b-dim" data-act="leaveroom">Sair</button></div>`,'lobby');
   $('#panel').classList.add('compact');
+}
+let cardsBack='home';
+function showCards(tab){
+  tab=tab||'pvp';
+  const row=(k)=>{const d=JK[k];return `<div class="cc"><div class="art" style="--jc:${d.bg}">${d.g}</div><div class="cct"><b>${d.n}</b><span>${d.d}</span></div><span class="ccp">$${d.c}</span></div>`};
+  let body;
+  if(tab==='pvp'){
+    const atk=Object.keys(JK).filter(k=>JK[k].pvp==='atk'),def=Object.keys(JK).filter(k=>JK[k].pvp==='def');
+    body=`<p class="lb-desc">Só aparecem na loja do PvP, 3 por vez. Você guarda até 5.</p><span class="kind atk" style="align-self:flex-start">Ataque · ${atk.length}</span><div class="cl">${atk.map(row).join('')}</div><span class="kind def" style="align-self:flex-start">Defesa · ${def.length}</span><div class="cl">${def.map(row).join('')}</div>`;
+  }else{
+    const jk=Object.keys(JK).filter(k=>!JK[k].pvp);
+    body=`<p class="lb-desc">Aparecem no solo e na Sobrevivência. Os coringas agem da esquerda para a direita.</p><span class="kind" style="align-self:flex-start;background:var(--panel-2);color:var(--gold)">Coringas · ${jk.length}</span><div class="cl">${jk.map(row).join('')}</div>
+    <span class="kind" style="align-self:flex-start;background:var(--panel-2);color:#8fc1ff">Planetas · 5</span><div class="cl">${Object.keys(HANDS).map(k=>{const h=HANDS[k];return `<div class="cc"><div class="art planet" style="--jc:${h.pc}"></div><div class="cct"><b>${h.p}</b><span>Sobe a jogada ${h.n}: +${h.lc} Fichas e +${h.lm} Mult por nível</span></div><span class="ccp">$3</span></div>`}).join('')}</div>`;
+  }
+  showSheet(`<h2>Cartas do jogo</h2>
+  <div class="seg"><button class="${tab==='pvp'?'on pvp':''}" data-act="cards" data-t="pvp">PvP</button><button class="${tab==='solo'?'on surv':''}" data-act="cards" data-t="solo">Solo</button></div>
+  ${body}
+  <button class="btn b-go" data-act="${cardsBack}">Voltar</button>`,'cards');
 }
 function showHow(back){
   showSheet(`<h2>Como jogar</h2><div class="how list">
@@ -1579,6 +1631,7 @@ function showMenu(){
   ${S.bi===2?`<div class="boss-note"><b>${blindName()}</b>${BOSSES[S.boss].d}</div>`:''}
   <div class="kv"><span>Cartas no baralho</span><span class="num" style="color:var(--ink)">${S.deck.length}</span></div>
   <button class="btn b-go" data-act="close">Voltar ao jogo</button>
+  <button class="btn b-dim" data-act="cardsm">Ver todas as cartas</button>
   <div class="row"><button class="btn b-dim" data-act="hands">Jogadas</button>${S.mp?'<button class="btn b-dim" data-act="board">Placar</button>':''}<button class="btn b-dim" data-act="howm">Como jogar</button></div>
   ${musicSlider()}
   <div class="row"><button class="btn b-dim" data-act="mutem">Efeitos: ${muted?'desligados':'ligados'}</button><button class="btn b-dbl" data-act="quit">Desistir</button></div>`,'menu');
@@ -1597,6 +1650,9 @@ document.addEventListener('click',e=>{
     case 'daily':{const d=new Date();newRun('dia-'+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(),'Desafio do dia '+todayStr());break}
     case 'continue':{const sv=store.get(SAVE);if(sv){S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;S.mp=null;resume()}break}
     case 'how':showHow('home');break;
+    case 'cardsh':cardsBack='home';showCards(S&&isPvp()?'pvp':'pvp');break;
+    case 'cardsm':cardsBack='menu';showCards(S&&isPvp()?'pvp':'solo');break;
+    case 'cards':showCards(t.dataset.t);break;
     case 'howm':showHow('menu');break;
     case 'home':if(S&&S.mp){showBoard();break}stopVitrine();S=null;render0();showStart();break;
     case 'winhome':store.del(SAVE);S=null;render0();showStart();break;
@@ -1744,7 +1800,7 @@ if(linkRoom&&ROOM){
   MP.prefill=linkRoom.toUpperCase();MP.msg=`Você foi convidado para a sala ${linkRoom.toUpperCase()}. Escolha um apelido e toque em Entrar na sala.`;
   showMPHome();
 }else showStart();
-if(QS.get('test')==='1')window.__c21={get S(){return S},set S(v){S=v},MP,get NR(){return NR},render,startBlind,duelFinished,mpTick,pvpHP:()=>pvpHP(),pvpSubmit,pvpNext,pvpStartRound,pvpReadyNext,showBoard,roomPlayers,gamePlayers,leaveShop,openShop,resolve};
+if(QS.get('test')==='1')window.__c21={get S(){return S},set S(v){S=v},MP,get NR(){return NR},render,startBlind,duelFinished,mpTick,pvpHP:()=>pvpHP(),pvpSubmit,pvpNext,pvpStartRound,pvpReadyNext,showBoard,roomPlayers,gamePlayers,leaveShop,openShop,resolve,JK};
 })();
 </script>
 </body>
