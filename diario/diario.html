@@ -85,7 +85,7 @@ td{padding:5px 6px;border-bottom:1px solid var(--line)}
 
 <div class="wrap">
   <header>
-    <span class="eyebrow">Diário do projeto · atualizado em 16/10/2026, 15:20</span>
+    <span class="eyebrow">Diário do projeto · atualizado em 16/10/2026, 15:45</span>
     <h1>Família <span>21</span></h1>
     <p class="lead">Cada vez que o jogo muda, aparece aqui. A última atualização fica em destaque; as anteriores ficam fechadas logo abaixo, é só tocar para abrir.</p>
   </header>
@@ -100,8 +100,8 @@ td{padding:5px 6px;border-bottom:1px solid var(--line)}
   <section>
     <h2>Última atualização</h2>
     <div class="now">
-      <div class="top"><span class="badge">v14.1</span><div><b>Embaralhar saiu</b><small>16/10 · 15:20</small></div></div>
-      <div class="vbody"><p class="ask"><b>Seu pedido</b>Tirar a carta de mesa Embaralhar e dar outras ideias de carta de mesa.</p><div class="grp"><span class="tag t-new">Novidades</span><ul><li>10 ideias novas de cartas de mesa na seção Possíveis ideias deste diário. Ainda não estão no jogo.</li></ul></div><div class="grp"><span class="tag t-chg">Mudanças</span><ul><li>A carta de mesa Embaralhar saiu do jogo. A mesa agora sorteia entre Tempestade, Trégua e Teto 19, sem repetir a anterior.</li></ul></div></div>
+      <div class="top"><span class="badge">v15</span><div><b>7 cartas de mesa novas</b><small>16/10 · 15:45</small></div></div>
+      <div class="vbody"><p class="ask"><b>Seu pedido</b>Adicionar as cartas de mesa sugeridas, menos Maré Alta, Azarão e Coroa Pesada.</p><div class="grp"><span class="tag t-new">Novidades</span><ul><li>Céu Aberto: só estoura acima de 23 (22 e 23 vencem 21). Mão Curta: no máximo 3 cartas, a mão fecha sozinha na terceira. Ás de Ferro: Ases valem só 1, então não tem blackjack.</li><li>Empate Sangrento: quem empatar com alguém leva 5 de dano. Febre do Ouro: o dinheiro das rodadas vem em dobro. Silêncio: as cartas de ataque e defesa não funcionam. Hospital: todos recuperam 4 PV no começo de cada rodada.</li><li>Teste novo no agente: um duelo roteirizado com as 7 cartas novas.</li></ul></div><div class="grp"><span class="tag t-chg">Mudanças</span><ul><li>A mesa agora sorteia entre 10 cartas de mesa, uma a cada 3 rodadas, sem repetir a anterior. Os bots seguem as mesmas regras.</li></ul></div></div>
     </div>
   </section>
 
@@ -109,6 +109,9 @@ td{padding:5px 6px;border-bottom:1px solid var(--line)}
     <h2>Histórico</h2>
     <p class="sec-note">Da mais nova para a mais antiga. Toque numa versão para ver os detalhes.</p>
     <details class="ver" >
+  <summary><span class="vtag">v14.1</span><span class="vt"><b>Embaralhar saiu</b><small>16/10 · 15:20</small></span><span class="chev">›</span></summary>
+  <div class="vbody"><p class="ask"><b>Seu pedido</b>Tirar a carta de mesa Embaralhar e dar outras ideias de carta de mesa.</p><div class="grp"><span class="tag t-new">Novidades</span><ul><li>10 ideias novas de cartas de mesa na seção Possíveis ideias deste diário. Ainda não estão no jogo.</li></ul></div><div class="grp"><span class="tag t-chg">Mudanças</span><ul><li>A carta de mesa Embaralhar saiu do jogo. A mesa agora sorteia entre Tempestade, Trégua e Teto 19, sem repetir a anterior.</li></ul></div></div>
+</details><details class="ver" >
   <summary><span class="vtag">v14</span><span class="vt"><b>Carta de mesa sorteada a cada 3 rodadas</b><small>16/10 · 15:10</small></span><span class="chev">›</span></summary>
   <div class="vbody"><p class="ask"><b>Seu pedido</b>A carta de mesa vale durante as rodadas: sempre uma ativa, sorteada, por 3 rodadas (até a próxima loja), e a animação fica 5 segundos.</p><div class="grp"><span class="tag t-new">Novidades</span><ul><li>A carta de mesa que está valendo aparece no topo da mesa, e o que ela faz aparece no meio da mesa entre as jogadas.</li></ul></div><div class="grp"><span class="tag t-chg">Mudanças</span><ul><li>As cartas de mesa não se compram mais. A mesa sempre tem uma valendo para todos: sorteada no começo da partida e trocada por outra a cada loja (a cada 3 rodadas), sem repetir a anterior.</li><li>Para durar 3 rodadas: Tempestade tira 5 PV de todos no começo de cada rodada, e Trégua corta todo dano pela metade (3 rodadas sem dano travariam a partida). Teto 19 e Embaralhar continuam iguais.</li><li>A animação aparece quando a carta de mesa entra, mostra em que rodadas ela vale e fica 5 segundos na tela.</li><li>A loja do PvP voltou a ter 3 cartas (ataque e defesa). Quem cria a sala ainda pode desligar as cartas de mesa.</li><li>Teste das cartas de mesa refeito para a regra nova; os testes de contas exatas de dano jogam sem carta de mesa.</li></ul></div></div>
 </details><details class="ver" >
@@ -194,7 +197,6 @@ td{padding:5px 6px;border-bottom:1px solid var(--line)}
     <p class="sec-note">Ainda não estão no jogo. Ficam guardadas para um futuro modo PvP Avançado, com cartas que escolhem um alvo ou mexem na mesa.</p>
     <div class="grid">
       <div class="box"><h3>Cartas com alvo</h3><ul><li><b>Mira:</b> todo o seu dano da rodada vai para um rival escolhido</li><li><b>Maldição:</b> um rival escolhido causa metade do dano na próxima rodada</li><li><b>Gelo:</b> um rival não pode pedir carta na próxima rodada</li><li><b>Roubo:</b> tira $3 de um rival</li><li><b>Troca de Mão:</b> troca uma carta sua com uma carta de um rival</li><li><b>Espião:</b> vê as cartas de um rival antes de jogar</li></ul></div>
-      <div class="box"><h3>Novas cartas de mesa (3 rodadas)</h3><ul><li><b>Maré Alta:</b> todo dano +50%</li><li><b>Céu Aberto:</b> só estoura acima de 23</li><li><b>Febre do Ouro:</b> o dinheiro das rodadas vem em dobro</li><li><b>Azarão:</b> quem tem menos vida causa o dobro de dano</li><li><b>Coroa Pesada:</b> quem tem mais vida leva +50% de dano</li><li><b>Empate Sangrento:</b> quem empatar com alguém leva 5 de dano</li><li><b>Mão Curta:</b> no máximo 3 cartas na mão</li><li><b>Silêncio:</b> as cartas de ataque e defesa param de funcionar</li><li><b>Hospital:</b> todos recuperam 4 PV por rodada</li><li><b>Ás de Ferro:</b> Ases valem só 1</li></ul></div>
       <div class="box"><h3>Baralho especial</h3><ul><li><b>Carta Bomba:</b> quem tirar leva 10 de dano</li><li><b>Curinga Vermelho:</b> vale o que você quiser de 1 a 11</li><li><b>Carta Ouro:</b> dá $2 a quem tirar</li></ul></div>
     </div>
   </section>

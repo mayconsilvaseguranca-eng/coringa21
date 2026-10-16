@@ -1,5 +1,11 @@
 import html
 V=[
+ ("v15","16/10 · 15:45","7 cartas de mesa novas",
+  "Adicionar as cartas de mesa sugeridas, menos Maré Alta, Azarão e Coroa Pesada.",
+  [("Novo","Céu Aberto: só estoura acima de 23 (22 e 23 vencem 21). Mão Curta: no máximo 3 cartas, a mão fecha sozinha na terceira. Ás de Ferro: Ases valem só 1, então não tem blackjack."),
+   ("Novo","Empate Sangrento: quem empatar com alguém leva 5 de dano. Febre do Ouro: o dinheiro das rodadas vem em dobro. Silêncio: as cartas de ataque e defesa não funcionam. Hospital: todos recuperam 4 PV no começo de cada rodada."),
+   ("Mudou","A mesa agora sorteia entre 10 cartas de mesa, uma a cada 3 rodadas, sem repetir a anterior. Os bots seguem as mesmas regras."),
+   ("Novo","Teste novo no agente: um duelo roteirizado com as 7 cartas novas.")]),
  ("v14.1","16/10 · 15:20","Embaralhar saiu",
   "Tirar a carta de mesa Embaralhar e dar outras ideias de carta de mesa.",
   [("Mudou","A carta de mesa Embaralhar saiu do jogo. A mesa agora sorteia entre Tempestade, Trégua e Teto 19, sem repetir a anterior."),
@@ -159,7 +165,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 15:20'
+UPD=AG['atualizado'] if AG else '16/10/2026, 15:45'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
@@ -306,7 +312,6 @@ td{{padding:5px 6px;border-bottom:1px solid var(--line)}}
     <p class="sec-note">Ainda não estão no jogo. Ficam guardadas para um futuro modo PvP Avançado, com cartas que escolhem um alvo ou mexem na mesa.</p>
     <div class="grid">
       <div class="box"><h3>Cartas com alvo</h3><ul><li><b>Mira:</b> todo o seu dano da rodada vai para um rival escolhido</li><li><b>Maldição:</b> um rival escolhido causa metade do dano na próxima rodada</li><li><b>Gelo:</b> um rival não pode pedir carta na próxima rodada</li><li><b>Roubo:</b> tira $3 de um rival</li><li><b>Troca de Mão:</b> troca uma carta sua com uma carta de um rival</li><li><b>Espião:</b> vê as cartas de um rival antes de jogar</li></ul></div>
-      <div class="box"><h3>Novas cartas de mesa (3 rodadas)</h3><ul><li><b>Maré Alta:</b> todo dano +50%</li><li><b>Céu Aberto:</b> só estoura acima de 23</li><li><b>Febre do Ouro:</b> o dinheiro das rodadas vem em dobro</li><li><b>Azarão:</b> quem tem menos vida causa o dobro de dano</li><li><b>Coroa Pesada:</b> quem tem mais vida leva +50% de dano</li><li><b>Empate Sangrento:</b> quem empatar com alguém leva 5 de dano</li><li><b>Mão Curta:</b> no máximo 3 cartas na mão</li><li><b>Silêncio:</b> as cartas de ataque e defesa param de funcionar</li><li><b>Hospital:</b> todos recuperam 4 PV por rodada</li><li><b>Ás de Ferro:</b> Ases valem só 1</li></ul></div>
       <div class="box"><h3>Baralho especial</h3><ul><li><b>Carta Bomba:</b> quem tirar leva 10 de dano</li><li><b>Curinga Vermelho:</b> vale o que você quiser de 1 a 11</li><li><b>Carta Ouro:</b> dá $2 a quem tirar</li></ul></div>
     </div>
   </section>
