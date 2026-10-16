@@ -1533,8 +1533,7 @@ function showBoard(){
   ${finished&&winner?`<div class="note" style="text-align:center;font-size:15px">Fim da partida. <b style="color:var(--gold)">${esc(winner.name)}</b> ficou em 1º lugar.</div>`:(ended?'<p style="text-align:center">O placar atualiza enquanto os outros jogam.</p>':'')}
   <div class="list">${ps.map((p,i)=>{const st=p.st||{};return `<div class="li ${p.me?'me':''} ${!st.al?'out':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span><span class="grow"><b>${esc(p.name)}</b>${p.off&&!p.me?' <span class="c-dim">(offline)</span>':''}<br><small class="c-dim">${status(p)} · ${fmt(st.t)} pts no total</small></span><span style="color:#ff6b61;font-weight:800">${st.al?(st.md==='pvp'?`${Math.max(0,+st.hp||0)} PV`:hearts(Math.min(3,+st.l||0))):''}</span></div>`}).join('')}
   ${missing>0?`<div class="li out"><span class="grow">${missing} jogador${missing>1?'es':''} fora da sala</span></div>`:''}</div>
-  ${ended?'<button class="btn b-go" data-act="lobby">Voltar ao lobby</button>':'<button class="btn b-go" data-act="close">Voltar ao jogo</button>'}
-  <button class="btn b-dim" data-act="leaveroom">Sair da sala</button>`,'board');
+  ${ended?'<button class="btn b-go" data-act="leaveroom" style="padding:14px 4px 12px;font-size:17px">Voltar ao menu</button>':'<button class="btn b-go" data-act="close">Voltar ao jogo</button><button class="btn b-dim" data-act="leaveroom">Sair da sala</button>'}`,'board');
 }
 function resultText(){return `Família 21${S.seed?' · '+S.seed:''}: cheguei no Ante ${S.ante}, venci ${S.stats.blinds} blinds e minha melhor mão fez ${fmt(S.stats.best)} pontos.`}
 function showOver(){
@@ -1544,7 +1543,7 @@ function showOver(){
   <div class="kv"><span>Melhor mão</span><span class="num">${fmt(S.stats.best)}</span></div>
   <div class="kv"><span>Mãos vencidas</span><span class="num">${S.stats.wins}/${S.stats.hands}</span></div></div>
   <p id="share" class="note">${esc(resultText())}</p>
-  <div class="row"><button class="btn b-dim" data-act="copy">Copiar resultado</button><button class="btn b-go" data-act="home">Jogar de novo</button></div>
+  <div class="row"><button class="btn b-dim" data-act="copy">Copiar resultado</button><button class="btn b-go" data-act="home">Voltar ao menu</button></div>
   <div class="best">${bestLine()}</div>`,'over');
 }
 function showWon(){
@@ -1552,7 +1551,7 @@ function showWon(){
   <p style="text-align:center">${S.stats.blinds} blinds vencidas, melhor mão de ${fmt(S.stats.best)} pontos.</p>
   <p id="share" class="note">${esc(resultText().replace('cheguei no','ZEREI o jogo no'))}</p>
   <div class="row"><button class="btn b-dim" data-act="copy">Copiar resultado</button><button class="btn b-dbl" data-act="endless">Modo sem fim</button></div>
-  <button class="btn b-go" data-act="winhome">Nova partida</button>`,'won');
+  <button class="btn b-go" data-act="winhome">Voltar ao menu</button>`,'won');
   const b=store.get(BEST)||{ante:0,blinds:0,hand:0};store.set(BEST,{ante:Math.max(b.ante,8),blinds:Math.max(b.blinds,S.stats.blinds),hand:Math.max(b.hand,S.stats.best)});
 }
 function showMenu(){
