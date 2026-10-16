@@ -40,12 +40,21 @@ export default async function () {
     await A.waitForFunction(() => window.__c21.gamePlayers().some(p => p.st && p.st.ph === 'won'), null, { timeout: 10000 }).catch(() => {});
     const final = await A.evaluate(() => window.__c21.gamePlayers().map(p => ({ n: p.name, ph: p.st && p.st.ph, hp: p.st && p.st.hp })));
     check(final.filter(x => x.ph === 'won').length === 1, 'não houve exatamente um vencedor: ' + JSON.stringify(final));
-    // fim de partida: só a opção de voltar ao menu
+    // fim de partida: voltar para a mesma sala (com os bots) ou para o menu
     await A.evaluate(() => window.__c21.showBoard());
     const btns = await A.$$eval('#panel .btn', els => els.map(e => e.textContent.trim()));
-    check(btns.some(x => x.includes('Voltar ao menu')) && !btns.some(x => /Jogar de novo|lobby/i.test(x)), 'botões do fim de partida errados: ' + btns.join(', '));
-    await A.click('#panel [data-act=leaveroom]');
-    await A.waitForSelector('.logo', { timeout: 5000 });
+    check(btns.some(x => x.includes('Voltar para a sala')) && btns.some(x => x.includes('Voltar ao menu')), 'botões do fim de partida errados: ' + btns.join(', '));
+    await A.click('#panel [data-act=lobby]');
+    await A.waitForSelector('.lb-code', { timeout: 5000 });
+    check((await A.textContent('.lb-code')).trim() === code, 'voltou para outra sala');
+    await A.waitForFunction(() => [...document.querySelectorAll('#panel .lb-p')].filter(e => e.textContent.includes('bot')).length === 4, null, { timeout: 8000 }).catch(() => {});
+    const back = await A.$$eval('#panel .lb-p', els => els.filter(e => e.textContent.includes('bot')).length);
+    check(back === 4, `os bots não voltaram para a sala (${back})`);
+    await B.evaluate(() => window.__c21.showBoard()); await B.click('#panel [data-act=lobby]');
+    await A.waitForFunction(() => document.querySelectorAll('#panel .lb-p').length >= 6, null, { timeout: 8000 });
+    await A.click('[data-act=startgame]');
+    for (const p of [A, B]) await p.waitForFunction(() => window.__c21.S && window.__c21.S.mp && !window.__c21.S.round, null, { timeout: 10000 });
+    check((await A.evaluate(() => window.__c21.S.mp.players.length)) === 6, 'a segunda partida não começou com os 6 jogadores');
     check(t.errors.length === 0, 'erros na página: ' + t.errors.join(' | '));
     return `pvp com bots ok: ${rounds} rodadas, vencedor ${final.find(x => x.ph === 'won').n}`;
   } finally { await t.close(); }

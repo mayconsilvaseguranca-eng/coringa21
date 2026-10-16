@@ -30,17 +30,19 @@ export default async function () {
     const h0 = (await hp())[0];
     check(h0 === 168, `PV iniciais de 2 jogadores deveriam ser 168, são ${h0}`);
     const up = x => Math.ceil(Math.round(x * 10) / 10);
-    // Blackjack de Ana com Golpe Crítico: 61 × 1,5 = 91,5 de dano; Escudo absorve 4; Espelho devolve 20% de 87,5.
+    // Blackjack de Ana com Golpe Crítico: 61 × 1,5 = 92 de dano; Escudo absorve 4 (88); Espelho devolve 20% de 88 = 18.
     const r1 = await round([['A', '♠'], ['K', '♥']], [['10', '♣'], ['7', '♦']]);
-    check(r1[1] === up(h0 - 87.5), `Escudo/Crítico: Beto deveria ter ${up(h0 - 87.5)} PV, tem ${r1[1]}`);
-    check(r1[0] === up(h0 - 17.5), `Espelho: Ana deveria ter ${up(h0 - 17.5)} PV, tem ${r1[0]}`);
+    check(r1[1] === h0 - 88, `Escudo/Crítico: Beto deveria ter ${h0 - 88} PV, tem ${r1[1]}`);
+    check(r1[0] === h0 - 18, `Espelho: Ana deveria ter ${h0 - 18} PV, tem ${r1[0]}`);
     // Beto vence com 20 (15 de dano); a Sangria de Ana (2) é absorvida pelo Escudo.
     const r2 = await round([['9', '♠'], ['6', '♥']], [['K', '♣'], ['Q', '♦']]);
-    check(r2[0] === up(h0 - 17.5 - 15) && r2[1] === up(h0 - 87.5), `rodada 2 errada: ${r2}`);
-    // Ana fecha com 16 e Beto estoura: Esquiva anula o dano; Vampiro cura Ana em 3,3.
+    check(r2[0] === h0 - 33 && r2[1] === h0 - 88, `rodada 2 errada: ${r2}`);
+    // Ana fecha com 16 e Beto estoura: Esquiva anula o dano; Vampiro cura Ana em 3.
     const r3 = await round([['10', '♠'], ['6', '♥']], [['K', '♣'], ['Q', '♦'], ['5', '♠']]);
-    check(r3[1] === up(h0 - 87.5), `Esquiva: Beto deveria continuar com ${up(h0 - 87.5)} PV, tem ${r3[1]}`);
-    check(r3[0] === up(h0 - 17.5 - 15 + 3.3), `Vampiro: Ana deveria ter ${up(h0 - 17.5 - 15 + 3.3)} PV, tem ${r3[0]}`);
+    check(r3[1] === h0 - 88, `Esquiva: Beto deveria continuar com ${h0 - 88} PV, tem ${r3[1]}`);
+    check(r3[0] === h0 - 30, `Vampiro: Ana deveria ter ${h0 - 30} PV, tem ${r3[0]}`);
+    const ints = await Promise.all([A, B].map(p => p.evaluate(() => [window.__c21.S.mp.dealt || 0, ...Object.values(window.__c21.S.mp.sent)].every(Number.isInteger))));
+    check(ints.every(Boolean), 'dano com número quebrado');
     check(t.errors.length === 0, 'erros na página: ' + t.errors.join(' | '));
     return 'cartas de ataque e defesa ok';
   } finally { await t.close(); }
