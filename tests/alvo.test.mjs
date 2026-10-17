@@ -107,7 +107,7 @@ export default async function () {
       const C = await t2.page('Caio');
       await createRoom(C, 'Caio', 'pvp');
       await C.click('[data-act=alvotoggle]');
-      check(await C.isVisible('[data-act=alvotoggle] >> text=Desligado'), 'o botão das cartas com alvo não mudou');
+      check(await C.getAttribute('[data-act=alvotoggle]', 'aria-pressed') === 'false', 'o botão das cartas com alvo não desligou');
       await C.click('[data-act=addbot]');
       await C.waitForTimeout(500);
       await C.click('[data-act=startgame]');

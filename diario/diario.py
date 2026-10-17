@@ -1,5 +1,13 @@
 import html
 V=[
+ ("v18","17/10 · 18:50","Baralhos para escolher na sala",
+  "Escolher o baralho na sala antes de começar, com explicação e todas as cartas, opção de desligar, e testar todos os baralhos com e sem cartas de mesa e com alvo para deixar todos no mesmo nível.",
+  [("Novo","Na sala, cada jogador escolhe o seu baralho em Baralho › trocar. A tela mostra os 11 baralhos; tocando em um, aparece como ele funciona e todas as cartas que tem (valor e quantidade)."),
+   ("Novo","Baralhos: Padrão; Vermelho (+1 troca por loja); Azul ($2 a mais, 15 PV a menos); Reis (sem 2 e 3, 15 PV a menos); Miúdo (só 2 a 8 e Ases, +2 de dano por carta além da segunda, 30 PV a mais); Ases (5 Ases, 8 PV a menos); Guerreiro (começa com uma carta de ataque, sem dinheiro); Guardião (começa com uma carta de defesa, sem dinheiro); Vidro (20 PV a menos, +3 de dano em cada rival); Apostador (Dobrar dá ×3, estourar tira 2 PV); Fantasma (vê a primeira carta de cada rival)."),
+   ("Novo","Quem cria a sala liga ou desliga os baralhos (botão Baralhos ✓). Desligados, todos jogam com o Padrão. Os bots sorteiam um baralho."),
+   ("Mudou","Balanceamento: cerca de 1 milhão de partidas simuladas, cada baralho contra o Padrão em 1 contra 1, mesa de 4 e mesa de 6, sem nada, só com cartas de mesa, só com cartas com alvo e com as duas. Na primeira versão Ases (+83%), Reis (+76%), Azul, Guerreiro e Guardião (+40% a +70%) estavam fortes demais, e Miúdo (−77%) e Vidro (−50%) fracos demais. Depois dos ajustes, quase todos ficam a até 20% do Padrão; o Miúdo é um pouco melhor com cartas de mesa e um pouco pior sem elas."),
+   ("Mudou","Sala mais compacta: Vida e Bots na mesma linha, e as opções Mesa, Alvo e Baralhos em três botões lado a lado. Continua cabendo no iPhone SE com 10 jogadores."),
+   ("Novo","Dois testes novos no agente: escolha de baralho na sala (com as cartas e a opção de desligar) e os efeitos do Vidro, Miúdo, Apostador e Fantasma durante o jogo.")]),
  ("v17.2","17/10 · 17:50","Tocar na carta usada em você, cartas com alvo a $1 e sempre na loja",
   "Poder tocar na carta usada em mim para saber o que ela faz, a loja sempre com uma carta com alvo, todas custando $1 (testar se fica forte), e ideias de baralhos diferentes.",
   [("Novo","Tocar na marca de uma carta com alvo (a etiqueta ao lado de Você ou o símbolo no quadrinho do rival) abre uma explicação: quem usou, se vale agora ou na próxima rodada e o que acontece com você. Por exemplo: Nesta rodada, você só pode pedir 1 carta."),
@@ -205,7 +213,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '17/10/2026, 17:50'
+UPD=AG['atualizado'] if AG else '17/10/2026, 18:50'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
@@ -351,7 +359,6 @@ td{{padding:5px 6px;border-bottom:1px solid var(--line)}}
     <h2>Possíveis ideias</h2>
     <p class="sec-note">Ainda não estão no jogo. Ficam guardadas para um futuro modo PvP Avançado, com cartas que escolhem um alvo ou mexem na mesa.</p>
     <div class="grid">
-      <div class="box"><h3>Baralhos para escolher na sala</h3><ul><li><b>Baralho Vermelho:</b> +1 troca por loja</li><li><b>Baralho Azul:</b> começa com $4 a mais</li><li><b>Baralho dos Reis:</b> sem as cartas de 2 a 5, só mãos altas e mais estouros</li><li><b>Baralho Miúdo:</b> só cartas de 2 a 7 e Ases, mãos de 4 e 5 cartas</li><li><b>Baralho dos Ases:</b> 8 Ases no baralho</li><li><b>Baralho do Guerreiro:</b> começa com uma carta de ataque sorteada</li><li><b>Baralho do Guardião:</b> começa com uma carta de defesa sorteada</li><li><b>Baralho de Vidro:</b> 40 PV a menos, mas +3 de dano em cada rival que passar</li><li><b>Baralho do Apostador:</b> Dobrar dá ×3, mas estourar tira 5 PV de você</li><li><b>Baralho Fantasma:</b> vê a primeira carta de cada rival</li></ul></div>
       <div class="box"><h3>Baralho especial</h3><ul><li><b>Carta Bomba:</b> quem tirar leva 10 de dano</li><li><b>Curinga Vermelho:</b> vale o que você quiser de 1 a 11</li><li><b>Carta Ouro:</b> dá $2 a quem tirar</li></ul></div>
     </div>
   </section>

@@ -261,6 +261,31 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .rack .slot.alvo{border-color:rgba(255,176,116,.45)}
 .rack .joker.alvoslot{box-shadow:0 0 0 2px #ffb074,0 3px 0 var(--edge)}
 .rack.withalvo .joker .jn{font-size:9.5px}
+.cfg2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cfg2 .bots{gap:4px;padding:4px 6px;min-width:0}
+.cfg2 .bots>span{font-size:13px;flex:0 0 auto}
+.cfg2 .bots b{flex:1;min-width:0;font-size:16px;text-align:center}
+.cfg2 .step{width:26px;height:28px;font-size:18px;flex:0 0 auto}
+.tg3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.tg3 .tgl{padding:7px 4px;font-size:13px}
+.deckrow{width:100%;font:inherit;color:inherit;border:0;cursor:pointer;text-align:left}
+.deckrow b{flex:1;min-width:0;text-align:left;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deckrow.off{cursor:default;opacity:.7}
+.dkg{display:inline-grid;place-items:center;width:28px;height:36px;border-radius:6px;background:var(--jc);border:2px solid var(--edge);font-weight:800;font-size:15px;color:#fff;flex:0 0 auto;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.dkg.big{width:52px;height:68px;font-size:26px}
+.dkgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dkt{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:2px solid var(--edge);border-radius:10px;padding:5px 8px;font:inherit;color:inherit;cursor:pointer;text-align:left;min-width:0}
+.dkt b{font-size:13.5px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dkt.on{box-shadow:inset 0 0 0 2px var(--gold)}
+.dkhead{display:flex;align-items:center;gap:12px}
+.dkhead small{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)}
+.dkhead h2{text-align:left!important}
+.dkcards{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dkc{display:flex;flex-direction:column;align-items:center;background:var(--card);color:var(--card-ink);border-radius:6px;padding:4px 0;box-shadow:0 2px 0 rgba(0,0,0,.4)}
+.dkc b{font-size:16px;line-height:1}
+.dkc small{font-size:10.5px;font-weight:700;color:#555}
+.dkc.extra{box-shadow:0 0 0 2px var(--gold),0 2px 0 rgba(0,0,0,.4)}
+.rvl .tg.ghost{color:#e9e4ff;background:#4a4a6e}
 .kind.alvo{background:color-mix(in srgb,var(--orange) 32%,transparent);color:#ffb074}
 .tgl-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .tgl-list .btn{flex-direction:row;justify-content:center;gap:6px;flex-wrap:wrap}
@@ -421,7 +446,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v17.2';
+const VERSION='v18';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -557,6 +582,27 @@ function pickBoss(prev){const ks=Object.keys(BOSSES).filter(k=>k!==prev);return 
 const has=k=>S.jokers.some(j=>j.k===k);
 const isPvp=()=>!!(S&&S.mp&&S.mp.mode==='pvp');
 const isDuel=()=>!!(S&&S.mp&&S.mp.mode!=='pvp'&&S.bi===2);
+/* ---------- Baralhos do PvP (escolhidos na sala). Números balanceados no simulador (tests/balanceamento.mjs). ---------- */
+const DECKS={
+  padrao:{n:'Padrão',g:'♠',bg:'#2f5249',d:'O baralho normal, sem regras extras.',hp:0},
+  vermelho:{n:'Vermelho',g:'⇄',bg:'#b8324f',d:'+1 troca por loja (3 em vez de 2).',hp:0},
+  azul:{n:'Azul',g:'$',bg:'#2a5fa8',d:'Começa com $2 a mais, mas com 15 PV a menos.',hp:-15},
+  reis:{n:'Reis',g:'K',bg:'#6a3fb5',d:'Sem as cartas 2 e 3: mãos mais altas. 15 PV a menos.',hp:-15},
+  miudo:{n:'Miúdo',g:'7',bg:'#3a8f4b',d:'Só cartas de 2 a 8 e Ases. Vencendo, cada carta além da segunda dá +2 de dano em cada rival. 30 PV a mais.',hp:30},
+  ases:{n:'Ases',g:'A',bg:'#c98a12',d:'5 Ases no baralho (um a mais). 8 PV a menos.',hp:-8},
+  guerreiro:{n:'Guerreiro',g:'†',bg:'#c43d2b',d:'Começa com uma carta de ataque sorteada, mas sem dinheiro.',hp:0},
+  guardiao:{n:'Guardião',g:'◈',bg:'#3d6f9e',d:'Começa com uma carta de defesa sorteada, mas sem dinheiro.',hp:0},
+  vidro:{n:'Vidro',g:'◇',bg:'#4f9fae',d:'20 PV a menos, mas +3 de dano em cada rival que você passar.',hp:-20},
+  apostador:{n:'Apostador',g:'×3',bg:'#d45d1e',d:'Dobrar dá ×3 Mult em vez de ×2, mas estourar tira 2 PV de você.',hp:0},
+  fantasma:{n:'Fantasma',g:'?',bg:'#4a4a6e',d:'Você vê a primeira carta de cada rival enquanto joga.',hp:0}
+};
+const DECK_K=Object.keys(DECKS);
+/* cartas do baralho: lista de [valor, quantidade] */
+function deckRanks(k){
+  const rs=k==='reis'?RANKS.filter(r=>r!=='2'&&r!=='3'):k==='miudo'?RANKS.filter(r=>r==='A'||(+r>=2&&+r<=8)):RANKS;
+  return rs.map(r=>[r,r==='A'&&k==='ases'?5:4])}
+function deckCards(k){const d=[];for(const [r,n] of deckRanks(k))for(let i=0;i<n;i++)d.push({r,s:SUITS[i%4]});return d}
+const myDeck=()=>S&&S.mp&&S.mp.deck||'padrao';
 /* estoque separado das cartas com alvo (uso único) */
 const ALVO_MAX=2;
 const alvoInv=()=>(S.alvoInv||(S.alvoInv=[]));
@@ -604,7 +650,7 @@ function blindName(i){i=i??S.bi;if(i===2)return (S&&S.mp&&S.mp.mode!=='pvp'?'Due
 function save(){if(!S||S.busy)return;if(S.mp)store.set(SAVE_MP,{S,rs:R.s,rs2:R2.s,code:MP.code});else if(S.phase!=='over')store.set(SAVE,{S,rs:R.s,rs2:R2.s})}
 
 /* ---------- Cartas ---------- */
-function newDeck(){const d=[];for(const s of SUITS)for(const r of RANKS)d.push({r,s,id:++S.uid});return shuffle(d)}
+function newDeck(){if(isPvp()&&myDeck()!=='padrao')return shuffle(deckCards(myDeck()).map(c=>({...c,id:++S.uid})));const d=[];for(const s of SUITS)for(const r of RANKS)d.push({r,s,id:++S.uid});return shuffle(d)}
 function draw(){if(!S.deck.length)S.deck=newDeck();return S.deck.pop()}
 const isRed=c=>c.s==='♥'||c.s==='♦';
 function baseVal(c){if(c.r==='A')return 11;if(c.r==='J'||c.r==='Q'||c.r==='K')return 10;return +c.r}
@@ -740,6 +786,7 @@ function renderRivals(){
     if(!st.al){tag='fora';cls='out'}
     else if(reveal&&sub){tag=sub.x?'estourou':(+sub.t===21?(sub.bj?'BJ':'21'):sub.t);cls=sub.x?'bust':+sub.t===21?'is21':'shown'}
     else if(sub&&S.mp.spy&&S.mp.spy.r===S.round&&S.mp.spy.pid===p.pid){tag='👁'+(sub.x?'estourou':sub.t);cls='spy'}
+    else if(myDeck()==='fantasma'&&st.f1&&+st.f1.r===S.round){tag=(sub?'✓':'')+esc(String(st.f1.c).slice(0,3));cls='ghost'}
     else if(sub){tag='✓';cls='ready'}
     else tag='…';
     return `<div class="rvl ${!st.al?'out':''}" title="${esc(p.name)}"><span class="top"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><span class="tg ${cls}">${tag}</span></span><span class="hp">${st.al?Math.max(0,+st.hp||0)+'<small>PV</small>':'—'}${st.al?fxOnPid(p.pid,S.round).map(f=>`<button class="fxb ${f.now?'now':'next'}" data-act="fxinfo" data-k="${f.k}" data-to="${esc(p.pid)}" data-from="${esc(f.from)}" data-now="${f.now?1:0}" aria-label="${esc(JK[f.k].n)} de ${esc(f.from)}" style="--jc:${JK[f.k].bg}">${JK[f.k].g}</button>`).join(''):''}</span>${st.al?`<span class="hpbar"><i style="width:${Math.max(0,Math.min(100,(+st.hp||0)/(S.mp.maxHp||PVP_HP)*100))}%"></i></span>`:''}</div>`}).join('')||'<p class="c-dim" style="font-size:13px">Esperando os rivais entrarem…</p>'}</div>`;
@@ -978,7 +1025,7 @@ async function scoreHand(type,ctx){
       pop(jokerEl(i),t==='c'?`+${fmt(v)}`:t==='m'?`+${fmt(v)} Mult`:`×${fmt(v)} Mult`,t==='c'?'chips':'mult');
       anim($(t==='c'?'#pc-c':'#pc-m'),'bump');beep(pitch+=60,.07,'triangle');await sleep(340)}
   }
-  if(S.doubled){const k=has('dobradinha')?3:2;m*=k;S.calc.m=m;renderCalc();pop($('#calc'),`×${k} Dobrou`,'mult');anim($('#pc-m'),'bump');beep(pitch+=80,.1,'sawtooth');await sleep(380)}
+  if(S.doubled){const k=has('dobradinha')||(isPvp()&&myDeck()==='apostador')?3:2;m*=k;S.calc.m=m;renderCalc();pop($('#calc'),`×${k} Dobrou`,'mult');anim($('#pc-m'),'bump');beep(pitch+=80,.1,'sawtooth');await sleep(380)}
   const tot=Math.floor(c*m);
   S.calc.total=tot;renderCalc();anim($('#calc'),'bump');beep(880,.12,'square',.05);await sleep(400);
   const from=S.roundScore,to=from+tot,steps=14;
@@ -1080,7 +1127,7 @@ function pvpStartRound(){
   if(S.mp.fx.length&&(S.round-1)%PVP_SHOP_EVERY===0)mesaShow(S.mp.fx[0].k,S.round);
   if(fxOn('hospital')&&S.mp.hp!=null){pvpHeal(4);setTimeout(()=>pop($('#blindBox'),'Hospital: +4 PV','info'),(S.round-1)%PVP_SHOP_EVERY===0?5600:400)}
   if(fxOn('tempestade')){if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(S.mp.hp-5);setTimeout(()=>pop($('#blindBox'),'Tempestade: −5 PV para todos','mult'),(S.round-1)%PVP_SHOP_EVERY===0?5600:400)}
-  if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=2} /* PvP: 2 trocas a cada loja */
+  if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=2+(myDeck()==='vermelho'?1:0)} /* PvP: 2 trocas a cada loja (+1 no baralho Vermelho) */
   if(!S.deck||S.deck.length<15)S.deck=newDeck();
   S.phase='play';S.roundScore=0;S.calc=null;S.pv=null;S.mp.sub=null;S.handsLeft=1;S.awaitNext=false;
   hideSheet();pvpDeal();
@@ -1142,6 +1189,8 @@ async function pvpShowdown(){
     if(act('lamina')){per+=3;extra.push('Lâmina: +3 em cada rival')}
     if(act('cinco')){const k=2*(S.player.length-1);per+=k;extra.push(`Cinco Lâminas: +${k} em cada rival`)}
     if(act('precisao')&&t===20){per+=7;extra.push('Precisão: fechou com 20, +7 em cada rival')}
+    if(myDeck()==='vidro'){per+=3;extra.push('Baralho Vidro: +3 em cada rival')}
+    if(myDeck()==='miudo'&&S.player.length>2){const k=2*(S.player.length-2);per+=k;extra.push(`Baralho Miúdo: +${k} em cada rival`)}
     if(cursed){per=Math.max(1,Math.round(per/2));extra.push('Maldição: você causou metade do dano')}
     let dealtNow=0;
     for(const b of beaten){const q=aim.includes(b.pid)?Math.round(per*1.5):per;if(q!==per)extra.push(`Mira: ${b.name} levou ${q}`);S.mp.sent[b.pid]=r1((S.mp.sent[b.pid]||0)+q);dealtNow+=q}
@@ -1151,6 +1200,7 @@ async function pvpShowdown(){
     pop($('#rs'),`⚔ ${fmt(per)} em ${beaten.length===1?beaten[0].name:beaten.length+' rivais'}`,'mult');beep(220,.12,'sawtooth',.05);
   }else if(bled)S.mp.dealt=r1((S.mp.dealt||0)+bled);
   /* dinheiro do PvP: $1 se passou alguém, $2 se teve a maior mão da mesa */
+  if(me.x&&myDeck()==='apostador'){if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(S.mp.hp-2);extra.push('Baralho Apostador: estourou e perdeu 2 PV')}
   let earn=beaten.length?(beaten.length===parts.length?2:1):0;
   if(fxOn('ouro')&&earn){earn*=2;extra.push('Febre do Ouro: dinheiro em dobro')}
   S.money+=earn;
@@ -1408,7 +1458,7 @@ function renderRoomList(){
 }
 setInterval(()=>{if(VIT&&openSheet==='mphome')renderRoomList();if(NR&&NR.announce)NR.announce(false)},5000);
 setInterval(()=>{if(NR)onRoomChange()},5000);
-const MP={code:null,pid:null,name:'',col:0,j:0,msg:'',started:new Set(),mesaOff:!!store.get('c21-mesaoff'),alvoOff:!!store.get('c21-alvooff')};
+const MP={code:null,pid:null,name:'',col:0,j:0,msg:'',started:new Set(),mesaOff:!!store.get('c21-mesaoff'),alvoOff:!!store.get('c21-alvooff'),deckOff:!!store.get('c21-deckoff'),deck:DECKS[store.get('c21-deck')]?store.get('c21-deck'):'padrao'};
 MP.pid=store.get('c21-pid');if(typeof MP.pid!=='string'){MP.pid=rid();store.set('c21-pid',MP.pid)}
 MP.name=store.get('c21-name')||'';
 MP.mode=store.get('c21-mode')==='surv'?'surv':'pvp';
@@ -1422,7 +1472,7 @@ function roomPlayers(){
     const pr=p.presence||{};if(typeof pr.pid!=='string'||pr.pid.length>16)continue;
     const me=pr.pid===MP.pid;
     const prev=m.get(pr.pid);
-    if(!prev||(me?p.sameTab:p.updatedAt>prev.updatedAt))m.set(pr.pid,{pid:pr.pid,name:cleanName(pr.name)||'Jogador',col:pr.col,j:+pr.j||0,g:typeof pr.g==='string'?pr.g:null,start:pr.start,st:pr.st&&typeof pr.st==='object'?pr.st:null,lm:pr.lm==='surv'?'surv':'pvp',lhp:Math.max(0,Math.min(500,+pr.lhp||0)),lmo:!!pr.lmo,lao:!!pr.lao,bot:!!pr.bot,me,off:!!p.off});
+    if(!prev||(me?p.sameTab:p.updatedAt>prev.updatedAt))m.set(pr.pid,{pid:pr.pid,name:cleanName(pr.name)||'Jogador',col:pr.col,j:+pr.j||0,g:typeof pr.g==='string'?pr.g:null,start:pr.start,st:pr.st&&typeof pr.st==='object'?pr.st:null,lm:pr.lm==='surv'?'surv':'pvp',lhp:Math.max(0,Math.min(500,+pr.lhp||0)),lmo:!!pr.lmo,lao:!!pr.lao,lbk:!!pr.lbk,dk:typeof pr.dk==='string'?pr.dk:'padrao',bot:!!pr.bot,me,off:!!p.off});
   }
   return [...m.values()];
 }
@@ -1433,7 +1483,7 @@ let lastPres='';
 function mpSync(){
   if(!NR||!S||!S.mp)return;
   const st={a:S.ante,b:S.bi,l:S.mp.lives,al:S.mp.alive?1:0,sc:S.roundScore,t:S.stats.total,ph:S.phase,dh:S.mp.dh,n:S.jokers.length};
-  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);st.tg=(S.mp.tg||[]).slice(-8);st.mo=S.money;if(S.mp.rx)st.rx=S.mp.rx;delete st.dh;delete st.l;delete st.sc}
+  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);st.tg=(S.mp.tg||[]).slice(-8);st.mo=S.money;if(S.player&&S.player[0]&&S.round)st.f1={r:S.round,c:cardStr(S.player[0])};if(S.mp.rx)st.rx=S.mp.rx;delete st.dh;delete st.l;delete st.sc}
   const s=JSON.stringify(st);if(s===lastPres)return;lastPres=s;
   NR.presence({g:S.mp.gid,st}).catch(()=>{});
 }
@@ -1478,7 +1528,7 @@ async function enterRoom(code){
   MP.name=nm;store.set('c21-name',nm);store.set('c21-col',MP.col);
   MP.msg='Entrando na sala…';showMPHome();
   const sala=new Sala(code,MP.pid);
-  sala.presence({name:MP.name,col:MP.col,j:Date.now(),g:null,start:null,st:null,lm:MP.mode,lmo:MP.mesaOff?1:0,lao:MP.alvoOff?1:0});
+  sala.presence({name:MP.name,col:MP.col,j:Date.now(),g:null,start:null,st:null,lm:MP.mode,lmo:MP.mesaOff?1:0,lao:MP.alvoOff?1:0,lbk:MP.deckOff?1:0,dk:MP.deck||'padrao'});
   try{NR=await sala.start()}catch(e){NR=null;MP.msg='Não consegui conectar ao servidor de salas. Confira a internet e tente de novo.';showMPHome();return}
   MP.code=code;MP.j=NR.me.j;MP.msg='';lastPres='';stopVitrine();
   NR.onPeers(()=>onRoomChange());
@@ -1513,14 +1563,17 @@ function botStart(st){
     if(!st.players.includes(b.pid))continue;
     b.g=st.gid;b.players=st.players.slice();b.maxHp=(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length);b.r=1;b.sd=0;b.sent={};b.deck=[];
     /* bots também compram e usam cartas de ataque e defesa */
-    b.hpv=b.maxHp;b.seen={};b.cards=[];b.money=4;b.bleed={};b.ult=0;b.coleteR=0;b.shR=0;b.shLeft=0;b.mesa=st.mesa!==0;b.alvo=st.alvo!==0;b.alvoInv=[];b.tg=[];b.tgSeen={};b.ev=[];b.fx=[];
+    b.hpv=b.maxHp;b.seen={};b.cards=[];b.money=4;b.bleed={};b.ult=0;b.coleteR=0;b.shR=0;b.shLeft=0;b.mesa=st.mesa!==0;b.alvo=st.alvo!==0;b.alvoInv=[];b.dk=st.dk&&st.decks&&DECKS[st.decks[b.pid]]?st.decks[b.pid]:'padrao';
+    if(DECKS[b.dk].hp)b.maxHp=Math.max(40,b.maxHp+DECKS[b.dk].hp);b.hpv=b.maxHp;
+    if(b.dk==='azul')b.money+=2;
+    if(b.dk==='guerreiro'||b.dk==='guardiao'){const L=Object.keys(JK).filter(x=>JK[x].pvp===(b.dk==='guerreiro'?'atk':'def'));b.cards.push(L[Math.floor(Math.random()*L.length)]);b.money=0}b.tg=[];b.tgSeen={};b.ev=[];b.fx=[];
     b.nextAt=Date.now()+4000+Math.random()*4000;
-    b.st={md:'pvp',al:1,hp:b.maxHp,dm:{},r:1,sd:0,sub:null,ph:'play',t:0,a:1,n:0,ev:[],tg:[],mo:4};
+    b.st={md:'pvp',al:1,hp:b.maxHp,dm:{},r:1,sd:0,sub:null,ph:'play',t:0,a:1,n:b.cards.length,ev:[],tg:[],mo:b.money};
     botPub(b);
   }
 }
 const bHas=(b,k)=>!!(b.cards&&b.cards.includes(k));
-function botDeck(){const d=[];for(const s of SUITS)for(const r of RANKS)d.push({r,s});for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d}
+function botDeck(k){if(k&&k!=='padrao'){const d=deckCards(k);for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d}const d=[];for(const s of SUITS)for(const r of RANKS)d.push({r,s});for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d}
 function botTotal(c,iron){let t=0,a=0;for(const x of c){if(x.r==='A'){if(iron)t+=1;else{t+=11;a++}}else t+=baseVal(x)}while(t>21&&a){t-=10;a--}return t}
 const bFx=(b,k)=>!!(b.fx&&b.fx.some(e=>e.k===k));
 const bAct=(b,k)=>bHas(b,k)&&!(bFx(b,'silencio')&&JK[k]&&(JK[k].pvp==='atk'||JK[k].pvp==='def'));
@@ -1585,7 +1638,7 @@ function botTick(){
     const others=all.filter(p=>p.st&&p.st.al);
     if(!st.sub||st.sub.r<b.r){
       if(now>=b.nextAt){
-        if(b.deck.length<15)b.deck=botDeck();
+        if(b.deck.length<15)b.deck=botDeck(b.dk);
         /* para no 17 e dobra com 10 ou 11 (como uma pessoa atenta); com Teto 19 para no 15 */
         if(botUseAlvo(b,others,'antes'))ch=true;
         const evs=b.alvo?botTg(b,all):[];
@@ -1595,6 +1648,7 @@ function botTick(){
         if(cap===21&&(t2===10||t2===11)){dbl=true;c.push(b.deck.pop())}
         else while(botTotal(c,iron)<cap-4&&c.length<mx)c.push(b.deck.pop());
         const t=botTotal(c,iron);
+        st.f1={r:b.r,c:cardStr(c[0])};
         st.sub={r:b.r,t:Math.min(t,99),c:c.map(cardStr),bj:c.length===2&&t===21&&cap>=21?1:0,f:c.length>=5&&t<=cap?1:0,x:t>cap?1:0};
         botUseAlvo(b,others,'depois',st.sub);
         b.dbl=dbl;st.ph='pwait';ch=true;
@@ -1610,7 +1664,7 @@ function botTick(){
           const s2=mySub,cards=s2.c.length,t=s2.t;
           const type=s2.bj?'bj':s2.f?'five':t===21?'t21':'win';
           const chips=HANDS[type].c+s2.c.reduce((a,x)=>{const r=String(x).replace(/[♠♥♦♣]/g,'');return a+(r==='A'&&bFx(b,'asferro')?1:baseVal({r}))},0);
-          const pts=chips*HANDS[type].m*(b.dbl?2:1);
+          const pts=chips*HANDS[type].m*(b.dbl?(b.dk==='apostador'?3:2):1);
           const dmg=Math.round(pts/ANTE_BASE[0]*DMG_K*(1+0.05*Math.min(10,b.r-1)));
           let per=Math.max(1,Math.round(dmg/Math.max(1,parts.length)),pvpMinHit(b.r));
           if(t===21&&bAct(b,'critico'))per=Math.round(per*1.5);
@@ -1619,6 +1673,8 @@ function botTick(){
           if(bAct(b,'lamina'))per+=3;
           if(bAct(b,'cinco'))per+=2*(cards-1);
           if(bAct(b,'precisao')&&t===20)per+=7;
+          if(b.dk==='vidro')per+=3;
+          if(b.dk==='miudo')per+=2*Math.max(0,cards-2);
           if(evs.some(e=>e.k==='maldicao'&&+e.r===b.r&&e.to===b.pid))per=Math.max(1,Math.round(per/2));
           const aim=evs.filter(e=>e.k==='mira'&&+e.r===b.r&&e.from===b.pid).map(e=>e.to);
           for(const x of beaten)b.sent[x.pid]=r1((b.sent[x.pid]||0)+(aim.includes(x.pid)?Math.round(per*1.5):per));
@@ -1628,6 +1684,7 @@ function botTick(){
         }
         b.money+=(beaten.length?(beaten.length===parts.length?2:1):0)*(bFx(b,'ouro')?2:1);
         if(bFx(b,'empate')&&myV>=0&&parts.some(p=>p.v===myV))b.hpv=r1(b.hpv-5);
+        if(b.dk==='apostador'&&mySub.x)b.hpv=r1(b.hpv-2);
         st.mo=b.money;
         st.dm={...b.sent};
         if(Math.random()<.3){const e=mySub.x?(Math.random()<.5?2:7):beaten.length===parts.length&&parts.length?(Math.random()<.5?5:4):!beaten.length?1:0;st.rx={e,t:Date.now()+800}}
@@ -1660,7 +1717,8 @@ function botTick(){
 setInterval(botTick,600);
 function startGame(){
   const lp=lobbyPlayers().slice(0,MAXP);
-  const st={gid:rid(),seed:rid()+rid(),players:lp.map(p=>p.pid),mode:MP.mode,hp:MP.hpSet||0,mesa:MP.mesaOff?0:1,alvo:MP.alvoOff?0:1};
+  const st={gid:rid(),seed:rid()+rid(),players:lp.map(p=>p.pid),mode:MP.mode,hp:MP.hpSet||0,mesa:MP.mesaOff?0:1,alvo:MP.alvoOff?0:1,dk:MP.deckOff?0:1,decks:{}};
+  if(st.dk)for(const p of lp)st.decks[p.pid]=p.me?(MP.deck||'padrao'):p.bot?DECK_K.filter(k=>k!=='fantasma')[Math.floor(Math.random()*(DECK_K.length-1))]:(DECKS[p.dk]?p.dk:'padrao');
   if(!st.players.includes(MP.pid))st.players.push(MP.pid);
   NR.presence({start:st}).catch(()=>{});
   if(st.mode==='pvp')botStart(st);else clearBots();
@@ -1671,7 +1729,16 @@ function beginMP(st){
   const sv=store.get(SAVE_MP);
   if(sv&&sv.S&&sv.S.mp&&sv.S.mp.gid===st.gid){S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;resume();return}
   const mode=st.mode==='surv'?'surv':'pvp';
-  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),hp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),bleed:{},sent:{},recv:{},dealt:0,mesa:st.mesa!==0,alvo:st.alvo!==0,ev:[],fx:[],tg:[]});
+  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),hp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),bleed:{},sent:{},recv:{},dealt:0,mesa:st.mesa!==0,alvo:st.alvo!==0,ev:[],fx:[],tg:[],deck:st.dk&&st.decks&&DECKS[st.decks[MP.pid]]?st.decks[MP.pid]:'padrao'});
+  applyDeck();
+}
+/* aplica o baralho escolhido no começo da partida */
+function applyDeck(){
+  if(!S||!S.mp||S.mp.mode!=='pvp')return;const k=myDeck(),d=DECKS[k];
+  if(d.hp){S.mp.maxHp=Math.max(40,S.mp.maxHp+d.hp);S.mp.hp=S.mp.maxHp}
+  if(k==='azul')S.money+=2;
+  if(k==='guerreiro'||k==='guardiao'){const L=Object.keys(JK).filter(x=>JK[x].pvp===(k==='guerreiro'?'atk':'def'));S.jokers.push({k:L[Math.floor(Math.random()*L.length)],v:0});S.money=0}
+  S.deck=[];render();
 }
 function backToLobby(){
   for(const b of BOTS){b.g=null;b.st=null;b.players=null;botPub(b)}
@@ -1708,7 +1775,7 @@ function renderStrip(){
 }
 
 /* ---------- Telas ---------- */
-const MENU_SHEETS=['start','mphome','lobby','joinpick'];
+const MENU_SHEETS=['start','mphome','lobby','joinpick','decks','deckinfo'];
 function showSheet(html,name){document.body.classList.toggle('menu',MENU_SHEETS.includes(name)||(!S&&['how','hands','cards'].includes(name)));$('#panel').classList.remove('compact','shoppanel');$('#panel').innerHTML=html;$('#sheet').hidden=false;openSheet=name||'x'}
 function hideSheet(){$('#sheet').hidden=true;openSheet=null;document.body.classList.remove('menu')}
 function bestLine(){const b=store.get(BEST);return b?`Seu recorde solo: Ante ${b.ante} · ${b.blinds} blinds · melhor mão ${fmt(b.hand)}`:'Ainda sem recorde solo neste aparelho'}
@@ -1773,16 +1840,35 @@ const MODE_TXT={
 };
 const lobbyHP=()=>MP.hpSet||hpFor(Math.max(2,lobbyPlayers().length));
 function setLobbyHP(d){const v=Math.max(40,Math.min(500,lobbyHP()+d));MP.hpSet=v;if(NR)NR.presence({lhp:v})}
+function deckRow(off){
+  if(off)return `<div class="bots deckrow off"><span>Baralhos desligados</span><small>todos jogam com o Padrão</small></div>`;
+  const d=DECKS[MP.deck]||DECKS.padrao;
+  return `<button class="bots deckrow" data-act="decks"><span>Baralho</span><span class="dkg" style="--jc:${d.bg}">${d.g}</span><b>${esc(d.n)}</b><small>trocar ›</small></button>`}
 function modeBlock(amHost,host){
   const m=amHost?MP.mode:(host&&host.lm)||'pvp';
   const short={pvp:'Sem dealer: a maior mão da rodada causa dano em quem ficou abaixo. Quem zera a vida sai.',surv:'3 vidas. Falhar uma blind ou perder o Duelo custa uma vida.'}[m];
-  if(!amHost)return `<div class="lb-mode"><b>Modo: ${m==='pvp'?'PvP':'Sobrevivência'}</b> <span>${short}</span>${m==='pvp'?`<br><b>Vida inicial:</b> ${host&&+host.lhp?+host.lhp:hpFor(lobbyPlayers().length)} PV · <b>Mesa:</b> ${host&&host.lmo?'desligada':'ligada'} · <b>Alvo:</b> ${host&&host.lao?'desligado':'ligado'}`:''}</div>`;
+  if(!amHost)return `<div class="lb-mode"><b>Modo: ${m==='pvp'?'PvP':'Sobrevivência'}</b> <span>${short}</span>${m==='pvp'?`<br><b>Vida inicial:</b> ${host&&+host.lhp?+host.lhp:hpFor(lobbyPlayers().length)} PV · <b>Mesa:</b> ${host&&host.lmo?'desligada':'ligada'} · <b>Alvo:</b> ${host&&host.lao?'desligado':'ligado'}`:''}</div>${m==='pvp'?deckRow(!!(host&&host.lbk)):''}`;
   const nb=BOTS.length,full=lobbyPlayers().length>=MAXP;
   return `<div class="seg"><button class="${m==='pvp'?'on pvp':''}" data-act="mode" data-m="pvp">PvP</button><button class="${m==='surv'?'on surv':''}" data-act="mode" data-m="surv">Sobrevivência</button></div>
   ${lobbyPlayers().length>4?'':`<p class="lb-desc">${short}</p>`}
-  ${m==='pvp'?`<div class="cfg"><div class="bots"><span>Vida</span><button class="step" data-act="hpdown" aria-label="Menos vida">−</button><b>${lobbyHP()}</b><button class="step" data-act="hpup" aria-label="Mais vida">+</button></div>
+  ${m==='pvp'?`<div class="cfg2"><div class="bots"><span>PV</span><button class="step" data-act="hpdown" aria-label="Menos vida">−</button><b>${lobbyHP()}</b><button class="step" data-act="hpup" aria-label="Mais vida">+</button></div>
   <div class="bots"><span>Bots</span><button class="step" data-act="rmbot" ${nb?'':'disabled'} aria-label="Remover bot">−</button><b>${nb}</b><button class="step" data-act="addbot" ${full?'disabled':''} aria-label="Adicionar bot">+</button></div></div>
-  <div class="bots tg2"><span>Mesa</span><button class="tgl ${MP.mesaOff?'':'on'}" data-act="mesatoggle" aria-pressed="${!MP.mesaOff}">${MP.mesaOff?'Desligada':'Ligada'}</button><span>Alvo</span><button class="tgl ${MP.alvoOff?'':'on'}" data-act="alvotoggle" aria-pressed="${!MP.alvoOff}">${MP.alvoOff?'Desligado':'Ligado'}</button></div>`:''}`;
+  <div class="tg3"><button class="tgl ${MP.mesaOff?'':'on'}" data-act="mesatoggle" aria-pressed="${!MP.mesaOff}">Mesa ${MP.mesaOff?'✕':'✓'}</button><button class="tgl ${MP.alvoOff?'':'on'}" data-act="alvotoggle" aria-pressed="${!MP.alvoOff}">Alvo ${MP.alvoOff?'✕':'✓'}</button><button class="tgl ${MP.deckOff?'':'on'}" data-act="decktoggle" aria-pressed="${!MP.deckOff}">Baralhos ${MP.deckOff?'✕':'✓'}</button></div>
+  ${deckRow(MP.deckOff)}`:''}`;
+}
+function showDecks(){
+  showSheet(`<h2>Escolha seu baralho</h2>
+  <p class="lb-desc">Cada um escolhe o seu. Toque para ver como funciona e as cartas.</p>
+  <div class="dkgrid">${DECK_K.map(k=>{const d=DECKS[k];return `<button class="dkt ${MP.deck===k?'on':''}" data-act="deckinfo" data-k="${k}"><span class="dkg" style="--jc:${d.bg}">${d.g}</span><b>${esc(d.n)}</b></button>`}).join('')}</div>
+  <button class="btn b-dim" data-act="lobbyback">Voltar</button>`,'decks');$('#panel').classList.add('compact');
+}
+function showDeckInfo(k){
+  const d=DECKS[k];if(!d)return;const rk=deckRanks(k);const n=rk.reduce((a,x)=>a+x[1],0);
+  showSheet(`<div class="dkhead"><span class="dkg big" style="--jc:${d.bg}">${d.g}</span><div><small>Baralho</small><h2>${esc(d.n)}</h2></div></div>
+  <div class="note" style="font-size:14.5px;text-align:center">${esc(d.d)}</div>
+  <div class="lb-count">${n} cartas no baralho</div>
+  <div class="dkcards">${rk.map(([r,c])=>`<span class="dkc ${r==='A'&&c>4?'extra':''}"><b>${r}</b><small>×${c}</small></span>`).join('')}</div>
+  <div class="row"><button class="btn b-dim" data-act="decks">Ver outros</button><button class="btn b-go" data-act="deckpick" data-k="${k}">${MP.deck===k?'Escolhido ✓':'Escolher'}</button></div>`,'deckinfo');$('#panel').classList.add('compact');
 }
 function showLobby(){
   const lp=lobbyPlayers();const playing=roomPlayers().filter(p=>p.g&&!p.off);
@@ -2070,6 +2156,11 @@ document.addEventListener('click',e=>{
     case 'addbot':addBot();showLobby();break;
     case 'hpup':setLobbyHP(20);showLobby();break;
     case 'alvotoggle':MP.alvoOff=!MP.alvoOff;store.set('c21-alvooff',MP.alvoOff);if(NR)NR.presence({lao:MP.alvoOff?1:0});showLobby();break;
+    case 'decktoggle':MP.deckOff=!MP.deckOff;store.set('c21-deckoff',MP.deckOff);if(NR)NR.presence({lbk:MP.deckOff?1:0});showLobby();break;
+    case 'decks':showDecks();break;
+    case 'lobbyback':showLobby();break;
+    case 'deckinfo':showDeckInfo(t.dataset.k);break;
+    case 'deckpick':if(DECKS[t.dataset.k]){MP.deck=t.dataset.k;store.set('c21-deck',MP.deck);if(NR)NR.presence({dk:MP.deck})}showLobby();break;
     case 'mesatoggle':MP.mesaOff=!MP.mesaOff;store.set('c21-mesaoff',MP.mesaOff);if(NR)NR.presence({lmo:MP.mesaOff?1:0});showLobby();break;
     case 'hpdown':setLobbyHP(-20);showLobby();break;
     case 'rmbot':removeBot();showLobby();break;
