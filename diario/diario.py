@@ -1,5 +1,12 @@
 import html
 V=[
+ ("v17.1","17/10 · 06:20","Cartas com alvo marcadas no jogador e estoque separado",
+  "Deixar na tela a carta que foi usada em cada jogador, para saber quando está ativa, e guardar as cartas com alvo numa área separada dos coringas, com no máximo 2.",
+  [("Novo","A carta com alvo fica marcada em quem recebeu enquanto valer: no quadrinho do rival aparece o símbolo dela (❄ Gelo, ☾ Maldição, ⌖ Mira, ⇆ Troca), brilhando quando vale nesta rodada e apagado quando vale na próxima."),
+   ("Novo","Se a carta foi usada em você, aparece uma etiqueta ao lado de Você, embaixo das suas cartas, com o nome da carta e de quem jogou (por exemplo, Gelo · Beto). Fica vermelha quando está valendo e mostra próx. quando vale na rodada seguinte."),
+   ("Mudou","As cartas com alvo não ocupam mais as 5 vagas dos coringas. Elas têm um estoque próprio de 2 vagas, com borda laranja, ao lado das outras cartas. Com 2 guardadas, a loja mostra Cheio até você usar ou vender uma."),
+   ("Mudou","Os bots seguem a mesma regra: no máximo 2 cartas com alvo guardadas."),
+   ("Mudou","O teste das cartas com alvo agora confere as marcas no jogador e o estoque de 2 vagas.")]),
  ("v17","17/10 · 05:50","Cartas com alvo, troca da loja a $1",
   "Adicionar as cartas com alvo com opção de tirar da partida, trocar as cartas da loja por $1, testar no 1 contra 1 e com mais gente e balancear as fortes.",
   [("Novo","6 cartas com alvo na loja do PvP, de uso único: toque nela na sua vez e escolha o rival. Mira ($2): o rival leva 50% a mais do seu dano nesta rodada. Maldição ($2): na próxima rodada, o rival causa metade do dano. Gelo ($3): na próxima rodada, o rival só pode pedir 1 carta. Roubo ($2): tira $2 do rival para você. Troca de Mão ($3): sua mão e a do rival trocam de dono na revelação. Espião ($1): você vê a mão do rival assim que ele fechar."),
@@ -191,7 +198,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '17/10/2026, 05:50'
+UPD=AG['atualizado'] if AG else '17/10/2026, 06:20'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

@@ -10,8 +10,8 @@ export default async function () {
     await A.waitForFunction(() => document.querySelectorAll('#panel .lb-p').length >= 2);
     await A.click('[data-act=startgame]');
     for (const p of [A, B]) await p.waitForFunction(() => window.__c21.S && window.__c21.S.mp);
-    await A.evaluate(() => { window.__c21.S.jokers = [{ k: 'mira', v: 0 }, { k: 'roubo', v: 0 }, { k: 'troca', v: 0 }, { k: 'espiao', v: 0 }]; });
-    await B.evaluate(() => { window.__c21.S.jokers = [{ k: 'gelo', v: 0 }, { k: 'maldicao', v: 0 }]; });
+    await A.evaluate(() => { window.__c21.S.alvoInv = ['mira', 'roubo']; });
+    await B.evaluate(() => { window.__c21.S.alvoInv = ['gelo', 'maldicao']; });
     // baralho só com 2 para nenhuma mão inicial virar blackjack sozinha antes do roteiro
     for (const p of [A, B]) await p.evaluate(() => { window.__c21.S.deck = Array.from({ length: 80 }, (_, i) => ({ r: '2', s: '♣', id: 5000 + i })); });
     // sem carta de mesa: este teste confere contas exatas de dano
@@ -41,16 +41,21 @@ export default async function () {
     async function usar(p, k, alvo) {
       await p.waitForFunction(() => window.__c21.S.phase === 'play' && !window.__c21.S.busy, null, { timeout: 15000 });
       await p.evaluate(() => window.__c21.render());
-      const i = await p.evaluate(k => window.__c21.S.jokers.findIndex(j => j.k === k), k);
-      await p.click(`#rack .joker[data-i="${i}"]`);
+      const i = await p.evaluate(k => window.__c21.S.alvoInv.indexOf(k), k);
+      await p.click(`#rack .alvoslot[data-i="${i}"]`);
       await p.click(`[data-act=usealvo] >> text=${alvo}`);
-      check(await p.evaluate(k => !window.__c21.S.jokers.some(j => j.k === k), k), `${k} não foi usada`);
+      check(await p.evaluate(k => !window.__c21.S.alvoInv.includes(k), k), `${k} não foi usada`);
     }
     // Rodada 1: Ana usa Mira e Roubo em Beto; Beto usa Gelo e Maldição em Ana (valem na rodada 2).
     await usar(A, 'mira', 'Beto');
     await usar(A, 'roubo', 'Beto');
     await usar(B, 'gelo', 'Ana');
     await usar(B, 'maldicao', 'Ana');
+    // a carta fica marcada no jogador: Beto vê ❄ no quadrinho da Ana; Ana vê a etiqueta Gelo (próxima rodada) embaixo das cartas
+    const marcaB = await B.waitForFunction(() => { window.__c21.render(); return [...document.querySelectorAll('.rvl .fxb.next')].some(e => e.textContent.includes('❄')); }, null, { timeout: 8000 }).then(() => true, () => false);
+    check(marcaB, 'Beto deveria ver o Gelo marcado no quadrinho da Ana');
+    const marcaA = await A.waitForFunction(() => { window.__c21.render(); const m = document.querySelector('#mefx'); return m && m.textContent.includes('Gelo') && m.textContent.includes('próx'); }, null, { timeout: 8000 }).then(() => true, () => false);
+    check(marcaA, 'Ana deveria ver a etiqueta do Gelo (próxima rodada) embaixo das cartas');
     const viu = await B.waitForFunction(() => [...document.querySelectorAll('#fx .alvo-toast')].some(e => e.textContent.includes('Ana') && e.textContent.includes('Mira')), null, { timeout: 8000 }).then(() => true, () => false);
     check(viu, 'Beto não viu o aviso da Mira da Ana');
     // Ana 20 contra 18: 15 de dano com Mira (+50%) = 23.
@@ -61,6 +66,7 @@ export default async function () {
     // Rodada 2 com Gelo: Ana pede carta e a mão fecha com 3 cartas. Beto estoura; a Maldição corta o dano de Ana pela metade.
     await A.waitForFunction(() => { const S = window.__c21.S; return S.round === 2 && S.phase === 'play' && !S.busy; }, null, { timeout: 15000 });
     await A.evaluate(() => window.__c21.render());
+    check(await A.evaluate(() => !!document.querySelector('#mefx .mfx.now')), 'na rodada 2 o Gelo deveria aparecer como ativo na Ana');
     await A.click('[data-act=hit]');
     await A.waitForFunction(() => window.__c21.S.mp.sub && window.__c21.S.mp.sub.r === 2, null, { timeout: 10000 });
     check(await A.evaluate(() => window.__c21.S.mp.sub.c.length) === 3, 'Gelo: a mão deveria fechar com 3 cartas');
@@ -72,6 +78,8 @@ export default async function () {
     check(r2[1] === h0 - 27, `Maldição: Beto deveria ter ${h0 - 27} PV (8 de dano vira 4), tem ${r2[1]}`);
     for (const p of [A, B]) { await p.waitForFunction(() => window.__c21.pvpReadyNext(), null, { timeout: 15000 }); await p.evaluate(() => window.__c21.pvpNext()); }
     // Rodada 3: Ana usa Troca de Mão em Beto. Ana fecha 15, Beto 20: trocam, Ana vence com 20 (15 de dano).
+    await A.evaluate(() => { window.__c21.S.alvoInv = ['troca', 'espiao']; window.__c21.render(); });
+    check(await A.evaluate(() => document.querySelectorAll('#rack .alvoslot').length) === 2, 'o estoque de cartas com alvo deveria mostrar 2 cartas');
     await usar(A, 'troca', 'Beto');
     const r3 = await round([['10', '♠'], ['5', '♥']], [['K', '♣'], ['Q', '♦']]);
     check(r3[0] === h0 && r3[1] === h0 - 42, `Troca de Mão: esperado Ana ${h0} e Beto ${h0 - 42}, veio ${r3}`);
