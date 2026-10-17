@@ -25,7 +25,7 @@ Blackjack roguelike (estilo Balatro) para celular, para o Maycon e a família. T
 - Cartas de PvP: 16 em `JK` com `pvp:'atk'|'def'`. Ataque em `pvpShowdown`, defesa em `pvpCheckDamage`, efeitos de início de rodada em `pvpStartRound`. Bônus de ataque valem sobre o dano final (depois de `pvpMinHit`). Rebalanceadas na v12.1 com o simulador.
 - Bots (`botTick`, `botDefend`, `botShop`): compram cartas na loja e usam as mesmas regras das pessoas, param no 17, dobram com 10/11 e ganham +5% de dano por rodada (até +50%). Simulação: 2 pessoas contra 4 bots vencem ~40%.
 - Cartas com alvo (`pvp:'alvo'`): uso único, só na fase `play`. `useAlvo` publica `{k,to,r,a}` em `st.tg`; `tgAll()` junta de todos. Mira/Maldição na revelação, Gelo via `maxCards()`, Roubo mexe em `S.money` (dinheiro vai em `st.mo`), Troca via `swapSubs` (mesma ordem em todos os aparelhos), Espião só no aparelho de quem usou. Bots: `botUseAlvo`, `botTg`, `botSubs`. Desligável na sala (`MP.alvoOff` → `st.alvo`). Simulação no `balanceamento.mjs` (opção `gift`). Estoque separado: `S.alvoInv` (máx. `ALVO_MAX=2`, bots `b.alvoInv`), vagas laranja na prateleira (`alvoSlots`). Marcas no jogador: `fxOnPid(pid,R)` (quadrinho do rival e `#mefx` ao lado de Você).
-- Loja do PvP: trocar custa $1 e sobe $1 a cada troca.
+- Loja do PvP: 3 de ataque/defesa + 1 com alvo (todas as com alvo custam $1); trocar custa $1 e sobe $1 a cada troca. Toque nas marcas de alvo abre `showFxInfo`.
 - Reações no PvP: botão `rxopen` no topo, `RX` (8 emojis), `S.mp.rx` vai em `st.rx`; `rxCheck` mostra o balão dos outros. Bots reagem às vezes.
 - Posição no PvP: `pvpRank()` (pela vida), mostrada no quadro de cima e no resultado da rodada.
 - Tela "Cartas" (`showCards`) lista as cartas de PvP e as do solo.

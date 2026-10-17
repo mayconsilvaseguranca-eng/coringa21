@@ -1,5 +1,12 @@
 import html
 V=[
+ ("v17.2","17/10 · 17:50","Tocar na carta usada em você, cartas com alvo a $1 e sempre na loja",
+  "Poder tocar na carta usada em mim para saber o que ela faz, a loja sempre com uma carta com alvo, todas custando $1 (testar se fica forte), e ideias de baralhos diferentes.",
+  [("Novo","Tocar na marca de uma carta com alvo (a etiqueta ao lado de Você ou o símbolo no quadrinho do rival) abre uma explicação: quem usou, se vale agora ou na próxima rodada e o que acontece com você. Por exemplo: Nesta rodada, você só pode pedir 1 carta."),
+   ("Mudou","A loja do PvP tem sempre 4 cartas: 3 de ataque ou defesa e 1 com alvo. Com as cartas com alvo desligadas, volta a ter 3."),
+   ("Mudou","Todas as cartas com alvo custam $1. Na simulação (comprando uma em toda loja, em 1 contra 1, mesa de 4 e mesa de 6), nenhuma passou de +10% de vitórias; as melhores são Roubo e Gelo. Por isso nenhuma precisou subir para $2."),
+   ("Novo","10 ideias de baralhos para escolher na sala, na seção Possíveis ideias deste diário."),
+   ("Mudou","Testes: o agente toca na etiqueta do Gelo e confere a explicação, e a loja com 4 cartas precisa caber no iPhone SE.")]),
  ("v17.1","17/10 · 06:20","Cartas com alvo marcadas no jogador e estoque separado",
   "Deixar na tela a carta que foi usada em cada jogador, para saber quando está ativa, e guardar as cartas com alvo numa área separada dos coringas, com no máximo 2.",
   [("Novo","A carta com alvo fica marcada em quem recebeu enquanto valer: no quadrinho do rival aparece o símbolo dela (❄ Gelo, ☾ Maldição, ⌖ Mira, ⇆ Troca), brilhando quando vale nesta rodada e apagado quando vale na próxima."),
@@ -198,7 +205,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '17/10/2026, 06:20'
+UPD=AG['atualizado'] if AG else '17/10/2026, 17:50'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
@@ -344,6 +351,7 @@ td{{padding:5px 6px;border-bottom:1px solid var(--line)}}
     <h2>Possíveis ideias</h2>
     <p class="sec-note">Ainda não estão no jogo. Ficam guardadas para um futuro modo PvP Avançado, com cartas que escolhem um alvo ou mexem na mesa.</p>
     <div class="grid">
+      <div class="box"><h3>Baralhos para escolher na sala</h3><ul><li><b>Baralho Vermelho:</b> +1 troca por loja</li><li><b>Baralho Azul:</b> começa com $4 a mais</li><li><b>Baralho dos Reis:</b> sem as cartas de 2 a 5, só mãos altas e mais estouros</li><li><b>Baralho Miúdo:</b> só cartas de 2 a 7 e Ases, mãos de 4 e 5 cartas</li><li><b>Baralho dos Ases:</b> 8 Ases no baralho</li><li><b>Baralho do Guerreiro:</b> começa com uma carta de ataque sorteada</li><li><b>Baralho do Guardião:</b> começa com uma carta de defesa sorteada</li><li><b>Baralho de Vidro:</b> 40 PV a menos, mas +3 de dano em cada rival que passar</li><li><b>Baralho do Apostador:</b> Dobrar dá ×3, mas estourar tira 5 PV de você</li><li><b>Baralho Fantasma:</b> vê a primeira carta de cada rival</li></ul></div>
       <div class="box"><h3>Baralho especial</h3><ul><li><b>Carta Bomba:</b> quem tirar leva 10 de dano</li><li><b>Curinga Vermelho:</b> vale o que você quiser de 1 a 11</li><li><b>Carta Ouro:</b> dá $2 a quem tirar</li></ul></div>
     </div>
   </section>

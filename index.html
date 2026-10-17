@@ -246,7 +246,8 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .rxb .rxn .dot{width:11px;height:11px}
 @keyframes rxUp{0%{opacity:0;transform:translate(-50%,20px) scale(.5)}12%{opacity:1;transform:translate(-50%,0) scale(1.15)}20%{transform:translate(-50%,-6px) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-140px) scale(1)}}
 .rvl .hp{display:flex;align-items:center;gap:3px}
-.fxb{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;font-size:11px;font-weight:800;color:#fff;background:var(--jc);border:1.5px solid rgba(0,0,0,.4);margin-left:2px;line-height:1}
+.fxb,.mfx{cursor:pointer;font-family:inherit}
+.fxb{padding:0;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;font-size:11px;font-weight:800;color:#fff;background:var(--jc);border:1.5px solid rgba(0,0,0,.4);margin-left:2px;line-height:1}
 .fxb.now{box-shadow:0 0 0 1.5px #ffb074,0 0 8px rgba(255,176,116,.8);animation:fxPulse 1.4s ease-in-out infinite}
 .fxb.next{opacity:.55}
 @keyframes fxPulse{50%{transform:scale(1.15)}}
@@ -420,7 +421,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v17.1';
+const VERSION='v17.2';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -495,11 +496,11 @@ const JK={
   muralha:{n:'Muralha',d:'Se você ficar em último na rodada, leva 20% a menos de dano',c:5,g:'▥',bg:'#4f5f78',pvp:'def'},
   colete:{n:'Colete',d:'Uso único: se você estourar, não leva dano na rodada',c:3,g:'◇',bg:'#2f6f8a',pvp:'def'},
   /* cartas com alvo: uso único, você escolhe um rival na sua vez (podem ser desligadas na sala) */
-  mira:{n:'Mira',d:'Nesta rodada, o rival escolhido leva 50% a mais do seu dano',c:2,g:'⌖',bg:'#b8452a',pvp:'alvo'},
-  maldicao:{n:'Maldição',d:'Na próxima rodada, o rival escolhido causa metade do dano',c:2,g:'☾',bg:'#5a2f6e',pvp:'alvo'},
-  gelo:{n:'Gelo',d:'Na próxima rodada, o rival escolhido só pode pedir 1 carta',c:3,g:'❄',bg:'#3a8fb5',pvp:'alvo'},
-  roubo:{n:'Roubo',d:'Tira $2 do rival escolhido para você',c:2,g:'₢',bg:'#8a6a1a',pvp:'alvo'},
-  troca:{n:'Troca de Mão',d:'Nesta rodada, sua mão e a do rival escolhido trocam de dono na revelação',c:3,g:'⇆',bg:'#6a4a9a',pvp:'alvo'},
+  mira:{n:'Mira',d:'Nesta rodada, o rival escolhido leva 50% a mais do seu dano',c:1,g:'⌖',bg:'#b8452a',pvp:'alvo'},
+  maldicao:{n:'Maldição',d:'Na próxima rodada, o rival escolhido causa metade do dano',c:1,g:'☾',bg:'#5a2f6e',pvp:'alvo'},
+  gelo:{n:'Gelo',d:'Na próxima rodada, o rival escolhido só pode pedir 1 carta',c:1,g:'❄',bg:'#3a8fb5',pvp:'alvo'},
+  roubo:{n:'Roubo',d:'Tira $2 do rival escolhido para você',c:1,g:'₢',bg:'#8a6a1a',pvp:'alvo'},
+  troca:{n:'Troca de Mão',d:'Nesta rodada, sua mão e a do rival escolhido trocam de dono na revelação',c:1,g:'⇆',bg:'#6a4a9a',pvp:'alvo'},
   espiao:{n:'Espião',d:'Nesta rodada, você vê a mão do rival escolhido assim que ele fechar',c:1,g:'⊙',bg:'#2f5f6f',pvp:'alvo'},
   /* cartas de mesa: sempre uma valendo para todos, sorteada a cada 3 rodadas (troca na loja). Podem ser desligadas na sala. */
   tempestade:{n:'Tempestade',d:'No começo de cada rodada, todos levam 5 de dano',c:4,g:'ϟ',bg:'#4b5aa8',pvp:'mesa'},
@@ -741,7 +742,7 @@ function renderRivals(){
     else if(sub&&S.mp.spy&&S.mp.spy.r===S.round&&S.mp.spy.pid===p.pid){tag='👁'+(sub.x?'estourou':sub.t);cls='spy'}
     else if(sub){tag='✓';cls='ready'}
     else tag='…';
-    return `<div class="rvl ${!st.al?'out':''}" title="${esc(p.name)}"><span class="top"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><span class="tg ${cls}">${tag}</span></span><span class="hp">${st.al?Math.max(0,+st.hp||0)+'<small>PV</small>':'—'}${st.al?fxOnPid(p.pid,S.round).map(f=>`<span class="fxb ${f.now?'now':'next'}" title="${esc(JK[f.k].n)} de ${esc(f.from)}${f.now?'':' (próxima rodada)'}" style="--jc:${JK[f.k].bg}">${JK[f.k].g}</span>`).join(''):''}</span>${st.al?`<span class="hpbar"><i style="width:${Math.max(0,Math.min(100,(+st.hp||0)/(S.mp.maxHp||PVP_HP)*100))}%"></i></span>`:''}</div>`}).join('')||'<p class="c-dim" style="font-size:13px">Esperando os rivais entrarem…</p>'}</div>`;
+    return `<div class="rvl ${!st.al?'out':''}" title="${esc(p.name)}"><span class="top"><span class="dot" style="--pc:${colOf(p.col)}"></span><span class="nm">${esc(p.name)}</span><span class="tg ${cls}">${tag}</span></span><span class="hp">${st.al?Math.max(0,+st.hp||0)+'<small>PV</small>':'—'}${st.al?fxOnPid(p.pid,S.round).map(f=>`<button class="fxb ${f.now?'now':'next'}" data-act="fxinfo" data-k="${f.k}" data-to="${esc(p.pid)}" data-from="${esc(f.from)}" data-now="${f.now?1:0}" aria-label="${esc(JK[f.k].n)} de ${esc(f.from)}" style="--jc:${JK[f.k].bg}">${JK[f.k].g}</button>`).join(''):''}</span>${st.al?`<span class="hpbar"><i style="width:${Math.max(0,Math.min(100,(+st.hp||0)/(S.mp.maxHp||PVP_HP)*100))}%"></i></span>`:''}</div>`}).join('')||'<p class="c-dim" style="font-size:13px">Esperando os rivais entrarem…</p>'}</div>`;
 }
 function renderTable(){
   if(!S){$('#dc').innerHTML='';$('#pc').innerHTML='';return}
@@ -752,7 +753,7 @@ function renderTable(){
     $('#pc').classList.toggle('tight',S.player.length>4);
     const pt=S.player.length?total(S.player):null;const pEl=$('#ptot');
     pEl.textContent=pt==null?'–':pt;pEl.className=pt>capNow()?'bust':(pt>=capNow()-1?'hot':'');
-    {const mf=$('#mefx');if(mf){const fx=S.mp.alive?fxOnPid(MP.pid,S.round):[];mf.innerHTML=fx.map(f=>`<span class="mfx ${f.now?'now':'next'}" style="--jc:${JK[f.k].bg}">${JK[f.k].g} ${esc(JK[f.k].n)}<small>${esc(f.from)}${f.now?'':' · próx.'}</small></span>`).join('')}}
+    {const mf=$('#mefx');if(mf){const fx=S.mp.alive?fxOnPid(MP.pid,S.round):[];mf.innerHTML=fx.map(f=>`<button class="mfx ${f.now?'now':'next'}" data-act="fxinfo" data-k="${f.k}" data-to="${esc(MP.pid)}" data-from="${esc(f.from)}" data-now="${f.now?1:0}" style="--jc:${JK[f.k].bg}">${JK[f.k].g} ${esc(JK[f.k].n)}<small>${esc(f.from)}${f.now?'':' · próx.'}</small></button>`).join('')}}
     const m=$('#msg');
     if(S.msg){m.className='msg';m.textContent=S.msg}
     else if(S.phase==='play'&&S.deadline){turnClock(m)}
@@ -1000,10 +1001,12 @@ function collect(){
 }
 function openShop(){S.phase='shop';S.shop={items:genShopItems(),reroll:3};render();showShop()}
 function genShopItems(){
-  /* No PvP a loja tem 3 cartas de ataque ou defesa. As cartas de mesa não se compram: a mesa sorteia uma a cada loja. */
+  /* No PvP a loja tem 3 cartas de ataque ou defesa e mais 1 carta com alvo. As cartas de mesa não se compram: a mesa sorteia uma a cada loja. */
   if(isPvp()){
-    const pool=shuffle(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def'||(JK[k].pvp==='alvo'&&S.mp.alvo))&&!has(k)&&!alvoInv().includes(k)));
+    const pool=shuffle(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def')&&!has(k)));
     const items=pool.slice(0,3).map(k=>({t:'j',k,sold:false}));
+    /* sempre 1 carta com alvo a mais (se estiverem ligadas) */
+    if(S.mp.alvo){const a=shuffle(Object.keys(JK).filter(k=>JK[k].pvp==='alvo'&&!alvoInv().includes(k)));if(a.length)items.push({t:'j',k:a[0],sold:false})}
     return items;
   }
   const pool=shuffle(Object.keys(JK).filter(k=>!has(k)&&!JK[k].pvp));
@@ -1525,7 +1528,8 @@ const bAct=(b,k)=>bHas(b,k)&&!(bFx(b,'silencio')&&JK[k]&&(JK[k].pvp==='atk'||JK[
 function botShop(b){
   b.money+=Math.min(2,Math.floor(b.money/10));
   const rnd=a=>a.sort(()=>Math.random()-.5);
-  const offer=rnd(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def'||(b.alvo&&JK[k].pvp==='alvo'&&k!=='espiao'))&&!bHas(b,k)&&!(b.alvoInv||[]).includes(k))).slice(0,3);
+  const offer=rnd(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def')&&!bHas(b,k))).slice(0,3);
+  if(b.alvo){const a=rnd(Object.keys(JK).filter(k=>JK[k].pvp==='alvo'&&k!=='espiao'&&!b.alvoInv.includes(k)));if(a.length)offer.push(a[0])}
   for(const k of offer){if(JK[k].c>b.money)continue;if(JK[k].pvp==='alvo'){if(b.alvoInv.length<ALVO_MAX){b.money-=JK[k].c;b.alvoInv.push(k)}}else if(b.cards.length<5){b.money-=JK[k].c;b.cards.push(k)}}
   b.st.n=b.cards.length;b.st.mo=b.money;
 }
@@ -1922,6 +1926,21 @@ function useAlvo(i,to){
   beep(760,.1,'triangle');mpSync();hideSheet();render();
   pop($('#blindBox'),k==='roubo'?`Roubo: +$${e.a} de ${tp.name}`:`${JK[k].n} em ${tp.name}`,'info');
 }
+/* Toque na marca: o que a carta está fazendo em você (ou no rival) */
+function showFxInfo(k,to,from,now){
+  const d=JK[k];if(!d)return;const me=to===MP.pid;
+  const who=me?'você':((gamePlayers().find(p=>p.pid===to)||{}).name||'o rival');
+  const Q=now?'Nesta rodada':'Na próxima rodada',q=Q.toLowerCase();
+  const efeito={
+    mira:me?`Se ${from} passar você ${q}, você leva 50% a mais do dano dele.`:`Se ${from} passar ${who} ${q}, ${who} leva 50% a mais do dano.`,
+    maldicao:me?`${Q}, todo dano que você causar cai pela metade.`:`${Q}, ${who} causa só metade do dano.`,
+    gelo:me?`${Q}, você só pode pedir 1 carta: a mão fecha sozinha com 3 cartas.`:`${Q}, ${who} só pode pedir 1 carta.`,
+    troca:me?`Na revelação ${now?'desta rodada':'da próxima rodada'}, a sua mão vai para ${from} e a mão de ${from} vem para você.`:`Na revelação, a mão de ${who} e a de ${from} trocam de dono.`
+  }[k]||d.d;
+  showSheet(`<div class="item" style="background:none;border:0"><div class="art" style="--jc:${d.bg};width:80px;height:104px;font-size:36px">${d.g}</div><span class="kind alvo">${now?'Valendo agora':'Vale na próxima rodada'}</span><h2>${d.n}</h2></div>
+  <div class="note" style="text-align:center;font-size:15px;line-height:1.45"><b style="color:#ffb074">${esc(from)}</b> usou em <b style="color:#ffb074">${esc(who)}</b>.<br>${esc(efeito)}</div>
+  <button class="btn b-go" data-act="close">Entendi</button>`,'fxinfo');
+}
 function showAlvo(i){
   const j={k:alvoInv()[i]};if(!j.k)return;const d=JK[j.k];
   {
@@ -2076,6 +2095,7 @@ document.addEventListener('click',e=>{
     case 'toshopfresh':openShop();break;
     case 'joker':if(S)showJoker(i);break;
     case 'alvoslot':if(S)showAlvo(i);break;
+    case 'fxinfo':if(S)showFxInfo(t.dataset.k,t.dataset.to,t.dataset.from,t.dataset.now==='1');break;
     case 'sellalvo':{const k=alvoInv()[i];if(!k)break;S.money+=sellPrice(k);alvoInv().splice(i,1);beep(300,.08);render();if(S.phase==='shop')showShop();else resumeSheet();break}
     case 'usealvo':if(S)useAlvo(i,t.dataset.p);break;
     case 'usemesa':if(S)useMesa(i);break;

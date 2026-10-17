@@ -56,6 +56,10 @@ export default async function () {
     check(marcaB, 'Beto deveria ver o Gelo marcado no quadrinho da Ana');
     const marcaA = await A.waitForFunction(() => { window.__c21.render(); const m = document.querySelector('#mefx'); return m && m.textContent.includes('Gelo') && m.textContent.includes('próx'); }, null, { timeout: 8000 }).then(() => true, () => false);
     check(marcaA, 'Ana deveria ver a etiqueta do Gelo (próxima rodada) embaixo das cartas');
+    // tocar na etiqueta explica o que a carta faz em você
+    await A.click('#mefx .mfx');
+    check(await A.isVisible('text=só pode pedir 1 carta'), 'tocar na etiqueta do Gelo deveria explicar o efeito');
+    await A.click('[data-act=close]');
     const viu = await B.waitForFunction(() => [...document.querySelectorAll('#fx .alvo-toast')].some(e => e.textContent.includes('Ana') && e.textContent.includes('Mira')), null, { timeout: 8000 }).then(() => true, () => false);
     check(viu, 'Beto não viu o aviso da Mira da Ana');
     // Ana 20 contra 18: 15 de dano com Mira (+50%) = 23.
