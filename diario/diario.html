@@ -85,7 +85,7 @@ td{padding:5px 6px;border-bottom:1px solid var(--line)}
 
 <div class="wrap">
   <header>
-    <span class="eyebrow">Diário do projeto · atualizado em 16/10/2026, 20:45</span>
+    <span class="eyebrow">Diário do projeto · atualizado em 17/10/2026, 05:50</span>
     <h1>Família <span>21</span></h1>
     <p class="lead">Cada vez que o jogo muda, aparece aqui. A última atualização fica em destaque; as anteriores ficam fechadas logo abaixo, é só tocar para abrir.</p>
   </header>
@@ -100,8 +100,8 @@ td{padding:5px 6px;border-bottom:1px solid var(--line)}
   <section>
     <h2>Última atualização</h2>
     <div class="now">
-      <div class="top"><span class="badge">v16.2</span><div><b>Teto 19 sem estouro na mão inicial e 2 trocas por loja</b><small>16/10 · 20:45</small></div></div>
-      <div class="vbody"><p class="ask"><b>Seu pedido</b>No Teto 19 ninguém pode estourar logo no início, e o Trocar fica só 2 vezes a cada loja.</p><div class="grp"><span class="tag t-chg">Mudanças</span><ul><li>No PvP, o Trocar vale 2 vezes a cada loja (eram 3).</li></ul></div><div class="grp"><span class="tag t-fix">Correções</span><ul><li>Com Teto 19, quem recebia 20 ou 21 nas duas primeiras cartas estourava sem jogar. Agora a mão inicial nunca estoura: a segunda carta é trocada até caber. Vale para pessoas e bots.</li></ul></div></div>
+      <div class="top"><span class="badge">v17</span><div><b>Cartas com alvo, troca da loja a $1</b><small>17/10 · 05:50</small></div></div>
+      <div class="vbody"><p class="ask"><b>Seu pedido</b>Adicionar as cartas com alvo com opção de tirar da partida, trocar as cartas da loja por $1, testar no 1 contra 1 e com mais gente e balancear as fortes.</p><div class="grp"><span class="tag t-new">Novidades</span><ul><li>6 cartas com alvo na loja do PvP, de uso único: toque nela na sua vez e escolha o rival. Mira ($2): o rival leva 50% a mais do seu dano nesta rodada. Maldição ($2): na próxima rodada, o rival causa metade do dano. Gelo ($3): na próxima rodada, o rival só pode pedir 1 carta. Roubo ($2): tira $2 do rival para você. Troca de Mão ($3): sua mão e a do rival trocam de dono na revelação. Espião ($1): você vê a mão do rival assim que ele fechar.</li><li>Quando alguém usa uma carta com alvo, todos veem um aviso (quem usou, qual carta, em quem). Se for em você, o aviso fica vermelho. Só o Espião é segredo.</li><li>Na sala, quem cria a partida liga ou desliga as cartas com alvo, na mesma linha das cartas de mesa.</li><li>Os bots compram e usam as cartas com alvo (menos o Espião), sempre no rival com mais vida. A Troca de Mão eles só usam com mão fraca.</li><li>Teste novo no agente: um duelo usando as 6 cartas com alvo pelos botões, mais a opção de desligar.</li></ul></div><div class="grp"><span class="tag t-chg">Mudanças</span><ul><li>Balanceamento no simulador, em 1 contra 1, mesa de 4 e mesa de 6: a Mira dobrava o dano (+26% de vitórias), virou +50%; o Gelo deixava o rival sem pedir carta (a mais forte, até +57%), virou só 1 carta; o Roubo tirava $3 (+40% na mesa de 4), virou $2. Como são de uso único, ficaram baratas ($1 a $3).</li><li>No PvP, trocar as cartas da loja custa $1 (era $3), subindo $1 a cada troca na mesma loja.</li></ul></div></div>
     </div>
   </section>
 
@@ -109,6 +109,9 @@ td{padding:5px 6px;border-bottom:1px solid var(--line)}
     <h2>Histórico</h2>
     <p class="sec-note">Da mais nova para a mais antiga. Toque numa versão para ver os detalhes.</p>
     <details class="ver" >
+  <summary><span class="vtag">v16.2</span><span class="vt"><b>Teto 19 sem estouro na mão inicial e 2 trocas por loja</b><small>16/10 · 20:45</small></span><span class="chev">›</span></summary>
+  <div class="vbody"><p class="ask"><b>Seu pedido</b>No Teto 19 ninguém pode estourar logo no início, e o Trocar fica só 2 vezes a cada loja.</p><div class="grp"><span class="tag t-chg">Mudanças</span><ul><li>No PvP, o Trocar vale 2 vezes a cada loja (eram 3).</li></ul></div><div class="grp"><span class="tag t-fix">Correções</span><ul><li>Com Teto 19, quem recebia 20 ou 21 nas duas primeiras cartas estourava sem jogar. Agora a mão inicial nunca estoura: a segunda carta é trocada até caber. Vale para pessoas e bots.</li></ul></div></div>
+</details><details class="ver" >
   <summary><span class="vtag">v16.1</span><span class="vt"><b>Trégua saiu</b><small>16/10 · 20:20</small></span><span class="chev">›</span></summary>
   <div class="vbody"><p class="ask"><b>Seu pedido</b>Tirar a carta de mesa Trégua.</p><div class="grp"><span class="tag t-chg">Mudanças</span><ul><li>A carta de mesa Trégua saiu do jogo. A mesa agora sorteia entre 9 cartas de mesa, uma a cada 3 rodadas, sem repetir a anterior.</li></ul></div></div>
 </details><details class="ver" >
@@ -208,7 +211,6 @@ td{padding:5px 6px;border-bottom:1px solid var(--line)}
     <h2>Possíveis ideias</h2>
     <p class="sec-note">Ainda não estão no jogo. Ficam guardadas para um futuro modo PvP Avançado, com cartas que escolhem um alvo ou mexem na mesa.</p>
     <div class="grid">
-      <div class="box"><h3>Cartas com alvo</h3><ul><li><b>Mira:</b> todo o seu dano da rodada vai para um rival escolhido</li><li><b>Maldição:</b> um rival escolhido causa metade do dano na próxima rodada</li><li><b>Gelo:</b> um rival não pode pedir carta na próxima rodada</li><li><b>Roubo:</b> tira $3 de um rival</li><li><b>Troca de Mão:</b> troca uma carta sua com uma carta de um rival</li><li><b>Espião:</b> vê as cartas de um rival antes de jogar</li></ul></div>
       <div class="box"><h3>Baralho especial</h3><ul><li><b>Carta Bomba:</b> quem tirar leva 10 de dano</li><li><b>Curinga Vermelho:</b> vale o que você quiser de 1 a 11</li><li><b>Carta Ouro:</b> dá $2 a quem tirar</li></ul></div>
     </div>
   </section>

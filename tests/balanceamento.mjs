@@ -2,6 +2,7 @@
 // Reproduz as regras de pvpStartRound / pvpShowdown / pvpCheckDamage do index.html.
 // Uso: node balanceamento.mjs [partidas]   (os números das cartas ficam em P)
 export const P = {
+  alvoCost: {mira:4,maldicao:4,gelo:5,roubo:3,troca:5,espiao:2}, roubo: 3, maldicao: 0.5, trocaMax: 15, miraAll: true, miraK: 0, geloMax: 2,
   escudo: 4, espelho: 0.20, espelhoMin1: true, esquiva: 17, critico: 1.5, sangria: 2, sangriaR: 3,
   vampiro: 0.25, lamina: 3, duplo: 1.5, duploN: 3, precisao: 4, furia: 1.4, furiaHp: 30, cinco: 2,
   armadura: 0.85, bandagem: 3, muralha: 10, muralhaFrac: 0, critico21: false, duploAll: false, cincoN: 5, esquivaX: false, cincoFlat: 0, furiaFlat: 0, criticoFlat: 0, duploAllK: 0, bandagemHalf: false, multOnPer: false, botGrowth: true, botSmart: false, cincoExtra: 0,
@@ -17,10 +18,16 @@ const hpFor = n => n>=6?120:120+12*(6-Math.max(2,n));
 function deck(rng){const d=[];for(let s=0;s<4;s++)for(const r of RANKS)d.push(r);for(let i=d.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d}
 export function mkRng(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296}}
 
-function playHand(p, rng){
+function playHand(p, rng, know){
   if(!p.deck||p.deck.length<15)p.deck=deck(rng);
   const draw=()=>p.deck.pop();
   const c=[draw(),draw()];let doubled=false;
+  if(p.frozenNow){while(c.length<P.geloMax&&tot(c)<17)c.push(draw());return {c,doubled}}
+  if(know){ // Espião: joga sabendo a mão do rival
+    if(know.x)return {c,doubled};
+    while(c.length<5&&tot(c)<21&&tot(c)<=know.t)c.push(draw());
+    return {c,doubled};
+  }
   if(tot(c)===21) return {c,doubled};
   // troca: mão dura de 12 a 16 com 2 cartas troca a menor
   if(!p.bot&&p.swaps>0&&c.length===2&&tot(c)>=12&&tot(c)<=16&&!c.includes('A')){const i=val(c[0])<=val(c[1])?0:1;c[i]=draw();p.swaps--;if(tot(c)===21)return{c,doubled}}
@@ -41,7 +48,7 @@ export function game(cfg, rng){
   const n=cfg.n, maxHp=cfg.hp||hpFor(n);
   const ps=[];
   for(let i=0;i<n;i++){const s=cfg.players[i]||{};
-    ps.push({i,hp:maxHp,al:true,has:{},cards:[],money:4,swaps:0,ult:false,colete:0,bleed:{},sent:0,dealt:0,dbl:s.bot?P.botSmart:(s.dbl??true),stop:s.stop,bot:!!s.bot,buy:s.buy||'none',want:s.want||null,fixed:s.cards||[],t:0,acq:{}});
+    ps.push({i,hp:maxHp,al:true,has:{},cards:[],money:4,swaps:0,ult:false,colete:0,bleed:{},sent:0,dealt:0,dbl:s.bot?P.botSmart:(s.dbl??true),gift:s.gift||null,alvo:[],stop:s.stop,bot:!!s.bot,buy:s.buy||'none',want:s.want||null,fixed:s.cards||[],t:0,acq:{}});
     for(const k of ps[i].fixed){ps[i].has[k]=true;ps[i].cards.push(k);ps[i].acq[k]=0}
   }
   let r=0, pingpong=0;
@@ -51,9 +58,23 @@ export function game(cfg, rng){
       if(p.colete&&p.colete<=r){p.has.colete=false;p.cards=p.cards.filter(k=>k!=='colete');p.colete=0}
       if(p.has.bandagem&&r>0&&p.hp<maxHp&&(!P.bandagemHalf||p.hp<maxHp/2))p.hp=Math.min(maxHp,p.hp+P.bandagem)}
     r++;
-    if((r-1)%3===0)for(const p of ps)p.swaps=3;
+    if((r-1)%3===0)for(const p of ps){p.swaps=3;}
     const alive=ps.filter(p=>p.al);
-    for(const p of alive){const h=playHand(p,rng);const t=tot(h.c);p.sub={t:Math.min(t,99),bj:h.c.length===2&&t===21,f:h.c.length>=5&&t<=21,x:t>21,c:h.c,d:h.doubled};p.v=handVal(p.sub)}
+    // cartas com alvo: usa uma por rodada, no rival com mais vida
+    for(const p of alive){p.mira=null;p.spy=null;p.trocaReady=false;p.frozenNow=p.frozen===r;
+      if(!p.alvo.length)continue;
+      const rv=alive.filter(q=>q!==p);if(!rv.length)continue;
+      const T=rv.reduce((a,b)=>b.hp>a.hp?b:a);const k=p.alvo.shift();p.used=(p.used||0)+1;
+      if(k==='mira')p.mira=T;else if(k==='maldicao')T.curse=r+1;else if(k==='gelo')T.frozen=r+1;
+      else if(k==='roubo'){const a=Math.min(P.roubo,T.money);T.money-=a;p.money+=a}
+      else if(k==='espiao')p.spy=T;else if(k==='troca')p.trocaReady=true}
+    const mk=(p,h)=>{const t=tot(h.c);p.sub={t:Math.min(t,99),bj:h.c.length===2&&t===21,f:h.c.length>=5&&t<=21,x:t>21,c:h.c,d:h.doubled};p.v=handVal(p.sub)};
+    for(const p of alive)if(!p.spy)mk(p,playHand(p,rng));
+    for(const p of alive)if(p.spy)mk(p,playHand(p,rng,P.spyOff?null:p.spy.sub));
+    for(const p of alive)if(p.trocaReady&&!p.sub.x&&p.sub.t<=P.trocaMax){
+      const rv=alive.filter(q=>q!==p);const T=rv.reduce((a,b)=>b.hp>a.hp?b:a);
+      [p.sub,T.sub]=[T.sub,p.sub];[p.v,T.v]=[T.v,p.v]}
+    for(const p of alive)if(p.trocaReady&&!(!p.sub.x&&p.sub.t<=P.trocaMax))p.alvo.unshift('troca');
     // ataques
     const inc=new Map(); // alvo -> Map(atacante -> dano bruto)
     const add=(to,from,d)=>{if(!inc.has(to))inc.set(to,new Map());const m=inc.get(to);m.set(from,(m.get(from)||0)+d)};
@@ -85,7 +106,10 @@ export function game(cfg, rng){
       if(p.has.critico&&P.criticoFlat&&s.t===21)per+=P.criticoFlat;
       if(p.has.duplo&&P.duploAllK&&beaten.length===parts.length)per=Math.round(per*P.duploAllK);
       if(p.has.precisao&&s.t===20)per+=P.precisao;
-      for(const b of beaten)add(b,p,per);
+      if(p.curse===r)per=Math.max(1,Math.round(per*P.maldicao));
+      if(p.mira&&P.miraK&&beaten.includes(p.mira)){for(const b of beaten)add(b,p,b===p.mira?Math.round(per*P.miraK):per)}
+      else if(p.mira&&beaten.includes(p.mira))add(p.mira,p,per*beaten.length);
+      else for(const b of beaten)add(b,p,per);
       p.dealt+=per*beaten.length;
       if(p.has.sangria)for(const b of beaten)p.bleed[b.i]={from:r,to:r+P.sangriaR};
       if(p.has.vampiro)p.hp=Math.min(maxHp,p.hp+Math.max(1,Math.round(per*beaten.length*P.vampiro)));
@@ -115,6 +139,7 @@ export function game(cfg, rng){
     // loja a cada 3 rodadas
     if(r%3===0)for(const p of ps){if(!p.al)continue;
       p.money+=Math.min(2,Math.floor(p.money/10));
+      if(p.gift&&p.money>=(P.alvoCost[p.gift]||0)){p.money-=(P.alvoCost[p.gift]||0);p.alvo.push(p.gift)}
       if(p.buy==='none')continue;
       let offer=shuffle(CARDS.filter(k=>!p.has[k]),rng).slice(0,3);let rr=3;
       for(let tries=0;tries<4;tries++){

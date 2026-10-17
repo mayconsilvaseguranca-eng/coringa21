@@ -71,7 +71,7 @@ export default async function () {
       const C = await t2.page('Caio');
       await createRoom(C, 'Caio', 'pvp');
       await C.click('[data-act=mesatoggle]');
-      check(await C.isVisible('text=Desligadas'), 'o botão das cartas de mesa não mudou para Desligadas');
+      check(await C.isVisible('[data-act=mesatoggle] >> text=Desligada'), 'o botão das cartas de mesa não mudou para Desligada');
       await C.click('[data-act=addbot]');
       await C.waitForTimeout(500);
       await C.click('[data-act=startgame]');

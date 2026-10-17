@@ -1,5 +1,14 @@
 import html
 V=[
+ ("v17","17/10 · 05:50","Cartas com alvo, troca da loja a $1",
+  "Adicionar as cartas com alvo com opção de tirar da partida, trocar as cartas da loja por $1, testar no 1 contra 1 e com mais gente e balancear as fortes.",
+  [("Novo","6 cartas com alvo na loja do PvP, de uso único: toque nela na sua vez e escolha o rival. Mira ($2): o rival leva 50% a mais do seu dano nesta rodada. Maldição ($2): na próxima rodada, o rival causa metade do dano. Gelo ($3): na próxima rodada, o rival só pode pedir 1 carta. Roubo ($2): tira $2 do rival para você. Troca de Mão ($3): sua mão e a do rival trocam de dono na revelação. Espião ($1): você vê a mão do rival assim que ele fechar."),
+   ("Novo","Quando alguém usa uma carta com alvo, todos veem um aviso (quem usou, qual carta, em quem). Se for em você, o aviso fica vermelho. Só o Espião é segredo."),
+   ("Novo","Na sala, quem cria a partida liga ou desliga as cartas com alvo, na mesma linha das cartas de mesa."),
+   ("Novo","Os bots compram e usam as cartas com alvo (menos o Espião), sempre no rival com mais vida. A Troca de Mão eles só usam com mão fraca."),
+   ("Mudou","Balanceamento no simulador, em 1 contra 1, mesa de 4 e mesa de 6: a Mira dobrava o dano (+26% de vitórias), virou +50%; o Gelo deixava o rival sem pedir carta (a mais forte, até +57%), virou só 1 carta; o Roubo tirava $3 (+40% na mesa de 4), virou $2. Como são de uso único, ficaram baratas ($1 a $3)."),
+   ("Mudou","No PvP, trocar as cartas da loja custa $1 (era $3), subindo $1 a cada troca na mesma loja."),
+   ("Novo","Teste novo no agente: um duelo usando as 6 cartas com alvo pelos botões, mais a opção de desligar.")]),
  ("v16.2","16/10 · 20:45","Teto 19 sem estouro na mão inicial e 2 trocas por loja",
   "No Teto 19 ninguém pode estourar logo no início, e o Trocar fica só 2 vezes a cada loja.",
   [("Corrigido","Com Teto 19, quem recebia 20 ou 21 nas duas primeiras cartas estourava sem jogar. Agora a mão inicial nunca estoura: a segunda carta é trocada até caber. Vale para pessoas e bots."),
@@ -182,7 +191,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '16/10/2026, 20:45'
+UPD=AG['atualizado'] if AG else '17/10/2026, 05:50'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
@@ -328,7 +337,6 @@ td{{padding:5px 6px;border-bottom:1px solid var(--line)}}
     <h2>Possíveis ideias</h2>
     <p class="sec-note">Ainda não estão no jogo. Ficam guardadas para um futuro modo PvP Avançado, com cartas que escolhem um alvo ou mexem na mesa.</p>
     <div class="grid">
-      <div class="box"><h3>Cartas com alvo</h3><ul><li><b>Mira:</b> todo o seu dano da rodada vai para um rival escolhido</li><li><b>Maldição:</b> um rival escolhido causa metade do dano na próxima rodada</li><li><b>Gelo:</b> um rival não pode pedir carta na próxima rodada</li><li><b>Roubo:</b> tira $3 de um rival</li><li><b>Troca de Mão:</b> troca uma carta sua com uma carta de um rival</li><li><b>Espião:</b> vê as cartas de um rival antes de jogar</li></ul></div>
       <div class="box"><h3>Baralho especial</h3><ul><li><b>Carta Bomba:</b> quem tirar leva 10 de dano</li><li><b>Curinga Vermelho:</b> vale o que você quiser de 1 a 11</li><li><b>Carta Ouro:</b> dá $2 a quem tirar</li></ul></div>
     </div>
   </section>
