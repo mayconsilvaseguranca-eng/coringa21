@@ -35,10 +35,10 @@ export default async function () {
     await deck('vidro');
     const r1 = await round([['K', '♠'], ['Q', '♥']], [['10', '♣'], ['8', '♦']]);
     check(r1[1] === h0 - 18, `Vidro: Beto deveria ter ${h0 - 18} PV, tem ${r1[1]}`);
-    // Miúdo: Ana fecha 20 com 3 cartas, 15 de dano +2
+    // Miúdo: Ana fecha 20 com 3 cartas, 15 de dano +1
     await deck('miudo');
     const r2 = await round([['5', '♠'], ['5', '♥'], ['10', '♣']], [['10', '♣'], ['8', '♦']]);
-    check(r2[1] === h0 - 35, `Miúdo: Beto deveria ter ${h0 - 35} PV, tem ${r2[1]}`);
+    check(r2[1] === h0 - 34, `Miúdo: Beto deveria ter ${h0 - 34} PV, tem ${r2[1]}`);
     // Apostador: Ana estoura e perde 2 PV a mais (Beto 18 causa 14)
     await deck('apostador');
     const r3 = await round([['K', '♠'], ['Q', '♥'], ['5', '♣']], [['10', '♣'], ['8', '♦']]);
@@ -53,7 +53,15 @@ export default async function () {
     await deck('fantasma');
     const viu = await A.waitForFunction(() => { window.__c21.render(); return !!document.querySelector('.rvl .tg.ghost'); }, null, { timeout: 8000 }).then(() => true, () => false);
     check(viu, 'Fantasma: Ana deveria ver a primeira carta de Beto');
+    // Cinco Cartas: 5 cartas somando 15 ganham de 18 (pontos (35+15)×4 = 200 → 50 de dano)
+    await deck('padrao');
+    const antes = (await hp())[1];
+    const r4 = await round([['2', '♠'], ['2', '♥'], ['3', '♣'], ['4', '♦'], ['4', '♠']], [['10', '♣'], ['8', '♦']]);
+    check(r4[1] === antes - 50 && r4[0] === h0 - 16, `Cinco Cartas: Beto deveria perder 50 PV e Ana nada, veio ${r4} (Beto tinha ${antes})`);
+    // a tela de jogadas do PvP explica as jogadas certas
+    await A.evaluate(() => { const b = document.createElement('button'); b.dataset.act = 'hands'; document.body.appendChild(b); b.click(); });
+    check(await A.isVisible('text=Jogadas do PvP') && await A.isVisible('text=ganha de qualquer mão até 20'), 'a tela de jogadas do PvP não apareceu');
     check(t.errors.length === 0, 'erros na página: ' + t.errors.join(' | '));
-    return 'baralhos no jogo ok (Vidro, Miúdo, Apostador, Fantasma)';
+    return 'baralhos no jogo ok (Vidro, Miúdo, Apostador, Fantasma) e Cinco Cartas no PvP';
   } finally { await t.close(); }
 }

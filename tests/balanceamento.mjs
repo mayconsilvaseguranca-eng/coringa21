@@ -53,7 +53,7 @@ function playHand(p, rng, know){
     c.push(draw())}
   return {c,doubled};
 }
-const handVal = h => h.x?-1:h.t+(h.bj?.5:0)+(h.f?.25:0);
+const handVal = h => h.x?-1:h.f?Math.max(h.t,20.5)+.25:h.t+(h.bj?.5:0); // igual ao jogo: Cinco Cartas ganha de qualquer mão até 20
 const MESA=['tempestade','teto','ceu','empate','curta','asferro','ouro','silencio','hospital'];
 
 // sim de uma partida. players: [{cards:[], buy:'random'|'none'|fn, ...}]

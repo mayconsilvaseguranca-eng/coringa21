@@ -1,5 +1,12 @@
 import html
 V=[
+ ("v18.1","17/10 · 19:30","Carta de mesa tocável, jogadas do PvP e Cinco Cartas corrigida",
+  "Poder tocar na carta de mesa para saber o que ela faz, mostrar direito as jogadas no PvP e corrigir a jogada de 5 cartas.",
+  [("Novo","O nome da carta de mesa no topo da mesa tem um (i): tocando nele aparece o que ela faz e em quais rodadas vale. Não precisa mais ir ao menu de pausa."),
+   ("Corrigido","Cinco Cartas no PvP: antes, 5 cartas valiam só um pouquinho a mais que o total (5 cartas somando 15 perdiam para 16). Agora 5 cartas sem estourar ganham de qualquer mão até 20 e só perdem para 21 e blackjack."),
+   ("Mudou","A tela de jogadas no PvP mostra as jogadas certas (Blackjack, Cinco Cartas, Vinte e Um, Vitória), quem ganha de quem e como os pontos viram dano. Saíram as dicas de dealer e o Empate, que só valem no solo."),
+   ("Mudou","Com a Cinco Cartas mais forte, o baralho Miúdo ficou forte demais na simulação (até +106%). Agora ele dá +1 de dano por carta além da segunda (era +2) e não ganha mais vida extra (eram +30 PV). Fica entre −16% e +25% do Padrão em todos os cenários. A carta Cinco Lâminas continua equilibrada."),
+   ("Mudou","Testes: Cinco Cartas com 15 ganhando de 18, a tela de jogadas do PvP e o toque na carta de mesa.")]),
  ("v18","17/10 · 18:50","Baralhos para escolher na sala",
   "Escolher o baralho na sala antes de começar, com explicação e todas as cartas, opção de desligar, e testar todos os baralhos com e sem cartas de mesa e com alvo para deixar todos no mesmo nível.",
   [("Novo","Na sala, cada jogador escolhe o seu baralho em Baralho › trocar. A tela mostra os 11 baralhos; tocando em um, aparece como ele funciona e todas as cartas que tem (valor e quantidade)."),
@@ -213,7 +220,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '17/10/2026, 18:50'
+UPD=AG['atualizado'] if AG else '17/10/2026, 19:30'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

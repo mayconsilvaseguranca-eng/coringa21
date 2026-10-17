@@ -46,6 +46,12 @@ export default async function () {
     check((await fx()).every(x => x === 'teto'), `rodada 1 deveria ter Teto 19 para os dois: ${await fx()}`);
     const viu = await B.waitForFunction(() => { const f = document.querySelector('#fx .mesa-fx'); return f && f.textContent.includes('Teto 19') && f.textContent.includes('rodadas 1 a 3'); }, null, { timeout: 8000 }).then(() => true, () => false);
     check(viu, 'Beto não viu a animação da carta de mesa');
+    // tocar no nome da carta de mesa explica o que ela faz
+    await A.waitForTimeout(1200);
+    await A.evaluate(() => window.__c21.render());
+    await A.click('#dlbl');
+    check(await A.isVisible('text=Passar de 19 estoura') && await A.isVisible('text=Vale nas rodadas 1 a 3'), 'tocar na carta de mesa deveria explicar o que ela faz');
+    await A.click('[data-act=close]');
     // Rodada 1 com Teto 19: Beto fecha 20 e estoura; Ana 18 vence (14 de dano).
     const r1 = await round([['10', '♠'], ['8', '♥']], [['K', '♣'], ['Q', '♦']]);
     check(r1[0] === h0 && r1[1] === h0 - 14, `Teto 19: esperado Ana ${h0} e Beto ${h0 - 14}, veio ${r1}`);

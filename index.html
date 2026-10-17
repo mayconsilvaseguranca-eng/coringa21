@@ -286,6 +286,8 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .dkc small{font-size:10.5px;font-weight:700;color:#555}
 .dkc.extra{box-shadow:0 0 0 2px var(--gold),0 2px 0 rgba(0,0,0,.4)}
 .rvl .tg.ghost{color:#e9e4ff;background:#4a4a6e}
+#dlbl.mesa-on{cursor:pointer}
+#dlbl .info{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#c9a6ff;color:#1a1030;font-style:normal;font-size:10px;font-weight:800;margin-left:3px;vertical-align:1px}
 .kind.alvo{background:color-mix(in srgb,var(--orange) 32%,transparent);color:#ffb074}
 .tgl-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .tgl-list .btn{flex-direction:row;justify-content:center;gap:6px;flex-wrap:wrap}
@@ -446,7 +448,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v18';
+const VERSION='v18.1';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -588,7 +590,7 @@ const DECKS={
   vermelho:{n:'Vermelho',g:'⇄',bg:'#b8324f',d:'+1 troca por loja (3 em vez de 2).',hp:0},
   azul:{n:'Azul',g:'$',bg:'#2a5fa8',d:'Começa com $2 a mais, mas com 15 PV a menos.',hp:-15},
   reis:{n:'Reis',g:'K',bg:'#6a3fb5',d:'Sem as cartas 2 e 3: mãos mais altas. 15 PV a menos.',hp:-15},
-  miudo:{n:'Miúdo',g:'7',bg:'#3a8f4b',d:'Só cartas de 2 a 8 e Ases. Vencendo, cada carta além da segunda dá +2 de dano em cada rival. 30 PV a mais.',hp:30},
+  miudo:{n:'Miúdo',g:'7',bg:'#3a8f4b',d:'Só cartas de 2 a 8 e Ases: mais mãos de 5 cartas. Vencendo, cada carta além da segunda dá +1 de dano em cada rival.',hp:0},
   ases:{n:'Ases',g:'A',bg:'#c98a12',d:'5 Ases no baralho (um a mais). 8 PV a menos.',hp:-8},
   guerreiro:{n:'Guerreiro',g:'†',bg:'#c43d2b',d:'Começa com uma carta de ataque sorteada, mas sem dinheiro.',hp:0},
   guardiao:{n:'Guardião',g:'◈',bg:'#3d6f9e',d:'Começa com uma carta de defesa sorteada, mas sem dinheiro.',hp:0},
@@ -776,7 +778,7 @@ function turnClock(m){
   m.innerHTML=`<span class="turnpill ${left<=10?'late':''}"><span>Sua vez</span><b>${left}s</b><i style="width:${pct}%"></i></span>`;
 }
 function renderRivals(){
-  {const f=S.mp&&S.mp.fx&&S.mp.fx[0];$('#dlbl').textContent=f?`${JK[f.k].g} ${JK[f.k].n}`:'Mesa';$('#dlbl').classList.toggle('mesa-on',!!f)}
+  {const f=S.mp&&S.mp.fx&&S.mp.fx[0];const el=$('#dlbl');el.innerHTML=f?`${JK[f.k].g} ${esc(JK[f.k].n)} <i class="info">i</i>`:'Mesa';el.classList.toggle('mesa-on',!!f);if(f){el.dataset.act='mesainfo';el.setAttribute('role','button')}else{delete el.dataset.act;el.removeAttribute('role')}}
   const reveal=S.phase==='pshow'&&S.pv&&S.pv.r===S.round;
   const ps=gamePlayers().filter(p=>!p.me);
   $('#dt').textContent=`${ps.filter(p=>p.st&&p.st.al).length} vivos`;$('#dt').className='';
@@ -1151,7 +1153,8 @@ function pvpSubmit(){
   if(!S.msg)S.msg=t>cap?'Estourou':`Você fechou com ${t}`;
   render();mpTick();
 }
-const handVal=sub=>!sub||sub.x?-1:(+sub.t||0)+(sub.bj?.5:0)+(sub.f?.25:0);
+/* valor da mão no PvP: Blackjack > Cinco Cartas com 21 > 21 > Cinco Cartas (qualquer total) > 20 > 19… */
+const handVal=sub=>!sub||sub.x?-1:sub.f?Math.max(+sub.t||0,20.5)+.25:(+sub.t||0)+(sub.bj?.5:0);
 async function pvpShowdown(){
   S.phase='pshow';S.busy=true;
   const evs=S.mp.alvo?tgAll():[];
@@ -1190,7 +1193,7 @@ async function pvpShowdown(){
     if(act('cinco')){const k=2*(S.player.length-1);per+=k;extra.push(`Cinco Lâminas: +${k} em cada rival`)}
     if(act('precisao')&&t===20){per+=7;extra.push('Precisão: fechou com 20, +7 em cada rival')}
     if(myDeck()==='vidro'){per+=3;extra.push('Baralho Vidro: +3 em cada rival')}
-    if(myDeck()==='miudo'&&S.player.length>2){const k=2*(S.player.length-2);per+=k;extra.push(`Baralho Miúdo: +${k} em cada rival`)}
+    if(myDeck()==='miudo'&&S.player.length>2){const k=S.player.length-2;per+=k;extra.push(`Baralho Miúdo: +${k} em cada rival`)}
     if(cursed){per=Math.max(1,Math.round(per/2));extra.push('Maldição: você causou metade do dano')}
     let dealtNow=0;
     for(const b of beaten){const q=aim.includes(b.pid)?Math.round(per*1.5):per;if(q!==per)extra.push(`Mira: ${b.name} levou ${q}`);S.mp.sent[b.pid]=r1((S.mp.sent[b.pid]||0)+q);dealtNow+=q}
@@ -1674,7 +1677,7 @@ function botTick(){
           if(bAct(b,'cinco'))per+=2*(cards-1);
           if(bAct(b,'precisao')&&t===20)per+=7;
           if(b.dk==='vidro')per+=3;
-          if(b.dk==='miudo')per+=2*Math.max(0,cards-2);
+          if(b.dk==='miudo')per+=Math.max(0,cards-2);
           if(evs.some(e=>e.k==='maldicao'&&+e.r===b.r&&e.to===b.pid))per=Math.max(1,Math.round(per/2));
           const aim=evs.filter(e=>e.k==='mira'&&+e.r===b.r&&e.from===b.pid).map(e=>e.to);
           for(const x of beaten)b.sent[x.pid]=r1((b.sent[x.pid]||0)+(aim.includes(x.pid)?Math.round(per*1.5):per));
@@ -1916,6 +1919,11 @@ function showHow(back){
     <button class="btn b-go" data-act="${back}">Entendi</button>`,'how');
 }
 function showHands(){
+  if(isPvp()){
+    const PV={win:'Passar pelo menos um rival',t21:'Fechar com 21 usando 3 ou mais cartas',bj:'21 com as 2 primeiras cartas',five:'5 cartas sem estourar: ganha de qualquer mão até 20'};
+    showSheet(`<h2>Jogadas do PvP</h2><div class="list">${['bj','five','t21','win'].map(k=>{const h=HANDS[k];return `<div class="li"><div class="grow"><b>${h.n}</b><br><small class="c-dim">${PV[k]}</small></div><span class="num c-chips">${h.c}</span><span class="c-dim">×</span><span class="num c-mult">${h.m}</span></div>`}).join('')}</div>
+    <div class="note" style="font-size:13.5px;line-height:1.4"><b>Quem ganha de quem:</b> Blackjack › Cinco Cartas com 21 › 21 › Cinco Cartas › 20 › 19 › … Estourou, perde para todos.<br><b>Dano:</b> Fichas da jogada + soma das cartas, vezes o Mult. Esses pontos viram dano em cada rival que ficou abaixo de você.</div>
+    <button class="btn b-go" data-act="close">Fechar</button>`,'hands');return}
   showSheet(`<h2>Suas jogadas</h2><div class="list">${Object.keys(HANDS).map(k=>{const v=hv(k);return `<div class="li"><div class="grow"><b>${HANDS[k].n}</b> <span class="c-dim">nv ${S?S.levels[k]:1}</span><br><small class="c-dim">${HAND_HINT[k]}</small></div><span class="num c-chips">${v.c}</span><span class="c-dim">×</span><span class="num c-mult">${v.m}</span></div>`}).join('')}</div>
   <p style="font-size:13.5px">Soma das cartas: Ás = 11, figuras = 10, demais pelo número.</p>
   <button class="btn b-go" data-act="close">Fechar</button>`,'hands');
@@ -2013,6 +2021,15 @@ function useAlvo(i,to){
   pop($('#blindBox'),k==='roubo'?`Roubo: +$${e.a} de ${tp.name}`:`${JK[k].n} em ${tp.name}`,'info');
 }
 /* Toque na marca: o que a carta está fazendo em você (ou no rival) */
+/* Toque na carta de mesa: o que ela faz e até quando vale */
+function showMesaInfo(){
+  const f=S&&S.mp&&S.mp.fx&&S.mp.fx[0];if(!f)return;const d=JK[f.k];
+  const ini=Math.floor(((S.round||1)-1)/PVP_SHOP_EVERY)*PVP_SHOP_EVERY+1,fim=ini+PVP_SHOP_EVERY-1;
+  showSheet(`<div class="item" style="background:none;border:0"><div class="art" style="--jc:${d.bg};width:80px;height:104px;font-size:36px">${d.g}</div><span class="kind mesa">Carta de mesa · vale para todos</span><h2>${d.n}</h2></div>
+  <div class="note" style="text-align:center;font-size:15.5px;line-height:1.45">${esc(d.d)}</div>
+  <p style="text-align:center;font-size:13.5px">Vale nas rodadas ${ini} a ${fim}. Na próxima loja, a mesa sorteia outra.</p>
+  <button class="btn b-go" data-act="close">Entendi</button>`,'mesainfo');
+}
 function showFxInfo(k,to,from,now){
   const d=JK[k];if(!d)return;const me=to===MP.pid;
   const who=me?'você':((gamePlayers().find(p=>p.pid===to)||{}).name||'o rival');
@@ -2186,6 +2203,7 @@ document.addEventListener('click',e=>{
     case 'toshopfresh':openShop();break;
     case 'joker':if(S)showJoker(i);break;
     case 'alvoslot':if(S)showAlvo(i);break;
+    case 'mesainfo':if(S)showMesaInfo();break;
     case 'fxinfo':if(S)showFxInfo(t.dataset.k,t.dataset.to,t.dataset.from,t.dataset.now==='1');break;
     case 'sellalvo':{const k=alvoInv()[i];if(!k)break;S.money+=sellPrice(k);alvoInv().splice(i,1);beep(300,.08);render();if(S.phase==='shop')showShop();else resumeSheet();break}
     case 'usealvo':if(S)useAlvo(i,t.dataset.p);break;
