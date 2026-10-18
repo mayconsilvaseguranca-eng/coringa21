@@ -1,5 +1,17 @@
 import html
 V=[
+ ("v19","18/10 · 15:50","Modo assistir e aposta da rodada",
+  "Quem sair da partida continua assistindo e escolhe quem quer ver, e a aposta da rodada.",
+  [("Novo","Modo assistir: quando sua vida acaba, aparece Assistir a partida. Você escolhe quem quer acompanhar (botões com o nome de cada um ainda vivo) e vê ao vivo as cartas dessa pessoa, a vida, se ela está pensando, fechou ou estourou, as cartas que ela tem e as cartas com alvo que estão nela."),
+   ("Novo","Aposta da rodada: no PvP, o quadro do dinheiro virou Apostar. No começo da sua vez, antes de pedir, parar, dobrar ou trocar, você aposta $1, $2 ou $3 em uma de duas coisas: fechar com 20 ou mais sem estourar (paga 2×) ou ter a maior mão da mesa (paga 2× contra 1 rival, 3× contra 2 ou 3, 4× contra 4 ou mais). Uma aposta por rodada; o resultado aparece no resumo da rodada."),
+   ("Mudou","Com Teto 19 a aposta vira fechar com 18 ou mais, e com Céu Aberto, 22 ou mais."),
+   ("Novo","Teste novo no agente: duas pessoas apostam (uma ganha, outra perde) e quem foi eliminado assiste o outro jogar ao vivo.")]),
+ ("v19","18/10 · 15:50","Modo assistir e aposta da rodada",
+  "Quem sair da partida continua assistindo e escolhe quem quer ver, e a aposta da rodada.",
+  [("Novo","Modo assistir: quando sua vida acaba, aparece Assistir a partida. Você escolhe quem quer acompanhar (botões com o nome de cada um ainda vivo) e vê ao vivo as cartas dessa pessoa, a vida, se ela está pensando, fechou ou estourou, as cartas que ela tem e as cartas com alvo que estão nela."),
+   ("Novo","Aposta da rodada: no PvP, o quadro do dinheiro virou Apostar. No começo da sua vez, antes de pedir, parar, dobrar ou trocar, você aposta $1, $2 ou $3 em uma de duas coisas: fechar com 20 ou mais sem estourar (paga 2×) ou ter a maior mão da mesa (paga 2× contra 1 rival, 3× contra 2 ou 3, 4× contra 4 ou mais). Uma aposta por rodada; o resultado aparece no resumo da rodada."),
+   ("Mudou","Com Teto 19 a aposta vira fechar com 18 ou mais, e com Céu Aberto, 22 ou mais."),
+   ("Novo","Teste novo no agente: duas pessoas apostam (uma ganha, outra perde) e quem foi eliminado assiste o outro jogar ao vivo.")]),
  ("v18.1","17/10 · 19:30","Carta de mesa tocável, jogadas do PvP e Cinco Cartas corrigida",
   "Poder tocar na carta de mesa para saber o que ela faz, mostrar direito as jogadas no PvP e corrigir a jogada de 5 cartas.",
   [("Novo","O nome da carta de mesa no topo da mesa tem um (i): tocando nele aparece o que ela faz e em quais rodadas vale. Não precisa mais ir ao menu de pausa."),
@@ -220,7 +232,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '17/10/2026, 19:30'
+UPD=AG['atualizado'] if AG else '18/10/2026, 15:50'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

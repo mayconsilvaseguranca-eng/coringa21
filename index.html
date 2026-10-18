@@ -288,6 +288,24 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .rvl .tg.ghost{color:#e9e4ff;background:#4a4a6e}
 #dlbl.mesa-on{cursor:pointer}
 #dlbl .info{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#c9a6ff;color:#1a1030;font-style:normal;font-size:10px;font-weight:800;margin-left:3px;vertical-align:1px}
+.stat.betbtn{cursor:pointer;font:inherit;color:inherit}
+.stat.betbtn small{color:var(--gold)}
+.stat.betbtn.on{box-shadow:0 0 0 2px var(--gold),0 2px 0 var(--edge)}
+.betrow{display:flex;align-items:center;gap:6px;background:var(--panel-2);border-radius:10px;padding:8px}
+.betrow .grow{display:flex;flex-direction:column;min-width:0}
+.betrow .grow b{font-size:14.5px}.betrow .grow small{font-size:12px;color:var(--ink-dim)}
+.betrow .btn{flex:0 0 44px;padding:9px 0}
+.wtop small{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:6px}
+.wsel{display:flex;flex-wrap:wrap;gap:6px}
+.wsel .tgl{display:inline-flex;align-items:center;gap:5px}
+.wsel .dot{width:11px;height:11px}
+.wcard{background:var(--felt);border:2px solid var(--edge);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.wname{display:flex;align-items:center;gap:8px;font-size:17px}
+.wbar{position:relative;height:5px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.1)}
+.wbar i{display:block;height:100%;background:#ff6b61}
+.wcards{min-height:var(--ch);justify-content:center}
+.wsitu{text-align:center;font-weight:800;font-size:15px}
+.wown{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
 .kind.alvo{background:color-mix(in srgb,var(--orange) 32%,transparent);color:#ffb074}
 .tgl-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .tgl-list .btn{flex-direction:row;justify-content:center;gap:6px;flex-wrap:wrap}
@@ -448,7 +466,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v18.1';
+const VERSION='v19';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -743,7 +761,7 @@ function renderHUD(){
   $('#stats').innerHTML=`
     <div class="stat h"><small>${pvp?'Loja em':'Mãos'}</small><span class="num">${pvp?pvpShopIn():S.handsLeft}</span></div>
     <div class="stat s"><small>Trocas</small><span class="num">${S.swapsLeft}</span></div>
-    <div class="stat mo"><small>Dinheiro</small><span class="num">$${S.money}</span></div>
+    ${pvp?`<button class="stat mo betbtn ${S.mp.bet&&S.mp.bet.r===S.round?'on':''}" data-act="bet" aria-label="Apostar"><small>${S.mp.bet&&S.mp.bet.r===S.round?'Aposta $'+S.mp.bet.a:'Apostar'}</small><span class="num">$${S.money}</span></button>`:`<div class="stat mo"><small>Dinheiro</small><span class="num">$${S.money}</span></div>`}
     ${pvp?`<button class="stat rxbtn" data-act="rxopen" aria-label="Mandar reação"><span class="rxi">😀</span><small>Reagir</small></button>`:`<div class="stat"><small>Ante</small><span class="num">${S.ante}<span class="c-dim">/8</span></span></div>`}
     <button class="stat menu" data-act="menu" aria-label="Pausa"><span class="pz">❚❚</span><small>Pausa</small></button>`;
   renderStrip();
@@ -830,7 +848,7 @@ function renderActions(){
   const a=$('#actions');
   if(S&&isPvp()&&S.phase==='pwait'){a.className='actions one';const w=pvpWaitingNames();a.innerHTML=`<button class="btn b-dim" data-act="board" style="color:var(--ink)">Esperando ${w.length?esc(w.slice(0,3).join(', '))+(w.length>3?' e mais '+(w.length-3):''):'a mesa'}<small>a rodada abre quando todos fecharem a mão</small></button>`;return}
   if(S&&isPvp()&&S.phase==='pshow'){a.className='actions one';a.innerHTML=`<button class="btn b-go" data-act="pvpres">Ver resultado da rodada</button>`;return}
-  if(!S||S.phase!=='play'){a.className='actions one';a.innerHTML=(S&&S.mp&&['out','done','won','duelwait'].includes(S.phase))?`<button class="btn b-go" data-act="board">Ver placar</button>`:'';return}
+  if(!S||S.phase!=='play'){a.className='actions one';a.innerHTML=(S&&S.mp&&['out','done','won','duelwait'].includes(S.phase))?(isPvp()&&S.phase==='out'?`<button class="btn b-swap" data-act="watch">Assistir a partida</button>`:`<button class="btn b-go" data-act="board">Ver placar</button>`):'';return}
   if(isPvp()&&S.phase==='play'&&S.player.length&&!S.busy){
     const canSwapP=!S.doubled&&S.swapsLeft>0&&S.sel!=null;
     a.className='actions';
@@ -1207,6 +1225,8 @@ async function pvpShowdown(){
   let earn=beaten.length?(beaten.length===parts.length?2:1):0;
   if(fxOn('ouro')&&earn){earn*=2;extra.push('Febre do Ouro: dinheiro em dobro')}
   S.money+=earn;
+  if(S.mp.bet&&S.mp.bet.r===S.round){const b=S.mp.bet;const won=b.k==='20'?(!me.x&&(+me.t||0)>=betLine()):(parts.length>0&&beaten.length===parts.length);
+    if(won){S.money+=b.a*b.m;extra.push(`Aposta: acertou e recebeu $${b.a*b.m}`)}else extra.push(`Aposta: errou e perdeu $${b.a}`);b.done=1}
   if(fxOn('empate')&&myV>=0&&parts.some(p=>p.v===myV)){if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(S.mp.hp-5);extra.push('Empate Sangrento: você empatou e levou 5 de dano')}
   if(beaten.length)S.stats.wins++;S.stats.hands++;S.stats.best=Math.max(S.stats.best,pts);S.stats.total+=pts;
   S.pv={r:S.round,parts,beaten:beaten.map(b=>b.pid),pts,per,earn,type,myV,extra,at:Date.now(),mySub:me};
@@ -1486,7 +1506,7 @@ let lastPres='';
 function mpSync(){
   if(!NR||!S||!S.mp)return;
   const st={a:S.ante,b:S.bi,l:S.mp.lives,al:S.mp.alive?1:0,sc:S.roundScore,t:S.stats.total,ph:S.phase,dh:S.mp.dh,n:S.jokers.length};
-  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);st.tg=(S.mp.tg||[]).slice(-8);st.mo=S.money;if(S.player&&S.player[0]&&S.round)st.f1={r:S.round,c:cardStr(S.player[0])};if(S.mp.rx)st.rx=S.mp.rx;delete st.dh;delete st.l;delete st.sc}
+  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);st.tg=(S.mp.tg||[]).slice(-8);st.mo=S.money;if(S.player&&S.player[0]&&S.round)st.f1={r:S.round,c:cardStr(S.player[0])};st.live=S.phase==='play'&&S.player.length?{r:S.round,c:S.player.map(cardStr)}:null;st.jk=S.jokers.map(j=>j.k);st.ai=alvoInv().slice();if(S.mp.rx)st.rx=S.mp.rx;delete st.dh;delete st.l;delete st.sc}
   const s=JSON.stringify(st);if(s===lastPres)return;lastPres=s;
   NR.presence({g:S.mp.gid,st}).catch(()=>{});
 }
@@ -1497,6 +1517,7 @@ function mpTick(){
     pvpCheckDamage(ps);
     rxCheck(ps);
     if(S.mp.alvo)alvoCheck();
+    if(openSheet==='watch')showWatch();
     if(S.phase==='pwait'&&S.mp.alive&&!S.busy&&S.mp.sub&&S.mp.sub.r===S.round&&!pvpWaitingNames().length){pvpShowdown();return}
     if(['play','pwait','pshow'].includes(S.phase)){renderActions();renderRivals()}
   }
@@ -1587,7 +1608,7 @@ function botShop(b){
   const offer=rnd(Object.keys(JK).filter(k=>(JK[k].pvp==='atk'||JK[k].pvp==='def')&&!bHas(b,k))).slice(0,3);
   if(b.alvo){const a=rnd(Object.keys(JK).filter(k=>JK[k].pvp==='alvo'&&k!=='espiao'&&!b.alvoInv.includes(k)));if(a.length)offer.push(a[0])}
   for(const k of offer){if(JK[k].c>b.money)continue;if(JK[k].pvp==='alvo'){if(b.alvoInv.length<ALVO_MAX){b.money-=JK[k].c;b.alvoInv.push(k)}}else if(b.cards.length<5){b.money-=JK[k].c;b.cards.push(k)}}
-  b.st.n=b.cards.length;b.st.mo=b.money;
+  b.st.n=b.cards.length;b.st.mo=b.money;b.st.jk=b.cards.slice();b.st.ai=b.alvoInv.slice();
 }
 function botFx(b,all,R){if(!b.mesa)return [];const k=mesaCardFor(b.g,R);return k?[{k}]:[]}
 /* Cartas com alvo vistas pelo bot (as dele e as dos outros) */
@@ -2030,6 +2051,49 @@ function showMesaInfo(){
   <p style="text-align:center;font-size:13.5px">Vale nas rodadas ${ini} a ${fim}. Na próxima loja, a mesa sorteia outra.</p>
   <button class="btn b-go" data-act="close">Entendi</button>`,'mesainfo');
 }
+/* ---------- Aposta da rodada (PvP): antes de jogar, aposte $1 a $3 ---------- */
+const betLine=()=>capNow()-1;
+const betMult=k=>{if(k==='20')return 2;const n=gamePlayers().filter(p=>!p.me&&p.st&&p.st.al).length;return n<=1?2:n<=3?3:4};
+const canBet=()=>isPvp()&&S.mp.alive&&S.phase==='play'&&!S.busy&&S.player.length===2&&S.mp.actR!==S.round&&!(S.mp.bet&&S.mp.bet.r===S.round);
+function showBet(){
+  const b=S.mp.bet&&S.mp.bet.r===S.round?S.mp.bet:null;
+  if(b){showSheet(`<h2>Sua aposta</h2><div class="note" style="text-align:center;font-size:15px">$${b.a} em <b>${b.k==='20'?`fechar com ${betLine()} ou mais`:'ter a maior mão da mesa'}</b>.<br>Se acertar, recebe $${b.a*b.m}.</div><button class="btn b-go" data-act="close">Voltar</button>`,'bet');return}
+  const ok=canBet();
+  const row=(k,t,sub)=>`<div class="betrow"><div class="grow"><b>${t}</b><small>${sub} · paga ${betMult(k)}×</small></div>${[1,2,3].map(a=>`<button class="btn b-go sm" data-act="betgo" data-k="${k}" data-a="${a}" ${ok&&S.money>=a?'':'disabled'}>$${a}</button>`).join('')}</div>`;
+  showSheet(`<h2>Aposta da rodada</h2>
+  <p style="text-align:center;font-size:13.5px">${ok?'Aposte antes de pedir, parar, dobrar ou trocar. Uma aposta por rodada.':'Só dá para apostar no começo da sua vez, antes de qualquer jogada.'}</p>
+  ${row('20',`Fechar com ${betLine()} ou mais`,'sem estourar')}
+  ${row('top','Maior mão da mesa','passar todos os rivais')}
+  <button class="btn b-dim" data-act="close">Voltar</button>`,'bet');
+}
+function placeBet(k,a){
+  if(!canBet()||![1,2,3].includes(a)||S.money<a||!['20','top'].includes(k))return;
+  S.money-=a;S.mp.bet={r:S.round,k,a,m:betMult(k)};beep(660,.08);setTimeout(()=>beep(880,.1),90);
+  hideSheet();render();pop($('#stats .betbtn'),`Aposta $${a}`,'gold');
+}
+/* ---------- Modo assistir: quem saiu escolhe de quem ver as cartas ---------- */
+function showWatch(){
+  if(!S||!S.mp)return;
+  const alive=gamePlayers().filter(p=>!p.me&&p.st&&p.st.al);
+  if(!alive.length){showBoard();return}
+  let p=alive.find(x=>x.pid===S.mp.watch)||alive[0];S.mp.watch=p.pid;
+  const st=p.st||{},r=+st.r||1;
+  const sub=st.sub&&+st.sub.r===r?st.sub:null;
+  const live=!sub&&st.live&&+st.live.r===r?st.live:null;
+  const cards=sub?sub.c:live?live.c:[];
+  const situ=st.ph==='shop'||st.ph==='cash'?'na loja':sub?(sub.x?'estourou':`fechou com ${sub.t}`):live?'pensando…':'esperando as cartas';
+  const fx=fxOnPid(p.pid,r);
+  const own=[...(Array.isArray(st.jk)?st.jk:[]),...(Array.isArray(st.ai)?st.ai:[])].filter(k=>JK[k]);
+  showSheet(`<div class="wtop"><small>Assistindo · rodada ${r}</small><div class="wsel">${alive.map(x=>`<button class="tgl ${x.pid===p.pid?'on':''}" data-act="watchp" data-p="${esc(x.pid)}"><span class="dot" style="--pc:${colOf(x.col)}"></span> ${esc(x.name)}</button>`).join('')}</div></div>
+  <div class="wcard"><div class="wname"><span class="dot" style="--pc:${colOf(p.col)}"></span><b>${esc(p.name)}</b><span class="num" style="color:#ff6b61;margin-left:auto">${Math.max(0,+st.hp||0)} PV</span></div>
+  <div class="hpbar wbar"><i style="width:${Math.max(0,Math.min(100,(+st.hp||0)/(S.mp.maxHp||PVP_HP)*100))}%"></i></div>
+  <div class="cards wcards">${cards.length?cards.map((c,i)=>cardHTML(cardFromStr(c,i))).join(''):'<p class="c-dim" style="font-size:13px;align-self:center">sem cartas na mão agora</p>'}</div>
+  <div class="wsitu">${esc(situ)}</div>
+  ${fx.length?`<div class="mefx" style="justify-content:center">${fx.map(f=>`<span class="mfx ${f.now?'now':'next'}" style="--jc:${JK[f.k].bg}">${JK[f.k].g} ${esc(JK[f.k].n)}<small>${esc(f.from)}</small></span>`).join('')}</div>`:''}
+  ${own.length?`<div class="wown">${own.map(k=>`<span class="dkg" style="--jc:${JK[k].bg}" title="${esc(JK[k].n)}">${JK[k].g}</span>`).join('')}</div>`:''}</div>
+  <button class="btn b-dim" data-act="board">Ver placar</button>`,'watch');
+  $('#panel').classList.add('compact');
+}
 function showFxInfo(k,to,from,now){
   const d=JK[k];if(!d)return;const me=to===MP.pid;
   const who=me?'você':((gamePlayers().find(p=>p.pid===to)||{}).name||'o rival');
@@ -2101,6 +2165,7 @@ function showBoard(){
   const missing=S.mp.players.length-ps.length;
   const ended=['out','done','won'].includes(S.phase);
   showSheet(`<h2>${head}</h2>
+  ${isPvp()&&S.phase==='out'&&!finished?'<button class="btn b-swap" data-act="watch">Assistir a partida<small>escolha de quem ver as cartas</small></button>':''}
   ${isPvp()&&S.mp.alive?`<div class="kv"><span>Seus PV</span><span class="num" style="color:#ff6b61">${pvpHP()}/${S.mp.maxHp||PVP_HP}</span></div><div class="kv"><span>Dano que você causou</span><span class="num">${Math.round(S.mp.dealt||0)}</span></div>`:''}
   ${finished&&winner?`<div class="note" style="text-align:center;font-size:15px">Fim da partida. <b style="color:var(--gold)">${esc(winner.name)}</b> ficou em 1º lugar.</div>`:(ended?'<p style="text-align:center">O placar atualiza enquanto os outros jogam.</p>':'')}
   <div class="list">${ps.map((p,i)=>{const st=p.st||{};return `<div class="li ${p.me?'me':''} ${!st.al?'out':''}"><span class="dot" style="--pc:${colOf(p.col)}">${i+1}</span><span class="grow"><b>${esc(p.name)}</b>${p.off&&!p.me?' <span class="c-dim">(offline)</span>':''}<br><small class="c-dim">${status(p)} · ${fmt(st.t)} pts no total</small></span><span style="color:#ff6b61;font-weight:800">${st.al?(st.md==='pvp'?`${Math.max(0,+st.hp||0)} PV`:hearts(Math.min(3,+st.l||0))):''}</span></div>`}).join('')}
@@ -2140,6 +2205,7 @@ function showQuit(){showSheet(`<h2>Desistir da partida?</h2><p style="text-align
 
 /* ---------- Entrada ---------- */
 document.addEventListener('click',e=>{
+  {const a=e.target.closest&&e.target.closest('[data-act]');if(a&&S&&S.mp&&['hit','stand','double','swap'].includes(a.dataset.act))S.mp.actR=S.round}
   const card=e.target.closest('#pc .card');
   if(card&&S&&S.phase==='play'&&!S.busy&&!S.awaitNext&&!S.doubled){const id=+card.dataset.cid;S.sel=S.sel===id?null:id;beep(700,.03);render();return}
   const t=e.target.closest('[data-act]');if(!t)return;
@@ -2187,6 +2253,10 @@ document.addEventListener('click',e=>{
     case 'lobby':backToLobby();break;
     case 'mpresume':{const sv=store.get(SAVE_MP);if(sv&&sv.S&&sv.S.mp){MP.started.add(sv.S.mp.gid);S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;lastPres='';resume()}break}
     case 'play':startBlind();break;
+    case 'bet':if(S&&isPvp())showBet();break;
+    case 'betgo':if(S)placeBet(t.dataset.k,+t.dataset.a);break;
+    case 'watch':if(S)showWatch();break;
+    case 'watchp':if(S){S.mp.watch=t.dataset.p;showWatch()}break;
     case 'hit':if(!S.busy)hit();break;
     case 'stand':if(!S.busy)stand();break;
     case 'double':if(!S.busy)doDouble();break;
