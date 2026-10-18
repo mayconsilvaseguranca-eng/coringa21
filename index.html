@@ -486,6 +486,12 @@ html[data-tema=doce] .b-dim{--b:#ffc2df;color:#4a1f40;text-shadow:none}html[data
 .tema.on{border-color:var(--gold)}
 .tema .tsw{display:flex;gap:3px;flex:none}.tema .tsw i{width:16px;height:26px;border-radius:4px;border:1px solid rgba(0,0,0,.25)}
 .tema small{display:block;font-size:12px;font-weight:600;color:var(--ink-dim)}
+.tbtn{display:flex;align-items:center;gap:8px;white-space:nowrap;width:100%;padding:8px 10px;border:2px solid var(--gold);border-radius:999px;background:rgba(0,0,0,.28);color:var(--ink);font:800 13.5px var(--font);cursor:pointer;box-shadow:0 3px 0 var(--edge);animation:tpulse 2.6s ease-in-out infinite}
+.tbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--edge)}
+.tbtn .tsw{display:flex}.tbtn b{color:var(--gold)}.tbtn .tgo{margin-left:auto;font-size:22px;line-height:1;color:var(--gold)}
+.tbtn .tsw i{width:14px;height:14px;border-radius:50%;margin-left:-3px;border:1.5px solid rgba(0,0,0,.35)}.tbtn .tsw i:first-child{margin-left:0}
+html.claro .tbtn{background:rgba(255,255,255,.6)}
+@keyframes tpulse{0%,100%{box-shadow:0 3px 0 var(--edge),0 0 0 0 transparent}50%{box-shadow:0 3px 0 var(--edge),0 0 10px 1px var(--gold)}}
 </style>
 </head>
 <body>
@@ -518,7 +524,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v20';
+const VERSION='v20.1';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1877,8 +1883,9 @@ function showStart(){
     <div class="row"><button class="btn b-hit" data-act="new">Solo<small>baralho aleatório</small></button>
     <button class="btn b-swap" data-act="daily">Desafio do dia<small>${todayStr()}</small></button></div>
     <button class="btn b-go" data-act="gameinvite">Convidar para o jogo<small>gera um link novo de convite</small></button>
+    <button class="tbtn" data-act="temas"><span class="tsw">${TEMAS[tema].c.map(c=>`<i style="background:${c}"></i>`).join('')}</span><span>Tema: <b>${TEMAS[tema].n}</b></span><span class="tgo">›</span></button>
     ${musicSlider()}
-    <div class="row"><button class="btn b-dim sm" data-act="cardsh">Cartas</button><button class="btn b-dim sm" data-act="how">Como jogar</button><button class="btn b-dim sm" data-act="mute">Efeitos: ${muted?'off':'on'}</button><button class="btn b-dim sm" data-act="temas">Tema</button></div>
+    <div class="row"><button class="btn b-dim sm" data-act="cardsh">Cartas</button><button class="btn b-dim sm" data-act="how">Como jogar</button><button class="btn b-dim sm" data-act="mute">Efeitos: ${muted?'off':'on'}</button></div>
     <div class="best">${bestLine()}</div>`,'start');
   $('#panel').classList.add('compact');
 }

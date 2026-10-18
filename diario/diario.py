@@ -1,5 +1,8 @@
 import html
 V=[
+ ("v20.1","18/10 · 16:26","Botão de tema em destaque",
+  "O botão de selecionar tema tem que ficar um pouco mais visível, tá muito escondido no meio, como se fosse só uma opção comum.",
+  [("Mudou","O Tema saiu da fileira de botões pequenos e virou uma barra própria no menu inicial, com contorno dourado que brilha devagar, as bolinhas de cor do tema atual e o nome dele (ex.: Tema: Feltro Verde ›). Continua cabendo no iPhone SE sem rolar, em todos os temas.")]),
  ("v20","18/10 · 16:20","Temas visuais",
   "Adicione todos os temas das amostras, só tira o Oceano.",
   [("Novo","Botão Tema no menu inicial com 5 temas: Feltro Verde (o de sempre), Neon Arcade (roxo com grade e brilho ciano e rosa), Cassino Clássico (vinho, dourado e logo com serifa), Caderno (claro, papel pautado com contorno de caneta) e Doce (claro, rosa com bolinhas e mesa verde-menta)."),
@@ -238,7 +241,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '18/10/2026, 16:20'
+UPD=AG['atualizado'] if AG else '18/10/2026, 16:26'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
