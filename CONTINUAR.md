@@ -13,7 +13,7 @@ Blackjack roguelike (estilo Balatro) para celular, para o Maycon e a família. T
 - Toda mudança: editar `index.html`, rodar os testes, commit + push, atualizar o diário (uma vez, no fim).
 - A versão aparece na tela inicial: `const VERSION` no topo do script de `index.html`. Suba junto com a entrada nova do diário (mesmo número).
 - Não atualizar a prévia do claude.ai: o Maycon testa o PvP pelo site, e na prévia o multiplayer não funciona. Só se ele pedir.
-- Tudo cabe numa tela de celular sem rolar (testar no iPhone SE). Números legíveis: fonte Rubik; fonte pixel só na palavra FAMÍLIA do logo.
+- Tudo cabe numa tela de celular sem rolar (testar no iPhone SE). Números legíveis: fonte Rubik; fonte pixel (ou a do tema) só no logo.
 - PvP é o modo principal. Dano e vida sempre inteiros. Ritmo mais lento (`PACE=1.6`).
 - Fim de partida: "Voltar para a sala" e "Voltar ao menu" (sem "Jogar de novo").
 - Quando ele pede explicação ("não acrescentem isso ao jogo"), só explicar.
@@ -37,3 +37,4 @@ Blackjack roguelike (estilo Balatro) para celular, para o Maycon e a família. T
 - Tela "Cartas" (`showCards`) lista as cartas de PvP e as do solo.
 - Cartas de mesa (`pvp:'mesa'`): não se compram. `mesaCardFor(gid,R)` sorteia uma por período de 3 rodadas (igual em todos os aparelhos, sem repetir a anterior); `mesaFx(R)` / `botFx`. Tempestade −5 PV de todos no início da rodada, Teto 19 e Céu Aberto via `capNow()`, Mão Curta via `maxCards()`, Ás de Ferro em `total()`, Silêncio via `act(k)` (humanos) e `bAct` (bots) no lugar de `has`, Hospital/Empate/Febre do Ouro no início da rodada e na revelação. 9 cartas em `MESA_K` (Embaralhar e Trégua foram removidas). `S.mp.mesaEvery` encurta o período nos testes. Animação `mesaShow` (5 s) no início de cada período. `S.mp.mesaSeq` fixa a sequência nos testes. Desligável na sala (`MP.mesaOff` → `st.mesa`).
 - Bots rodam no aparelho de quem criou a sala.
+- Temas visuais (v20): `TEMAS` (feltro, neon, cassino, papel, doce), `applyTema(k)` põe `html[data-tema]` (e `.claro` nos claros) e troca a meta theme-color; salvo em `c21-tema`. Botão Tema no menu inicial (`showTemas`). O CSS fica no fim do `<style>` e só troca variáveis, fundo e detalhes; o fundo em pixel (`#bg`) só aparece no Feltro Verde. A letra do jogo continua Rubik em todos (Poppins/Lora só no logo e títulos), porque letras mais largas quebravam as telas do iPhone SE. Teste: `tests/temas.test.mjs`.

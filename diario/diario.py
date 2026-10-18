@@ -1,5 +1,11 @@
 import html
 V=[
+ ("v20","18/10 · 16:20","Temas visuais",
+  "Adicione todos os temas das amostras, só tira o Oceano.",
+  [("Novo","Botão Tema no menu inicial com 5 temas: Feltro Verde (o de sempre), Neon Arcade (roxo com grade e brilho ciano e rosa), Cassino Clássico (vinho, dourado e logo com serifa), Caderno (claro, papel pautado com contorno de caneta) e Doce (claro, rosa com bolinhas e mesa verde-menta)."),
+   ("Novo","O tema muda na hora e fica salvo no aparelho. Vale para o menu, a sala, a mesa do PvP, a loja, a pausa e as outras telas. Cada pessoa escolhe o seu; não muda nada para os outros jogadores."),
+   ("Mudou","Os números e textos continuam na letra Rubik em todos os temas (a letra do tema fica no logo), para tudo continuar cabendo no iPhone SE."),
+   ("Novo","Teste novo de temas: escolhe cada um, confere que o menu cabe sem rolar e que o tema fica salvo depois de recarregar.")]),
  ("v19","18/10 · 15:50","Modo assistir e aposta da rodada",
   "Quem sair da partida continua assistindo e escolhe quem quer ver, e a aposta da rodada.",
   [("Novo","Modo assistir: quando sua vida acaba, aparece Assistir a partida. Você escolhe quem quer acompanhar (botões com o nome de cada um ainda vivo) e vê ao vivo as cartas dessa pessoa, a vida, se ela está pensando, fechou ou estourou, as cartas que ela tem e as cartas com alvo que estão nela."),
@@ -232,7 +238,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '18/10/2026, 15:50'
+UPD=AG['atualizado'] if AG else '18/10/2026, 16:20'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
