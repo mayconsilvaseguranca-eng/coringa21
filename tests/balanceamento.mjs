@@ -16,7 +16,7 @@ export const RC = {cap:21, iron:false, maxC:5};
 const tot = cs => { let t=0,a=0; for(const r of cs){ if(r==='A'&&RC.iron){t+=1;continue} t+=val(r); if(r==='A')a++} while(t>21&&a){t-=10;a--} return t };
 const cval = r => r==='A'&&RC.iron?1:val(r);
 const minHit = r => Math.round(1+0.4*Math.max(0,r-1));
-const hpFor = n => n>=6?120:120+12*(6-Math.max(2,n));
+const hpFor = n => n>=6?200:200+8*(6-Math.max(2,n)); // igual ao jogo (PVP_HP=200)
 export const DECKS={padrao:1,vermelho:1,azul:1,reis:1,miudo:1,ases:1,guerreiro:1,guardiao:1,vidro:1,apostador:1,fantasma:1};
 export const DK={vermelhoSw:1,azulMo:4,vidroHp:40,vidroDmg:3,apostK:3,apostBust:5,asesExtra:4,reisMin:6,miudoMax:7,fantasmaSw:0,guerMo:0,miudoCard:0,miudoHp:0,reisHp:0,asesHp:0,azulShop:0};
 const ATK=['critico','sangria','vampiro','lamina','duplo','precisao','furia','cinco'],DEF=['escudo','espelho','esquiva','armadura','bandagem','ultima','muralha','colete'];
@@ -84,7 +84,7 @@ export function game(cfg, rng){
       if(M==='tempestade')p.hp-=5;
       if(M==='hospital')p.hp=Math.min(p.maxHp,p.hp+4);
       if(M==='silencio'){p.hasReal=p.has;p.has={}}}
-    if((r-1)%3===0)for(const p of ps){p.swaps=2+(p.deckK==='vermelho'?DK.vermelhoSw:0)+(p.deckK==='fantasma'?DK.fantasmaSw:0);}
+    if(!cfg.classic&&(r-1)%3===0)for(const p of ps){p.swaps=2+(p.deckK==='vermelho'?DK.vermelhoSw:0)+(p.deckK==='fantasma'?DK.fantasmaSw:0);}
     const alive=ps.filter(p=>p.al);
     // cartas com alvo: usa uma por rodada, no rival com mais vida
     for(const p of alive){p.mira=null;p.spy=null;p.trocaReady=false;p.frozenNow=p.frozen===r;

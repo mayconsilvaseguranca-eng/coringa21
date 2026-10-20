@@ -1,5 +1,13 @@
 import html
 V=[
+ ("v21","20/10 · 05:43","21 Clássico e temas com prévia",
+  "Bota algo mais visual na escolha de temas e, no PvP, um modo sem loja e sem cartas, um 21 normal, com a vida balanceada para durar o mesmo que os outros.",
+  [("Novo","21 Clássico: terceira opção no modo da sala, ao lado de PvP e Sobrevivência. É o PvP só com 21: sem loja, sem cartas de ataque e defesa, sem cartas de mesa e com alvo, sem baralhos especiais, sem trocas e sem apostas. Ficam Pedir, Parar e Dobrar. Escolhendo esse modo, as outras opções da sala somem."),
+   ("Novo","Vida do 21 Clássico balanceada no simulador para durar o mesmo que o PvP com cartas: 200 PV com 6 ou mais jogadores e 14 PV a mais para cada jogador a menos (256 no 1 contra 1). Fica em ~19 a 22 rodadas, igual ao PvP normal. Quem cria a sala ainda pode mudar a vida no − e +."),
+   ("Mudou","A escolha de tema agora mostra uma miniatura de cada um (logo, mesa com cartas e botões nas cores do tema), em duas colunas. Cabe no iPhone SE sem rolar."),
+   ("Mudou","No topo da mesa do 21 Clássico aparecem Rodada, Rivais e Modo no lugar de Loja, Trocas e Apostar."),
+   ("Corrigido","O simulador de balanceamento ainda usava a vida antiga (120 PV). Agora usa a mesma do jogo. Com tudo desligado, o PvP com cartas dura ~3 rodadas a mais que com tudo ligado."),
+   ("Novo","Teste novo do 21 Clássico: sala sem as outras opções, 256 PV no 1 contra 1, sem Trocar nem aposta e sem loja depois da 3ª rodada.")]),
  ("v20.1","18/10 · 16:26","Botão de tema em destaque",
   "O botão de selecionar tema tem que ficar um pouco mais visível, tá muito escondido no meio, como se fosse só uma opção comum.",
   [("Mudou","O Tema saiu da fileira de botões pequenos e virou uma barra própria no menu inicial, com contorno dourado que brilha devagar, as bolinhas de cor do tema atual e o nome dele (ex.: Tema: Feltro Verde ›). Continua cabendo no iPhone SE sem rolar, em todos os temas.")]),
@@ -241,7 +249,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '18/10/2026, 16:26'
+UPD=AG['atualizado'] if AG else '20/10/2026, 05:43'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

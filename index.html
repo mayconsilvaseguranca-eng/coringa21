@@ -129,6 +129,7 @@ body.menu #sheet{background:rgba(3,10,9,.35)}
 /* Actions */
 .actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding-bottom:4px}
 .actions.one{grid-template-columns:1fr}
+.actions.three{grid-template-columns:repeat(3,1fr)}
 .btn{border:0;border-radius:10px;padding:12px 4px 10px;font-size:16px;font-weight:800;background:var(--b,var(--chips));color:#fff;box-shadow:0 4px 0 var(--edge);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1;text-shadow:0 1px 0 rgba(0,0,0,.3)}
 .btn small{font-size:11px;font-weight:600;opacity:.92}
 .btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--edge)}
@@ -357,9 +358,10 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 .lb-p .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
 .lb-p small{font-size:10.5px;color:var(--ink-dim);font-weight:700}
 .seg{display:flex;background:var(--edge);border-radius:10px;padding:3px;gap:3px}
-.seg button{flex:1;border:0;border-radius:8px;padding:9px 4px;font-weight:800;font-size:14.5px;background:transparent;color:var(--ink-dim);cursor:pointer}
+.seg button{flex:1 1 auto;border:0;border-radius:8px;padding:9px 2px;font-weight:800;font-size:13.5px;white-space:nowrap;min-width:0;background:transparent;color:var(--ink-dim);cursor:pointer}
 .seg button.on.pvp{background:var(--mult);color:#fff}
 .seg button.on.surv{background:var(--violet);color:#fff}
+.seg button.on.cl{background:var(--chips);color:#fff}
 .lb-desc{font-size:12.5px!important;text-align:center;line-height:1.35!important}
 .lb-mode{background:var(--panel-2);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35;color:var(--ink-dim)}
 .lb-mode b{color:var(--gold)}
@@ -481,11 +483,28 @@ html[data-tema=doce] .logo .l2{color:#3b95f0;text-shadow:4px 4px 0 #8a3f6b}
 html[data-tema=doce] #sheet{background:rgba(138,63,107,.3)}html[data-tema=doce] body.menu #sheet{background:transparent}
 html[data-tema=doce] .b-dim{--b:#ffc2df;color:#4a1f40;text-shadow:none}html[data-tema=doce] .b-go{color:#4a1f40}
 /* escolha de tema */
-.temas{display:flex;flex-direction:column;gap:8px}
-.tema{display:flex;align-items:center;gap:10px;border:2px solid transparent;border-radius:12px;padding:8px 10px;background:var(--panel-2);color:var(--ink);font-weight:800;font-size:16px;text-align:left;cursor:pointer}
-.tema.on{border-color:var(--gold)}
-.tema .tsw{display:flex;gap:3px;flex:none}.tema .tsw i{width:16px;height:26px;border-radius:4px;border:1px solid rgba(0,0,0,.25)}
-.tema small{display:block;font-size:12px;font-weight:600;color:var(--ink-dim)}
+.temas{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tema{display:flex;flex-direction:column;align-items:stretch;gap:3px;border:2px solid transparent;border-radius:12px;padding:5px;background:var(--panel-2);color:var(--ink);font-weight:800;font-size:14px;text-align:left;cursor:pointer;min-width:0}
+.tema:last-child:nth-child(odd){grid-column:1/-1}
+.tema.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.tema .tnm{padding:0 3px;line-height:1.15}.tema.on .tnm{color:var(--gold)}
+.pv{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;height:94px;border-radius:8px;padding:5px 6px 6px;overflow:hidden;background:var(--pbg);border:1px solid rgba(0,0,0,.3)}
+.pv-logo{font:800 22px/1 var(--pfont);color:var(--pg);text-shadow:var(--psh)}
+.pv-tab{flex:1;width:100%;display:flex;justify-content:center;align-items:center;gap:5px;background:var(--ptab);border:var(--pbd);border-radius:8px 8px 18px 18px}
+.pv-c{display:flex;flex-direction:column;align-items:center;justify-content:center;width:22px;height:30px;border-radius:4px;background:var(--pcard);color:#17161c;font:800 12px/1 Rubik,sans-serif;box-shadow:var(--pcsh)}
+.pv-c i{font-style:normal;font-size:11px}.pv-c.r{color:#cc2a25}
+.pv-bt{display:flex;gap:4px;width:100%}.pv-bt i{flex:1;height:9px;border-radius:3px;box-shadow:var(--pbsh)}
+.pv-bt .b1{background:var(--pb1)}.pv-bt .b2{background:var(--pb2)}.pv-bt .b3{background:var(--pb3)}
+.tema:last-child:nth-child(odd) .pv{height:84px}
+.pv-feltro{--pbg:#071c19;--pg:#f5bd3a;--pfont:"Pixelify Sans",Rubik,sans-serif;--psh:2px 2px 0 #f0453a;--ptab:radial-gradient(ellipse at 50% 0%,#17574a,#0f3d34 70%);--pbd:2px solid #050f0d;--pcard:#fbf6ea;--pcsh:0 2px 0 rgba(0,0,0,.4);--pb1:#2b86f0;--pb2:#e8822a;--pb3:#f0453a;--pbsh:0 2px 0 #050f0d}
+.pv-neon{--pbg:linear-gradient(rgba(139,92,255,.25) 1px,transparent 1px) 0 0/10px 10px,linear-gradient(90deg,rgba(139,92,255,.25) 1px,transparent 1px) 0 0/10px 10px,#0b0618;--pg:#00d9ff;--pfont:Poppins,sans-serif;--psh:0 0 8px #00d9ff,2px 2px 0 #ff2bd6;--ptab:radial-gradient(ellipse at 50% 0%,#3a1680,#170a36 70%);--pbd:2px solid #00d9ff;--pcard:#f7f2ff;--pcsh:0 0 6px rgba(255,43,214,.7);--pb1:#00b8e6;--pb2:#ff8a3d;--pb3:#ff2bd6;--pbsh:0 0 6px currentColor}
+.pv-neon .pv-tab{box-shadow:0 0 8px rgba(0,217,255,.5)}.pv-neon .pv-bt i{box-shadow:0 0 6px rgba(255,43,214,.7)}
+.pv-cassino{--pbg:radial-gradient(circle at 50% 30%,#3a0a10,#140305 75%);--pg:#e9bb4c;--pfont:Lora,Georgia,serif;--psh:2px 2px 0 #000,0 0 10px rgba(233,187,76,.5);--ptab:radial-gradient(ellipse at 50% 0%,#8a1a27,#4a0c13 72%);--pbd:2px solid #c9973a;--pcard:#fffaf0;--pcsh:0 0 0 1px #c9973a;--pb1:#3d7ee6;--pb2:#d9782a;--pb3:#d93a2e;--pbsh:0 2px 0 #0d0203}
+.pv-papel{--pbg:repeating-linear-gradient(transparent 0 11px,rgba(47,111,214,.2) 11px 12px) #f2e8d3;--pg:#b97d00;--pfont:Poppins,sans-serif;--psh:2px 2px 0 #2b2118;--ptab:#efe3c9;--pbd:2px dashed #3b3024;--pcard:#fff;--pcsh:2px 2px 0 #2b2118;--pb1:#2f6fd6;--pb2:#d9701e;--pb3:#d63c2c;--pbsh:2px 2px 0 #3b3024}
+.pv-papel .pv-c{border:1.5px solid #2b2118}
+.pv-doce{--pbg:radial-gradient(#ffc2df 1.5px,transparent 1.5px) 0 0/10px 10px,linear-gradient(#ffe6f2,#fff1e0);--pg:#3b95f0;--pfont:Poppins,sans-serif;--psh:2px 2px 0 #8a3f6b;--ptab:radial-gradient(ellipse at 50% 0%,#d9fff1,#a6e9d3 70%);--pbd:2px solid #8a3f6b;--pcard:#fff;--pcsh:0 2px 0 #8a3f6b;--pb1:#3b95f0;--pb2:#ff7a45;--pb3:#ff4f8b;--pbsh:0 2px 0 #8a3f6b}
+.pv-doce .pv-tab{border-radius:10px 10px 22px 22px}
+.tema small{display:block;padding:0 3px;font-size:11px;font-weight:600;line-height:1.2;color:var(--ink-dim)}
 .tbtn{display:flex;align-items:center;gap:8px;white-space:nowrap;width:100%;padding:8px 10px;border:2px solid var(--gold);border-radius:999px;background:rgba(0,0,0,.28);color:var(--ink);font:800 13.5px var(--font);cursor:pointer;box-shadow:0 3px 0 var(--edge);animation:tpulse 2.6s ease-in-out infinite}
 .tbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--edge)}
 .tbtn .tsw{display:flex}.tbtn b{color:var(--gold)}.tbtn .tgo{margin-left:auto;font-size:22px;line-height:1;color:var(--gold)}
@@ -524,7 +543,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v20.1';
+const VERSION='v21';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -636,6 +655,9 @@ const COLORS=['#f0453a','#2b86f0','#f5bd3a','#3fbf6a','#a05be0','#ff7ab6','#25c3
 const MAXP=10, LIVES=3, PVP_HP=200, DMG_K=20, PVP_SHOP_EVERY=3, PVP_TURN_MS=45000;
 /* PV do PvP: 200 com 6 ou mais jogadores (até 232 com 2). Na simulação a partida dura ~16 rodadas e quem chega ao fim tem ~4 cartas compradas. */
 const hpFor=n=>n>=6?PVP_HP:PVP_HP+8*(6-Math.max(2,n));
+/* 21 Clássico (PvP sem loja nem cartas): mais vida em mesas pequenas para durar o mesmo que o PvP com cartas (simulador) */
+const hpForCl=n=>n>=6?PVP_HP:PVP_HP+14*(6-Math.max(2,n));
+const hpOf=(n,cl)=>cl?hpForCl(n):hpFor(n);
 const r1=x=>Math.round((+x||0)*10)/10;
 
 /* ---------- Armazenamento ---------- */
@@ -650,7 +672,8 @@ const TEMAS={feltro:{n:'Feltro Verde',d:'o clássico de mesa de cassino',c:['#0f
 let tema=TEMAS[store.get('c21-tema')]?store.get('c21-tema'):'feltro';
 function applyTema(k){if(!TEMAS[k])k='feltro';tema=k;const h=document.documentElement;h.dataset.tema=k;h.classList.toggle('claro',!!TEMAS[k].claro);const m=document.querySelector('meta[name=theme-color]');if(m)m.content=TEMAS[k].m}
 applyTema(tema);
-function showTemas(){showSheet(`<h2>Tema</h2><div class="temas">${Object.entries(TEMAS).map(([k,t])=>`<button class="tema ${k===tema?'on':''}" data-act="temapick" data-k="${k}" aria-pressed="${k===tema}"><span class="tsw">${t.c.map(c=>`<i style="background:${c}"></i>`).join('')}</span><span>${t.n}<small>${t.d}</small></span></button>`).join('')}</div>
+function temaPrev(k){return `<span class="pv pv-${k}"><span class="pv-logo">21</span><span class="pv-tab"><span class="pv-c">A<i>♠</i></span><span class="pv-c r">K<i>♥</i></span></span><span class="pv-bt"><i class="b1"></i><i class="b2"></i><i class="b3"></i></span></span>`}
+function showTemas(){showSheet(`<h2>Tema</h2><div class="temas">${Object.entries(TEMAS).map(([k,t])=>`<button class="tema ${k===tema?'on':''}" data-act="temapick" data-k="${k}" aria-pressed="${k===tema}">${temaPrev(k)}<span class="tnm">${k===tema?"✓ ":""}${t.n}</span></button>`).join('')}</div>
   <button class="btn b-go" data-act="home">Voltar</button>`,'temas');$('#panel').classList.add('compact')}const SAVE='coringa21-save', SAVE_MP='coringa21-mpsave', BEST='coringa21-best';
 let muted=!!store.get('coringa21-mute');
 
@@ -827,6 +850,13 @@ function renderHUD(){
   $('#rs').classList.toggle('hpnum',isPvp());
   renderCalc();
   const pvp=isPvp();
+  const cl=pvp&&S.mp&&S.mp.cl;
+  if(cl){$('#stats').innerHTML=`
+    <div class="stat h"><small>Rodada</small><span class="num">${S.round||1}</span></div>
+    <div class="stat s"><small>Rivais</small><span class="num">${pvpRank().n}</span></div>
+    <div class="stat cl"><small>Modo</small><span class="num">21</span></div>
+    <button class="stat rxbtn" data-act="rxopen" aria-label="Mandar reação"><span class="rxi">😀</span><small>Reagir</small></button>
+    <button class="stat menu" data-act="menu" aria-label="Pausa"><span class="pz">❚❚</span><small>Pausa</small></button>`;renderStrip();return}
   $('#stats').innerHTML=`
     <div class="stat h"><small>${pvp?'Loja em':'Mãos'}</small><span class="num">${pvp?pvpShopIn():S.handsLeft}</span></div>
     <div class="stat s"><small>Trocas</small><span class="num">${S.swapsLeft}</span></div>
@@ -925,7 +955,7 @@ function renderActions(){
     <button class="btn b-hit" data-act="hit">Pedir<small>+1 carta</small></button>
     <button class="btn b-stand" data-act="stand">Parar<small>fechar mão</small></button>
     <button class="btn b-dbl" data-act="double" ${S.player.length===2?'':'disabled'}>Dobrar<small>×${has('dobradinha')?3:2} mult</small></button>
-    <button class="btn b-swap" data-act="swap" ${canSwapP?'':'disabled'}>Trocar<small>${S.sel==null?'toque 1 carta':'restam '+S.swapsLeft}</small></button>`;return}
+    ${S.mp.cl?'':`<button class="btn b-swap" data-act="swap" ${canSwapP?'':'disabled'}>Trocar<small>${S.sel==null?'toque 1 carta':'restam '+S.swapsLeft}</small></button>`}`;if(S.mp.cl)a.className='actions three';return}
   if(S.awaitNext){a.className='actions one';a.innerHTML=`<button class="btn b-go" data-act="next">Próxima mão<small>${S.handsLeft} restante${S.handsLeft===1?'':'s'}</small></button>`;return}
   const live=!S.busy&&S.player.length>0;
   const canSwap=live&&!S.doubled&&S.swapsLeft>0&&S.sel!=null&&!bossOn('corrente');
@@ -1216,7 +1246,7 @@ function pvpStartRound(){
   if(S.mp.fx.length&&(S.round-1)%PVP_SHOP_EVERY===0)mesaShow(S.mp.fx[0].k,S.round);
   if(fxOn('hospital')&&S.mp.hp!=null){pvpHeal(4);setTimeout(()=>pop($('#blindBox'),'Hospital: +4 PV','info'),(S.round-1)%PVP_SHOP_EVERY===0?5600:400)}
   if(fxOn('tempestade')){if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(S.mp.hp-5);setTimeout(()=>pop($('#blindBox'),'Tempestade: −5 PV para todos','mult'),(S.round-1)%PVP_SHOP_EVERY===0?5600:400)}
-  if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=2+(myDeck()==='vermelho'?1:0)} /* PvP: 2 trocas a cada loja (+1 no baralho Vermelho) */
+  if((S.round-1)%PVP_SHOP_EVERY===0){S.swapsLeft=S.mp.cl?0:2+(myDeck()==='vermelho'?1:0)} /* PvP: 2 trocas a cada loja (+1 no baralho Vermelho) */
   if(!S.deck||S.deck.length<15)S.deck=newDeck();
   S.phase='play';S.roundScore=0;S.calc=null;S.pv=null;S.mp.sub=null;S.handsLeft=1;S.awaitNext=false;
   hideSheet();pvpDeal();
@@ -1327,7 +1357,7 @@ function pvpNext(){
     if(r==='die'){eliminate();return}
     S.mp.hp=1;S.msg='Todos zeraram e você venceu o desempate!';pop($('#blindBox'),'Desempate: você ficou com 1 PV','info');
   }
-  if(S.round%PVP_SHOP_EVERY===0){
+  if(S.round%PVP_SHOP_EVERY===0&&!S.mp.cl){
     const interest=Math.min(2,Math.floor(S.money/10));S.cash={reward:0,hands:0,interest,bonus:0,total:interest};
     S.phase='cash';S.deadline=Date.now()+30000;render();showCash();return}
   pvpStartRound();
@@ -1358,7 +1388,7 @@ function showPvpResult(){
   ${v.extra&&v.extra.length?`<div class="note" style="text-align:center">${v.extra.map(esc).join('<br>')}</div>`:''}
   <div class="list">${rows.map(r=>`<div class="li ${r.me?'me':''} ${r.v<0?'out':''}"><span class="dot" style="--pc:${colOf(r.col)}"></span><span class="grow"><b>${esc(r.name)}</b>${!r.me&&v.beaten.includes(r.pid)?` <span class="c-mult">−${fmt(v.per)} PV</span>`:''}<br><span class="mini">${miniCards(r.sub&&r.sub.c)}</span></span><span class="num ${r.v<0?'c-mult':'c-gold'}" style="font-size:19px">${r.v<0?'estourou':(r.sub&&r.sub.t)}</span></div>`).join('')}</div>
   <div class="kv"><span>Seus PV${(()=>{const k=pvpRank();return k.pos?` <small class="c-dim">· ${k.pos}º de ${k.n}</small>`:''})()}</span><span class="num" style="color:#ff6b61">${pvpHP()}/${S.mp.maxHp||PVP_HP}</span></div>
-  <div class="kv"><span>Dinheiro da rodada<br><small class="c-dim" style="font-size:12px">$1 se passou alguém · $2 com a maior mão</small></span><span class="num">+$${v.earn}</span></div>
+  ${S.mp.cl?'':`<div class="kv"><span>Dinheiro da rodada<br><small class="c-dim" style="font-size:12px">$1 se passou alguém · $2 com a maior mão</small></span><span class="num">+$${v.earn}</span></div>`}
   <button class="btn b-go" id="pvpnext" data-act="pvpnext" ${pvpReadyNext()?'':'disabled'}>Próxima rodada</button>
   <button class="btn b-dim" data-act="board">Placar</button>`,'pvpres');
 }
@@ -1550,7 +1580,7 @@ function renderRoomList(){
 }
 setInterval(()=>{if(VIT&&openSheet==='mphome')renderRoomList();if(NR&&NR.announce)NR.announce(false)},5000);
 setInterval(()=>{if(NR)onRoomChange()},5000);
-const MP={code:null,pid:null,name:'',col:0,j:0,msg:'',started:new Set(),mesaOff:!!store.get('c21-mesaoff'),alvoOff:!!store.get('c21-alvooff'),deckOff:!!store.get('c21-deckoff'),deck:DECKS[store.get('c21-deck')]?store.get('c21-deck'):'padrao'};
+const MP={code:null,pid:null,name:'',col:0,j:0,msg:'',started:new Set(),mesaOff:!!store.get('c21-mesaoff'),alvoOff:!!store.get('c21-alvooff'),deckOff:!!store.get('c21-deckoff'),classic:!!store.get('c21-classic'),deck:DECKS[store.get('c21-deck')]?store.get('c21-deck'):'padrao'};
 MP.pid=store.get('c21-pid');if(typeof MP.pid!=='string'){MP.pid=rid();store.set('c21-pid',MP.pid)}
 MP.name=store.get('c21-name')||'';
 MP.mode=store.get('c21-mode')==='surv'?'surv':'pvp';
@@ -1564,7 +1594,7 @@ function roomPlayers(){
     const pr=p.presence||{};if(typeof pr.pid!=='string'||pr.pid.length>16)continue;
     const me=pr.pid===MP.pid;
     const prev=m.get(pr.pid);
-    if(!prev||(me?p.sameTab:p.updatedAt>prev.updatedAt))m.set(pr.pid,{pid:pr.pid,name:cleanName(pr.name)||'Jogador',col:pr.col,j:+pr.j||0,g:typeof pr.g==='string'?pr.g:null,start:pr.start,st:pr.st&&typeof pr.st==='object'?pr.st:null,lm:pr.lm==='surv'?'surv':'pvp',lhp:Math.max(0,Math.min(500,+pr.lhp||0)),lmo:!!pr.lmo,lao:!!pr.lao,lbk:!!pr.lbk,dk:typeof pr.dk==='string'?pr.dk:'padrao',bot:!!pr.bot,me,off:!!p.off});
+    if(!prev||(me?p.sameTab:p.updatedAt>prev.updatedAt))m.set(pr.pid,{pid:pr.pid,name:cleanName(pr.name)||'Jogador',col:pr.col,j:+pr.j||0,g:typeof pr.g==='string'?pr.g:null,start:pr.start,st:pr.st&&typeof pr.st==='object'?pr.st:null,lm:pr.lm==='surv'?'surv':'pvp',lhp:Math.max(0,Math.min(500,+pr.lhp||0)),lmo:!!pr.lmo,lao:!!pr.lao,lbk:!!pr.lbk,lcl:!!pr.lcl,dk:typeof pr.dk==='string'?pr.dk:'padrao',bot:!!pr.bot,me,off:!!p.off});
   }
   return [...m.values()];
 }
@@ -1621,7 +1651,7 @@ async function enterRoom(code){
   MP.name=nm;store.set('c21-name',nm);store.set('c21-col',MP.col);
   MP.msg='Entrando na sala…';showMPHome();
   const sala=new Sala(code,MP.pid);
-  sala.presence({name:MP.name,col:MP.col,j:Date.now(),g:null,start:null,st:null,lm:MP.mode,lmo:MP.mesaOff?1:0,lao:MP.alvoOff?1:0,lbk:MP.deckOff?1:0,dk:MP.deck||'padrao'});
+  sala.presence({name:MP.name,col:MP.col,j:Date.now(),g:null,start:null,st:null,lm:MP.mode,lmo:MP.mesaOff?1:0,lao:MP.alvoOff?1:0,lbk:MP.deckOff?1:0,lcl:MP.classic?1:0,dk:MP.deck||'padrao'});
   try{NR=await sala.start()}catch(e){NR=null;MP.msg='Não consegui conectar ao servidor de salas. Confira a internet e tente de novo.';showMPHome();return}
   MP.code=code;MP.j=NR.me.j;MP.msg='';lastPres='';stopVitrine();
   NR.onPeers(()=>onRoomChange());
@@ -1654,7 +1684,7 @@ function clearBots(){while(BOTS.length)removeBot()}
 function botStart(st){
   for(const b of BOTS){
     if(!st.players.includes(b.pid))continue;
-    b.g=st.gid;b.players=st.players.slice();b.maxHp=(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length);b.r=1;b.sd=0;b.sent={};b.deck=[];
+    b.g=st.gid;b.players=st.players.slice();b.maxHp=(+st.hp>=40&&+st.hp<=500)?+st.hp:hpOf(st.players.length,st.cl===1);b.cl=st.cl===1;b.r=1;b.sd=0;b.sent={};b.deck=[];
     /* bots também compram e usam cartas de ataque e defesa */
     b.hpv=b.maxHp;b.seen={};b.cards=[];b.money=4;b.bleed={};b.ult=0;b.coleteR=0;b.shR=0;b.shLeft=0;b.mesa=st.mesa!==0;b.alvo=st.alvo!==0;b.alvoInv=[];b.dk=st.dk&&st.decks&&DECKS[st.decks[b.pid]]?st.decks[b.pid]:'padrao';
     if(DECKS[b.dk].hp)b.maxHp=Math.max(40,b.maxHp+DECKS[b.dk].hp);b.hpv=b.maxHp;
@@ -1795,7 +1825,7 @@ function botTick(){
         }
         if(go){
           if(b.coleteR&&b.coleteR<=b.r){b.cards=b.cards.filter(k=>k!=='colete');b.coleteR=0;st.n=b.cards.length}
-          if(b.r%PVP_SHOP_EVERY===0)botShop(b);
+          if(b.r%PVP_SHOP_EVERY===0&&!b.cl)botShop(b);
           if(bAct(b,'bandagem')&&b.hpv<b.maxHp/2)b.hpv=r1(Math.min(b.maxHp,b.hpv+3));
           b.r++;st.r=b.r;st.a=1+Math.floor((b.r-1)/(PVP_SHOP_EVERY*2));st.ph='play';b.nextAt=now+1500+Math.random()*3500;ch=true;
           b.fx=botFx(b,all,b.r);
@@ -1810,7 +1840,8 @@ function botTick(){
 setInterval(botTick,600);
 function startGame(){
   const lp=lobbyPlayers().slice(0,MAXP);
-  const st={gid:rid(),seed:rid()+rid(),players:lp.map(p=>p.pid),mode:MP.mode,hp:MP.hpSet||0,mesa:MP.mesaOff?0:1,alvo:MP.alvoOff?0:1,dk:MP.deckOff?0:1,decks:{}};
+  const cl=MP.mode==='pvp'&&MP.classic;
+  const st={gid:rid(),seed:rid()+rid(),players:lp.map(p=>p.pid),mode:MP.mode,hp:MP.hpSet||0,mesa:MP.mesaOff||cl?0:1,alvo:MP.alvoOff||cl?0:1,dk:MP.deckOff||cl?0:1,cl:cl?1:0,decks:{}};
   if(st.dk)for(const p of lp)st.decks[p.pid]=p.me?(MP.deck||'padrao'):p.bot?DECK_K.filter(k=>k!=='fantasma')[Math.floor(Math.random()*(DECK_K.length-1))]:(DECKS[p.dk]?p.dk:'padrao');
   if(!st.players.includes(MP.pid))st.players.push(MP.pid);
   NR.presence({start:st}).catch(()=>{});
@@ -1822,7 +1853,7 @@ function beginMP(st){
   const sv=store.get(SAVE_MP);
   if(sv&&sv.S&&sv.S.mp&&sv.S.mp.gid===st.gid){S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;resume();return}
   const mode=st.mode==='surv'?'surv':'pvp';
-  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),hp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpFor(st.players.length),bleed:{},sent:{},recv:{},dealt:0,mesa:st.mesa!==0,alvo:st.alvo!==0,ev:[],fx:[],tg:[],deck:st.dk&&st.decks&&DECKS[st.decks[MP.pid]]?st.decks[MP.pid]:'padrao'});
+  newRun(st.seed,'Sala '+MP.code.toUpperCase()+(mode==='pvp'?' · PvP':''),{gid:st.gid,players:st.players.slice(0,MAXP),lives:LIVES,alive:true,dh:[],lastDuel:0,mode,maxHp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpOf(st.players.length,st.cl===1),hp:(+st.hp>=40&&+st.hp<=500)?+st.hp:hpOf(st.players.length,st.cl===1),cl:st.cl===1,bleed:{},sent:{},recv:{},dealt:0,mesa:st.mesa!==0,alvo:st.alvo!==0,ev:[],fx:[],tg:[],deck:st.dk&&st.decks&&DECKS[st.decks[MP.pid]]?st.decks[MP.pid]:'padrao'});
   applyDeck();
 }
 /* aplica o baralho escolhido no começo da partida */
@@ -1932,7 +1963,7 @@ const MODE_TXT={
   pvp:{n:'PvP · todos contra todos',d:`Sem dealer. Todos jogam a mesma rodada, cada um com o próprio baralho. Quando todos fecham a mão, quem fez mais causa dano em quem ficou abaixo. Cada um começa com 200 PV (um pouco mais em mesas com menos de 6). Quem zerar sai e o último de pé vence.`},
   surv:{n:'Sobrevivência',d:'Cada um tem 3 vidas. Falhar uma blind custa uma vida, e no Duelo de cada ante quem fizer menos pontos perde outra.'}
 };
-const lobbyHP=()=>MP.hpSet||hpFor(Math.max(2,lobbyPlayers().length));
+const lobbyHP=()=>MP.hpSet||hpOf(Math.max(2,lobbyPlayers().length),MP.mode==='pvp'&&MP.classic);
 function setLobbyHP(d){const v=Math.max(40,Math.min(500,lobbyHP()+d));MP.hpSet=v;if(NR)NR.presence({lhp:v})}
 function deckRow(off){
   if(off)return `<div class="bots deckrow off"><span>Baralhos desligados</span><small>todos jogam com o Padrão</small></div>`;
@@ -1940,15 +1971,16 @@ function deckRow(off){
   return `<button class="bots deckrow" data-act="decks"><span>Baralho</span><span class="dkg" style="--jc:${d.bg}">${d.g}</span><b>${esc(d.n)}</b><small>trocar ›</small></button>`}
 function modeBlock(amHost,host){
   const m=amHost?MP.mode:(host&&host.lm)||'pvp';
-  const short={pvp:'Sem dealer: a maior mão da rodada causa dano em quem ficou abaixo. Quem zera a vida sai.',surv:'3 vidas. Falhar uma blind ou perder o Duelo custa uma vida.'}[m];
-  if(!amHost)return `<div class="lb-mode"><b>Modo: ${m==='pvp'?'PvP':'Sobrevivência'}</b> <span>${short}</span>${m==='pvp'?`<br><b>Vida inicial:</b> ${host&&+host.lhp?+host.lhp:hpFor(lobbyPlayers().length)} PV · <b>Mesa:</b> ${host&&host.lmo?'desligada':'ligada'} · <b>Alvo:</b> ${host&&host.lao?'desligado':'ligado'}`:''}</div>${m==='pvp'?deckRow(!!(host&&host.lbk)):''}`;
+  const cl=m==='pvp'&&(amHost?MP.classic:!!(host&&host.lcl));
+  const short=cl?'Só 21: sem loja, sem cartas, sem trocas e sem apostas. A maior mão causa dano em quem ficou abaixo.':{pvp:'Sem dealer: a maior mão da rodada causa dano em quem ficou abaixo. Quem zera a vida sai.',surv:'3 vidas. Falhar uma blind ou perder o Duelo custa uma vida.'}[m];
+  if(!amHost)return `<div class="lb-mode"><b>Modo: ${cl?'21 Clássico':m==='pvp'?'PvP':'Sobrevivência'}</b> <span>${short}</span>${m==='pvp'?`<br><b>Vida inicial:</b> ${host&&+host.lhp?+host.lhp:hpOf(lobbyPlayers().length,cl)} PV${cl?'':` · <b>Mesa:</b> ${host&&host.lmo?'desligada':'ligada'} · <b>Alvo:</b> ${host&&host.lao?'desligado':'ligado'}`}`:''}</div>${m==='pvp'&&!cl?deckRow(!!(host&&host.lbk)):''}`;
   const nb=BOTS.length,full=lobbyPlayers().length>=MAXP;
-  return `<div class="seg"><button class="${m==='pvp'?'on pvp':''}" data-act="mode" data-m="pvp">PvP</button><button class="${m==='surv'?'on surv':''}" data-act="mode" data-m="surv">Sobrevivência</button></div>
+  return `<div class="seg"><button class="${m==='pvp'&&!cl?'on pvp':''}" data-act="mode" data-m="pvp">PvP</button><button class="${cl?'on cl':''}" data-act="mode" data-m="cl">21 Clássico</button><button class="${m==='surv'?'on surv':''}" data-act="mode" data-m="surv">Sobrevivência</button></div>
   ${lobbyPlayers().length>4?'':`<p class="lb-desc">${short}</p>`}
   ${m==='pvp'?`<div class="cfg2"><div class="bots"><span>PV</span><button class="step" data-act="hpdown" aria-label="Menos vida">−</button><b>${lobbyHP()}</b><button class="step" data-act="hpup" aria-label="Mais vida">+</button></div>
   <div class="bots"><span>Bots</span><button class="step" data-act="rmbot" ${nb?'':'disabled'} aria-label="Remover bot">−</button><b>${nb}</b><button class="step" data-act="addbot" ${full?'disabled':''} aria-label="Adicionar bot">+</button></div></div>
-  <div class="tg3"><button class="tgl ${MP.mesaOff?'':'on'}" data-act="mesatoggle" aria-pressed="${!MP.mesaOff}">Mesa ${MP.mesaOff?'✕':'✓'}</button><button class="tgl ${MP.alvoOff?'':'on'}" data-act="alvotoggle" aria-pressed="${!MP.alvoOff}">Alvo ${MP.alvoOff?'✕':'✓'}</button><button class="tgl ${MP.deckOff?'':'on'}" data-act="decktoggle" aria-pressed="${!MP.deckOff}">Baralhos ${MP.deckOff?'✕':'✓'}</button></div>
-  ${deckRow(MP.deckOff)}`:''}`;
+  ${cl?'':`<div class="tg3"><button class="tgl ${MP.mesaOff?'':'on'}" data-act="mesatoggle" aria-pressed="${!MP.mesaOff}">Mesa ${MP.mesaOff?'✕':'✓'}</button><button class="tgl ${MP.alvoOff?'':'on'}" data-act="alvotoggle" aria-pressed="${!MP.alvoOff}">Alvo ${MP.alvoOff?'✕':'✓'}</button><button class="tgl ${MP.deckOff?'':'on'}" data-act="decktoggle" aria-pressed="${!MP.deckOff}">Baralhos ${MP.deckOff?'✕':'✓'}</button></div>
+  ${deckRow(MP.deckOff)}`}`:''}`;
 }
 function showDecks(){
   showSheet(`<h2>Escolha seu baralho</h2>
@@ -2037,7 +2069,7 @@ function showSelectPvp(){
   <div class="list">
     <div class="kv"><span>Pontos de vida</span><span class="num" style="color:#ff6b61">${S.mp.maxHp||PVP_HP}</span></div>
     <div class="kv"><span>Tempo para jogar</span><span class="num" style="color:var(--ink)">${PVP_TURN_MS/1000}s</span></div>
-    <div class="kv"><span>Loja a cada</span><span class="num" style="color:var(--ink)">${PVP_SHOP_EVERY} rodadas</span></div>
+    ${S.mp.cl?`<div class="kv"><span>Modo</span><span class="num" style="color:var(--gold)">21 Clássico</span></div>`:`<div class="kv"><span>Loja a cada</span><span class="num" style="color:var(--ink)">${PVP_SHOP_EVERY} rodadas</span></div>`}
   </div>
   <button class="btn b-go" data-act="pvpgo">Sentar à mesa</button>
   <button class="btn b-dim" data-act="hands">Ver jogadas</button>`,'select');
@@ -2307,7 +2339,7 @@ document.addEventListener('click',e=>{
     case 'pvpgo':pvpStartRound();break;
     case 'pvpnext':pvpNext();break;
     case 'pvpres':showPvpResult();break;
-    case 'mode':MP.mode=t.dataset.m==='surv'?'surv':'pvp';store.set('c21-mode',MP.mode);if(MP.mode!=='pvp')clearBots();if(NR)NR.presence({lm:MP.mode});showLobby();break;
+    case 'mode':{const was=MP.mode==='pvp'&&MP.classic;MP.mode=t.dataset.m==='surv'?'surv':'pvp';MP.classic=t.dataset.m==='cl';store.set('c21-mode',MP.mode);store.set('c21-classic',MP.classic);if(MP.mode!=='pvp')clearBots();if(was!==(MP.mode==='pvp'&&MP.classic))MP.hpSet=0;if(NR)NR.presence({lm:MP.mode,lcl:MP.classic?1:0,lhp:MP.hpSet||0});showLobby();break}
     case 'addbot':addBot();showLobby();break;
     case 'hpup':setLobbyHP(20);showLobby();break;
     case 'alvotoggle':MP.alvoOff=!MP.alvoOff;store.set('c21-alvooff',MP.alvoOff);if(NR)NR.presence({lao:MP.alvoOff?1:0});showLobby();break;
@@ -2325,7 +2357,7 @@ document.addEventListener('click',e=>{
     case 'lobby':backToLobby();break;
     case 'mpresume':{const sv=store.get(SAVE_MP);if(sv&&sv.S&&sv.S.mp){MP.started.add(sv.S.mp.gid);S=sv.S;R.s=sv.rs;R2.s=Number.isInteger(sv.rs2)?sv.rs2:trueSeed();S.busy=false;lastPres='';resume()}break}
     case 'play':startBlind();break;
-    case 'bet':if(S&&isPvp())showBet();break;
+    case 'bet':if(S&&isPvp()&&!S.mp.cl)showBet();break;
     case 'betgo':if(S)placeBet(t.dataset.k,+t.dataset.a);break;
     case 'watch':if(S)showWatch();break;
     case 'watchp':if(S){S.mp.watch=t.dataset.p;showWatch()}break;
