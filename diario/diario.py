@@ -4,7 +4,7 @@ V=[
   "Loja maior e mais parecida com o Balatro, no PvP e no solo; no PvP a próxima rodada só começa quando todo mundo terminar a compra; testes de balanceamento do solo.",
   [("Mudou","Loja nova no PvP e no solo: as cartas aparecem grandes, em duas colunas, com a etiqueta de preço no topo e a carta balançando de leve, como no Balatro. Nome em letra maior e a descrição embaixo (tocando na carta aparece o texto inteiro e o Comprar). Título LOJA na letra do logo, dinheiro em destaque, botão Trocar verde e Voltar/Próxima vermelho, maiores. Continua cabendo no iPhone SE sem rolar."),
    ("Corrigido","No PvP, quem saía da loja já começava a rodada seguinte enquanto os outros ainda compravam. Agora aparece Loja fechada · Esperando Fulano terminar as compras, e a rodada começa para todos ao mesmo tempo. Se alguém sumir, a mesa segue depois de 150 segundos. Os bots não seguram ninguém."),
-   ("Novo","Simulador do modo solo (tests/solo-sim.mjs): joga milhares de partidas com as regras do solo e dois jogadores-robô. Resultado: do jeito que está, quase ninguém passa do ante 5 e ninguém vence o ante 8 (veja Possíveis ideias)."),
+   ("Novo","Simulador do modo solo (tests/solo-sim.mjs): joga milhares de partidas com as regras do solo e dois jogadores-robô. Resultado: do jeito que está, quase ninguém passa do ante 5 e ninguém vence o ante 8."),
    ("Novo","Teste novo: Ana sai da loja primeiro e espera a Beto; a rodada 4 começa para os dois juntos.")]),
  ("v21","20/10 · 05:43","21 Clássico e temas com prévia",
   "Bota algo mais visual na escolha de temas e, no PvP, um modo sem loja e sem cartas, um 21 normal, com a vida balanceada para durar o mesmo que os outros.",
