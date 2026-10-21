@@ -559,6 +559,7 @@ html.claro .tut-x{background:rgba(0,0,0,.08)}
 @keyframes tutPulse{50%{box-shadow:0 0 0 3px var(--gold),0 0 28px 8px color-mix(in srgb,var(--gold) 45%,transparent)}}
 .tut-coach{position:absolute;left:10px;right:10px;z-index:8;background:var(--panel);color:var(--ink);border:3px solid var(--gold);border-radius:14px;padding:12px 13px;box-shadow:0 6px 0 var(--edge),0 10px 30px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:10px;animation:tutIn .25s ease-out}
 .tut-coach p{margin:0;font-size:15.5px;line-height:1.4}
+.tut-coach.narr{border-color:var(--chips);pointer-events:none}
 .tut-coach.bottom{bottom:max(14px,env(safe-area-inset-bottom,0px))}.tut-coach.top{top:58px}.tut-coach.mid{top:50%;transform:translateY(-50%);animation:none}
 @keyframes tutIn{from{opacity:0;transform:translateY(8px)}}
 .tut-dmg{position:absolute;right:6px;top:18px;color:#fff;background:var(--mult);border-radius:6px;padding:0 5px;font-size:14px;font-weight:800;animation:tutIn .3s ease-out}
@@ -602,7 +603,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v24';
+const VERSION='v24.1';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2505,6 +2506,9 @@ const TUT_MAX=200;
 const tc=(r,s)=>({r,s,id:'t'+Math.random().toString(36).slice(2,8)});
 const tTot=cs=>{let t=0,a=0;for(const c of cs){if(c.r==='A'){t+=11;a++}else t+=baseVal(c)}while(t>21&&a){t-=10;a--}return t};
 const TUT_STEPS=12;
+const tWait=ms=>new Promise(r=>setTimeout(r,ms));
+/* narra o que está acontecendo durante as animações: o balão fica na tela, sem botão e sem escurecer */
+async function nar(text,ms=1800){if(!T)return;T.coach=text;T.pos='mid';T.btn=null;T.hi=null;T.allow=null;T.narr=true;tutRender();await tWait(ms)}
 function startTutorial(){
   hideSheet();
   T={i:0,hp:TUT_MAX,riv:[{n:'Beto',col:1,hp:TUT_MAX,tag:'…',cls:''},{n:'Dama',col:3,hp:TUT_MAX,tag:'…',cls:''}],
@@ -2514,27 +2518,27 @@ function startTutorial(){
 function endTutorial(to){T=null;$('#tut').hidden=true;$('#tut').innerHTML='';if(to==='create')doCreateFromTut();else showMPHome()}
 function doCreateFromTut(){showMPHome();setTimeout(()=>{const b=document.querySelector('[data-act=create]');if(b)b.scrollIntoView({block:'center'})},50)}
 async function tutStep(i){
-  if(!T)return;T.i=i;T.btn=null;T.allow=null;T.hi=null;
+  if(!T)return;T.i=i;T.btn=null;T.allow=null;T.hi=null;T.narr=false;
   const say=(text,o={})=>{T.coach=text;T.pos=o.pos||'bottom';T.hi=o.hi||null;T.allow=o.allow||null;T.btn=o.btn||null;tutRender()};
   switch(i){
     case 0:say('<b>Bem-vindo ao PvP!</b> Aqui não tem dealer: todo mundo joga a mesma rodada, e quem fizer a maior mão causa dano em quem ficou abaixo. Quem zerar a vida sai, e o último de pé vence.',{pos:'mid',btn:'Bora'});break;
     case 1:say('Esta é a <b>sua vida</b>. Todo mundo começa com 200 PV.',{hi:'hp',pos:'mid',btn:'Continuar'});break;
     case 2:say('Estes são seus <b>rivais</b>. A vida de cada um aparece aqui. <b>…</b> quer dizer que ainda está jogando; <b>✓</b>, que já fechou a mão.',{hi:'riv',pos:'bottom',btn:'Continuar'});break;
     case 3:
-      T.hand=[];T.msg='Distribuindo…';tutRender();
-      for(const c of [tc('10','♠'),tc('6','♥')]){T.hand.push(c);tutRender();await sleep(260)}
-      T.msg='Sua vez';
+      T.hand=[];T.msg='Sua vez';T.busy=true;nar('Distribuindo suas cartas…',900);
+      for(const c of [tc('10','♠'),tc('6','♥')]){await tWait(450);T.hand.push(c);tutRender()}
+      await tWait(700);T.busy=false;T.narr=false;
       say('Você tem <b>16</b>. É pouco: quase qualquer mão ganha de 16. Toque em <b>Pedir</b> para comprar uma carta.',{hi:'hit',allow:'hit',pos:'top'});break;
     case 4:say('<b>20!</b> Mão forte. Se pedir de novo, você pode passar de 21 e <b>estourar</b>. Toque em <b>Parar</b> para fechar a mão.',{hi:'stand',allow:'stand',pos:'top'});break;
     case 5:say('Você passou os dois! Seus pontos viraram <b>dano em cada rival que ficou abaixo</b>. A Dama estourou: quem estoura não causa dano em ninguém e leva dano de todos.',{hi:'riv',pos:'bottom',btn:'Continuar'});break;
     case 6:
-      T.round=2;T.hand=[];T.riv.forEach(r=>{r.tag='…';r.cls='';r.dmg=0});T.msg='Rodada 2';tutRender();await sleep(300);
-      for(const c of [tc('5','♦'),tc('6','♣')]){T.hand.push(c);tutRender();await sleep(260)}
-      T.msg='Sua vez';
+      T.round=2;T.hand=[];T.riv.forEach(r=>{r.tag='…';r.cls='';r.dmg=0});T.msg='Rodada 2';T.busy=true;nar('<b>Rodada 2.</b> Distribuindo as cartas…',900);
+      for(const c of [tc('5','♦'),tc('6','♣')]){await tWait(450);T.hand.push(c);tutRender()}
+      await tWait(700);T.busy=false;T.narr=false;
       say('Rodada 2. Você tem <b>11</b>: hora de <b>Dobrar</b>. Você recebe só mais 1 carta, e o dano da mão dobra.',{hi:'double',allow:'double',pos:'top'});break;
     case 7:say('<b>21!</b> E dobrado. Cuidado: se alguém fechar mais alto que você, é <b>você</b> quem leva o dano dele. O <b>Trocar</b> (2 vezes a cada loja) troca uma carta da mão.',{hi:'riv',pos:'bottom',btn:'Continuar'});break;
     case 8:T.view='shop';say('A cada <b>3 rodadas</b> abre a <b>loja</b>. Cartas de <b>ataque</b> aumentam seu dano e as de <b>defesa</b> te protegem. Toque na <b>Lâmina</b> para comprar.',{hi:'buy',allow:'buy',pos:'bottom'});break;
-    case 9:say('Comprada! As cartas <b style="color:#ffb074">com alvo</b> (laranja) são de uso único: na sua vez, você escolhe um rival para atingir. Toque em <b>Voltar à mesa</b>.',{hi:'leave',allow:'leave',pos:'top'});break;
+    case 9:say('Comprada! A <b style="color:#ffb074">Mira</b> é uma carta <b style="color:#ffb074">com alvo</b> (etiqueta laranja): de uso único, na sua vez você escolhe um rival para atingir. Toque em <b>Voltar à mesa</b>.',{hi:['mira','leave'],allow:'leave',pos:'top'});break;
     case 10:T.view='mesa';say('Toda loja também sorteia uma <b>carta de mesa</b>, que muda a regra para todo mundo nas 3 rodadas seguintes. Por exemplo, a Tempestade tira 5 PV de todos no começo de cada rodada.',{hi:'mesa',pos:'bottom',btn:'Continuar'});break;
     case 11:T.view='decks';T.deck=null;say('Na sala, cada um escolhe um <b>baralho</b>, e cada baralho tem uma regra própria. Toque no <b>Vidro</b> para ver o que ele faz.',{hi:'deck',allow:'deck',pos:'top'});break;
     case 12:say(`<b>Vidro:</b> ${esc(DECKS.vidro.d)} São 11 baralhos, e dá para ver as cartas de cada um antes de escolher.`,{hi:'decks',pos:'top',btn:'Continuar'});break;
@@ -2547,20 +2551,22 @@ async function tutAct(k){
   if(k==='exit'){endTutorial();return}
   if(k==='next'){if(T.i===14){endTutorial('create');return}tutStep(T.i+1);return}
   if(k!==T.allow)return;
-  T.busy=true;T.allow=null;T.coach='';tutRender();
+  T.busy=true;T.allow=null;
   try{
-  if(k==='hit'){T.hand.push(tc('4','♣'));beep(640,.05);tutRender();await sleep(450);tutStep(4)}
+  if(k==='hit'){T.hand.push(tc('4','♣'));beep(640,.05);await nar('Veio um <b>4</b>: agora você tem <b>20</b>.',1700);tutStep(4)}
   else if(k==='stand'){
-    T.msg='Esperando a mesa…';tutRender();await sleep(500);
-    T.riv[0].tag='✓';T.riv[0].cls='ready';tutRender();await sleep(450);T.riv[1].tag='✓';T.riv[1].cls='ready';tutRender();await sleep(500);
-    T.riv[0].tag='18';T.riv[0].cls='shown';T.riv[1].tag='estourou';T.riv[1].cls='bust';T.msg='Revelação: você fez 20';tutRender();await sleep(600);
-    T.riv.forEach(r=>{r.dmg=24;r.hp-=24});beep(220,.12,'sawtooth');tutRender();await sleep(700);tutStep(5)}
+    T.msg='Esperando a mesa…';await nar('Você fechou com <b>20</b>. Agora a mesa espera o Beto e a Dama fecharem as mãos…',1700);
+    T.riv[0].tag='✓';T.riv[0].cls='ready';tutRender();await tWait(800);T.riv[1].tag='✓';T.riv[1].cls='ready';tutRender();await tWait(800);
+    T.riv[0].tag='18';T.riv[0].cls='shown';T.riv[1].tag='estourou';T.riv[1].cls='bust';T.msg='Revelação: você fez 20';
+    await nar('<b>Revelação!</b> O Beto fez <b>18</b> e a Dama <b>estourou</b> com 25. Seu 20 ganha dos dois.',2400);
+    T.riv.forEach(r=>{r.dmg=24;r.hp-=24});beep(220,.12,'sawtooth');T.narr=false;tutRender();await tWait(900);tutStep(5)}
   else if(k==='double'){
-    T.msg='Dobrou! ×2';T.hand.push(tc('K','♠'));beep(300,.08,'sawtooth');tutRender();await sleep(500);
-    T.msg='21!';tutRender();try{fx21()}catch(e){}await sleep(900);
-    T.riv[0].tag='✓';T.riv[0].cls='ready';T.riv[1].tag='✓';T.riv[1].cls='ready';tutRender();await sleep(500);
-    T.riv[0].tag='20';T.riv[0].cls='shown';T.riv[1].tag='17';T.riv[1].cls='shown';T.msg='Revelação: você fez 21';tutRender();await sleep(600);
-    T.riv.forEach(r=>{r.dmg=60;r.hp-=60});beep(180,.15,'sawtooth');tutRender();await sleep(800);tutStep(7)}
+    T.msg='Dobrou! ×2';T.hand.push(tc('K','♠'));beep(300,.08,'sawtooth');
+    await nar('Dobrou! Você recebe só mais 1 carta… veio um <b>K</b>: <b>21!</b>',1900);try{fx21()}catch(e){}
+    T.msg='Esperando a mesa…';T.riv[0].tag='✓';T.riv[0].cls='ready';T.riv[1].tag='✓';T.riv[1].cls='ready';await nar('Esperando a mesa fechar…',1200);
+    T.riv[0].tag='20';T.riv[0].cls='shown';T.riv[1].tag='17';T.riv[1].cls='shown';T.msg='Revelação: você fez 21';
+    await nar('<b>Revelação!</b> O Beto fez <b>20</b> e a Dama <b>17</b>. Seu 21 dobrado passa os dois.',2400);
+    T.riv.forEach(r=>{r.dmg=60;r.hp-=60});beep(180,.15,'sawtooth');T.narr=false;tutRender();await tWait(900);tutStep(7)}
   else if(k==='buy'){T.bought=true;T.money-=4;beep(880,.08);setTimeout(()=>beep(1180,.1),90);tutRender();await sleep(300);tutStep(9)}
   else if(k==='leave'){tutStep(10)}
   else if(k==='deck'){T.deck='vidro';tutRender();tutStep(12)}
@@ -2568,16 +2574,16 @@ async function tutAct(k){
 }
 function tutRender(){
   if(!T)return;const el=$('#tut');
-  const hi=k=>T.hi===k?'tut-hi':'';
+  const hi=k=>(Array.isArray(T.hi)?T.hi.includes(k):T.hi===k)?'tut-hi':'';
   const btn=(k,cls,label,small)=>`<button class="btn ${cls} ${hi(k)}" data-tut="${k}" ${T.allow===k?'':'tabindex="-1"'}>${label}<small>${small}</small></button>`;
   const riv=`<div class="rivals few ${hi('riv')}" data-tut="riv">${T.riv.map(r=>`<div class="rvl"><span class="top"><span class="dot" style="--pc:${colOf(r.col)}"></span><span class="nm">${r.n}</span><span class="tg ${r.cls}">${r.tag}</span></span><span class="hp">${r.hp}<small>PV</small></span>${r.dmg?`<span class="tut-dmg">−${r.dmg}</span>`:''}<span class="hpbar"><i style="width:${r.hp/TUT_MAX*100}%"></i></span></div>`).join('')}</div>`;
   const pt=T.hand.length?tTot(T.hand):'–';
   let mid;
   if(T.view==='table'||T.view==='end'&&false)mid='';
   if(T.view==='shop'){
-    const sc=(k,tag,sold,h)=>{const d=JK[k];return `<button class="sc ${sold?'sold':''} ${h?hi('buy'):''}" ${h?'data-tut="buy"':''}><span class="tag">${sold?'✓':'$'+d.c}</span><span class="face" style="--jc:${d.bg}"><span class="g">${d.g}</span><span class="kind ${d.pvp}">${KIND_TXT[d.pvp]}</span></span><b>${d.n}</b><span class="dd">${d.d}</span></button>`};
+    const sc=(k,tag,sold,h,hk)=>{const d=JK[k];return `<button class="sc ${sold?'sold':''} ${h?hi('buy'):''} ${hk?hi(hk):''}" ${h?'data-tut="buy"':''}><span class="tag">${sold?'✓':'$'+d.c}</span><span class="face" style="--jc:${d.bg}"><span class="g">${d.g}</span><span class="kind ${d.pvp}">${KIND_TXT[d.pvp]}</span></span><b>${d.n}</b><span class="dd">${d.d}</span></button>`};
     mid=`<div class="tut-pane"><div class="shophead"><h2>Loja</h2><span class="num money">$${T.money}</span></div>
-      <div class="shoplist">${sc('lamina','',T.bought,true)}${sc('armadura','',false,false)}${sc('mira','',false,false)}${sc('escudo','',false,false)}</div>
+      <div class="shoplist">${sc('lamina','',T.bought,true)}${sc('armadura','',false,false)}${sc('mira','',false,false,'mira')}${sc('escudo','',false,false)}</div>
       <button class="btn b-next ${hi('leave')}" data-tut="leave">Voltar à mesa<small>a mesa espera você</small></button></div>`;
   }else if(T.view==='mesa'){
     const d=JK.tempestade;mid=`<div class="tut-pane up"><div class="tut-mesa ${hi('mesa')}" data-tut="mesa"><div class="mf-card" style="--jc:${d.bg}"><span>${d.g}</span></div><b>${d.n}</b><p>${d.d}</p><small>Carta de mesa · vale para todos por 3 rodadas</small></div></div>`;
@@ -2600,8 +2606,8 @@ function tutRender(){
   el.innerHTML=`<div class="tut-top"><b>Tutorial</b><span class="tut-dots">${Array.from({length:TUT_STEPS},(_,k)=>`<i class="${k<=Math.min(TUT_STEPS-1,Math.floor(T.i*TUT_STEPS/15))?'on':''}"></i>`).join('')}</span><button class="tut-x" data-tut="exit">Sair</button></div>
     <div class="score tut-hp ${hi('hp')}" data-tut="hp"><span class="lbl">Sua vida</span><span class="num hpnum">${T.hp}<small class="of">/${TUT_MAX}</small></span></div>
     ${mid||table}
-    ${T.coach||T.hi||T.allow?'<div class="tut-dim"></div>':''}
-    ${T.coach?`<div class="tut-coach ${T.pos}"><p>${T.coach}</p>${T.btn?`<button class="btn b-go" data-tut="next">${T.btn}</button>`:''}</div>`:''}`;
+    ${(T.coach||T.hi||T.allow)&&!T.narr?'<div class="tut-dim"></div>':''}
+    ${T.coach?`<div class="tut-coach ${T.pos} ${T.narr?'narr':''}"><p>${T.coach}</p>${T.btn?`<button class="btn b-go" data-tut="next">${T.btn}</button>`:''}</div>`:''}`;
 }
 document.getElementById('tut').addEventListener('click',e=>{const b=e.target.closest('[data-tut]');if(!b)return;e.preventDefault();tutAct(b.dataset.tut)});
 const SITE_URL='https://mayconsilvaseguranca-eng.github.io/coringa21/';

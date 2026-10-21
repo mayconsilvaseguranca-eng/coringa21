@@ -1,5 +1,9 @@
 import html
 V=[
+ ("v24.1","21/10 · 06:25","Tutorial mais claro",
+  "Acender a carta com alvo como as outras e corrigir os textos que apareciam rápido demais e sumiam enquanto as cartas chegavam.",
+  [("Corrigido","No passo das cartas com alvo, a Mira agora acende com o brilho dourado junto com o botão Voltar à mesa, para ficar claro de qual carta o texto fala."),
+   ("Corrigido","Enquanto as cartas chegam, a mesa espera e a revelação acontece, um balão azul fica na tela contando o que está acontecendo (Veio um 4: agora você tem 20; Revelação! O Beto fez 18 e a Dama estourou…). Cada texto fica pelo menos 1,7 segundo, e a tela não escurece nesses momentos.")]),
  ("v24","21/10 · 06:11","Tutorial jogável no multiplayer",
   "No multiplayer, uma opção de tutorial jogável que explique o PvP, os modos e os baralhos, onde só dá para tocar no que for liberado, e que não seja longo.",
   [("Novo","Botão Como jogar? Fazer o tutorial na tela do Multiplayer. Dura uns 2 minutos e funciona sem internet. Você joga duas rodadas contra Beto e Dama: pede carta com 16, para no 20 e vê seu dano cair nos dois (a Dama estoura), depois dobra com 11 e faz 21."),
@@ -268,7 +272,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '21/10/2026, 06:11'
+UPD=AG['atualizado'] if AG else '21/10/2026, 06:25'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}
