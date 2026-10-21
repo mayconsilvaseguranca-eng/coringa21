@@ -1,5 +1,12 @@
 import html
 V=[
+ ("v23","21/10 · 04:08","8 cartas novas no solo e solo rebalanceado",
+  "Adicione as cartas novas do solo e faça um balanceamento delas com as antigas.",
+  [("Novo","8 coringas novos no solo: Rei do 21 (×4 Mult fechando com 21, $4), Dealer Azarado (×2 Mult quando o dealer estoura, $5), Sequência (×2 na 2ª vitória seguida, ×3 na 3ª e assim por diante; zera ao perder, $6), Mão Cheia (×3 Mult vencendo com 3 cartas ou mais, $4), Rede de Segurança (mão perdida ainda marca as Fichas das cartas, $4), Cofrinho (+$4 no fim de cada blind, $3), Juros Altos (juros de $1 a cada $2 guardados, até $8, $2) e Baralho Alto (tira os 2, 3 e 4 do baralho e dá +1 Mult, $4)."),
+   ("Mudou","O solo era difícil demais: no simulador, ninguém vencia o ante 8 e 28% perdiam já no ante 1, só pelo azar das mãos. Agora são 6 mãos por blind (eram 5) e metas mais suaves: 35, 90, 180, 350, 620, 1.000, 1.550 e 2.300 na blind pequena (eram 80 até 38.000). O robô do simulador perde no ante 1 só 4% das vezes e vence o ante 8 em ~20%. Vale também para a Sobrevivência."),
+   ("Mudou","Modo sem fim: a meta sobe ×1,6 por ante depois do 8 (era ×2,2). O robô chega até o ante 13 ou 14."),
+   ("Mudou","Cartas antigas rebalanceadas para todas valerem o preço: Escalada agora dá +1 Mult a cada 4 vitórias e custa $10 (era a mais forte de longe); Coringa $4 (era $2); Bolso Cheio $6; Ás de Ouro +40 Fichas por Ás; Par Perfeito ×3 Mult; Sete da Sorte ×2 por 7 e $4; Dobradinha $4 e ganhar uma mão dobrada devolve a mão; Trocador +3 trocas e $3; Ganância +1 Mult a cada $3 e $4; Vidente também dá +3 Mult; Na Beirada $5; Cautela e Seguro $4."),
+   ("Novo","Teste novo: confere a pontuação de cada carta nova com mãos montadas, as 6 mãos por blind, Juros Altos, Cofrinho e Baralho Alto.")]),
  ("v22","21/10 · 03:34","Loja estilo Balatro e loja do PvP sincronizada",
   "Loja maior e mais parecida com o Balatro, no PvP e no solo; no PvP a próxima rodada só começa quando todo mundo terminar a compra; testes de balanceamento do solo.",
   [("Mudou","Loja nova no PvP e no solo: as cartas aparecem grandes, em duas colunas, com a etiqueta de preço no topo e a carta balançando de leve, como no Balatro. Nome em letra maior e a descrição embaixo (tocando na carta aparece o texto inteiro e o Comprar). Título LOJA na letra do logo, dinheiro em destaque, botão Trocar verde e Voltar/Próxima vermelho, maiores. Continua cabendo no iPhone SE sem rolar."),
@@ -255,7 +262,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '21/10/2026, 03:34'
+UPD=AG['atualizado'] if AG else '21/10/2026, 04:08'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

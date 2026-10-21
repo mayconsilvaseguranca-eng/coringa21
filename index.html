@@ -571,7 +571,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v22';
+const VERSION='v23';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -601,7 +601,10 @@ const HANDS={
 const HAND_HINT={win:'Ganhar do dealer',t21:'Ganhar com 21 usando 3+ cartas',bj:'21 com as 2 primeiras cartas',five:'5 cartas sem estourar (vitória automática)',push:'Mesmo total que o dealer'};
 const WIN_TYPES=['win','t21','bj','five'];
 const BLINDS=[{n:'Blind Pequena',r:3,k:1,col:'var(--chips)'},{n:'Blind Grande',r:4,k:1.5,col:'var(--gold)'},{n:'Chefe',r:5,k:2,col:'var(--mult)'}];
-const ANTE_BASE=[80,220,600,1500,3800,8500,18000,38000];
+/* metas do solo e da Sobrevivência: balanceadas no simulador (tests/solo-sim.mjs) */
+const ANTE_BASE=[35,90,180,350,620,1000,1550,2300], ENDLESS_K=1.6;
+/* o dano do PvP continua na escala antiga (80 pontos = 1 unidade de dano), independente das metas do solo */
+const PVP_BASE=80;
 const BOSSES={
   muro:{n:'O Muro',d:'O dealer só para com 18 ou mais.'},
   espelho:{n:'O Espelho',d:'Empates contam como derrota.'},
@@ -611,24 +614,32 @@ const BOSSES={
   chama:{n:'A Chama',d:'O Mult base de todas as jogadas cai pela metade.'}
 };
 const JK={
-  coringa:{n:'Coringa',d:'+4 Mult',c:2,g:'J',bg:'#b8324f'},
-  as:{n:'Ás de Ouro',d:'+25 Fichas por Ás na sua mão',c:4,g:'A',bg:'#c98a12'},
+  coringa:{n:'Coringa',d:'+4 Mult',c:4,g:'J',bg:'#b8324f'},
+  as:{n:'Ás de Ouro',d:'+40 Fichas por Ás na sua mão',c:4,g:'A',bg:'#c98a12'},
   corte:{n:'Corte Real',d:'+3 Mult por J, Q ou K na sua mão',c:5,g:'K',bg:'#6a3fb5'},
-  beirada:{n:'Na Beirada',d:'×2 Mult se seu total for 20 ou 21',c:6,g:'20',bg:'#1f7a8c'},
+  beirada:{n:'Na Beirada',d:'×2 Mult se seu total for 20 ou 21',c:5,g:'20',bg:'#1f7a8c'},
   pefrio:{n:'Pé Frio',d:'+60 Fichas se o dealer estourar',c:4,g:'✕',bg:'#2d6cdf'},
-  bolso:{n:'Bolso Cheio',d:'+2 Mult por carta na sua mão',c:5,g:'▤',bg:'#3a8f4b'},
-  sete:{n:'Sete da Sorte',d:'×1,5 Mult para cada 7 na sua mão',c:6,g:'7',bg:'#d0442f'},
-  cautela:{n:'Cautela',d:'×3 Mult ao vencer com 16 ou menos',c:6,g:'16',bg:'#5b6b7a'},
-  seguro:{n:'Seguro',d:'Uma vez por blind, um estouro vira empate',c:5,g:'✚',bg:'#2f7d6d'},
-  vidente:{n:'Vidente',d:'Mostra a carta virada do dealer',c:4,g:'◉',bg:'#8a3fa0'},
+  bolso:{n:'Bolso Cheio',d:'+2 Mult por carta na sua mão',c:6,g:'▤',bg:'#3a8f4b'},
+  sete:{n:'Sete da Sorte',d:'×2 Mult para cada 7 na sua mão',c:4,g:'7',bg:'#d0442f'},
+  cautela:{n:'Cautela',d:'×3 Mult ao vencer com 16 ou menos',c:4,g:'16',bg:'#5b6b7a'},
+  seguro:{n:'Seguro',d:'Uma vez por blind, um estouro vira empate',c:4,g:'✚',bg:'#2f7d6d'},
+  vidente:{n:'Vidente',d:'Mostra a carta virada do dealer e dá +3 Mult',c:4,g:'◉',bg:'#8a3fa0'},
   agiota:{n:'Agiota',d:'+$1 a cada mão vencida',c:5,g:'$',bg:'#a87410'},
-  par:{n:'Par Perfeito',d:'+10 Mult se suas 2 primeiras cartas forem do mesmo valor',c:4,g:'=',bg:'#c25a8a'},
-  dobradinha:{n:'Dobradinha',d:'Dobrar dá ×3 Mult em vez de ×2',c:6,g:'×3',bg:'#d45d1e'},
+  par:{n:'Par Perfeito',d:'×3 Mult se suas 2 primeiras cartas forem do mesmo valor',c:4,g:'=',bg:'#c25a8a'},
+  dobradinha:{n:'Dobradinha',d:'Dobrar dá ×3 Mult em vez de ×2, e ganhar uma mão dobrada devolve a mão',c:4,g:'×3',bg:'#d45d1e'},
   reserva:{n:'Reserva',d:'+1 mão por blind',c:6,g:'+1',bg:'#2a5fa8'},
-  trocador:{n:'Trocador',d:'+2 trocas por blind',c:4,g:'⇄',bg:'#7a5a2a'},
+  trocador:{n:'Trocador',d:'+3 trocas por blind',c:3,g:'⇄',bg:'#7a5a2a'},
   sangue:{n:'Sangue Quente',d:'+15 Fichas por carta de ♥ ou ♦',c:4,g:'♥',bg:'#a8243a'},
-  escalada:{n:'Escalada',d:'Ganha +1 Mult a cada mão vencida',c:7,g:'▲',bg:'#3b8a7a'},
-  ganancia:{n:'Ganância',d:'+1 Mult para cada $5 que você tem',c:5,g:'¢',bg:'#8c7a16'},
+  escalada:{n:'Escalada',d:'Ganha +1 Mult a cada 4 mãos vencidas',c:10,g:'▲',bg:'#3b8a7a'},
+  rei21:{n:'Rei do 21',d:'×4 Mult quando você fecha com 21',c:4,g:'21',bg:'#b8860b'},
+  azarado:{n:'Dealer Azarado',d:'×2 Mult quando o dealer estoura',c:5,g:'☄',bg:'#3a5fbf'},
+  sequencia:{n:'Sequência',d:'×Mult a mais por vitória seguida (×2 na 2ª, ×3 na 3ª…); zera ao perder',c:6,g:'»',bg:'#c0502a'},
+  maocheia:{n:'Mão Cheia',d:'×3 Mult ao vencer com 3 cartas ou mais',c:4,g:'≡',bg:'#4f7a2a'},
+  rede:{n:'Rede de Segurança',d:'Mão perdida ainda marca as Fichas das cartas',c:4,g:'#',bg:'#2f6f7a'},
+  cofrinho:{n:'Cofrinho',d:'+$4 no fim de cada blind',c:3,g:'◖',bg:'#c06a8a'},
+  juros:{n:'Juros Altos',d:'Juros de $1 a cada $2 guardados (até $8)',c:2,g:'%',bg:'#7a6a1a'},
+  baralhoalto:{n:'Baralho Alto',d:'Tira os 2, 3 e 4 do baralho e dá +1 Mult',c:4,g:'▲',bg:'#5a3f9a'},
+  ganancia:{n:'Ganância',d:'+1 Mult para cada $3 que você tem',c:4,g:'¢',bg:'#8c7a16'},
   escudo:{n:'Escudo',d:'Absorve os primeiros 2 de dano que você levar em cada rodada',c:5,g:'◈',bg:'#3d6f9e',pvp:'def'},
   espelho:{n:'Espelho',d:'Devolve 20% do dano que você leva para quem te bateu',c:4,g:'◐',bg:'#6b7fa0',pvp:'def'},
   esquiva:{n:'Esquiva',d:'Rivais que fecharam com 17 ou menos não te causam dano',c:4,g:'≈',bg:'#2f8a7e',pvp:'def'},
@@ -665,19 +676,25 @@ const JK={
 };
 const JF={
   coringa:x=>x.m(4),
-  as:x=>{const k=x.cards.filter(c=>c.r==='A').length;k&&x.c(25*k)},
+  as:x=>{const k=x.cards.filter(c=>c.r==='A').length;k&&x.c(40*k)},
   corte:x=>{const k=x.cards.filter(c=>c.r==='J'||c.r==='Q'||c.r==='K').length;k&&x.m(3*k)},
   beirada:x=>{x.total>=20&&x.x(2)},
   pefrio:x=>{x.dBust&&x.c(60)},
   bolso:x=>x.m(2*x.cards.length),
-  sete:x=>{x.cards.forEach(c=>{c.r==='7'&&x.x(1.5)})},
+  sete:x=>{x.cards.forEach(c=>{c.r==='7'&&x.x(2)})},
   cautela:x=>{x.isWin&&x.total<=16&&x.x(3)},
-  par:x=>{x.cards.length>=2&&x.cards[0].r===x.cards[1].r&&x.m(10)},
+  par:x=>{x.cards.length>=2&&x.cards[0].r===x.cards[1].r&&x.x(3)},
   sangue:x=>{const k=x.cards.filter(c=>c.s==='♥'||c.s==='♦').length;k&&x.c(15*k)},
-  escalada:(x,j)=>{j.v&&x.m(j.v)},
-  ganancia:x=>{const k=Math.floor(S.money/5);k&&x.m(k)}
+  escalada:(x,j)=>{const k=Math.floor((j.v||0)/4);k&&x.m(k)},
+  ganancia:x=>{const k=Math.floor(S.money/3);k&&x.m(k)},
+  vidente:x=>x.m(3),
+  rei21:x=>{x.total===21&&x.x(4)},
+  azarado:x=>{x.dBust&&x.x(2)},
+  sequencia:(x,j)=>{j.v&&x.x(1+j.v)},
+  maocheia:x=>{x.isWin&&x.cards.length>=3&&x.x(3)},
+  baralhoalto:x=>x.m(1)
 };
-const jDesc=j=>JK[j.k].d+(j.k==='escalada'?` (agora +${j.v||0})`:'');
+const jDesc=j=>JK[j.k].d+(j.k==='escalada'?` (agora +${Math.floor((j.v||0)/4)}, ${j.v||0} vitórias)`:j.k==='sequencia'?` (agora ${j.v?'×'+(1+j.v):'sem sequência'})`:'');
 const sellPrice=k=>Math.max(1,Math.floor(JK[k].c/2));
 const COLORS=['#f0453a','#2b86f0','#f5bd3a','#3fbf6a','#a05be0','#ff7ab6','#25c3c3','#ff8a2a','#c9d14a','#e8e8e8'];
 const MAXP=10, LIVES=3, PVP_HP=200, DMG_K=20, PVP_SHOP_EVERY=3, PVP_TURN_MS=45000;
@@ -783,14 +800,14 @@ const act=k=>has(k)&&!(isPvp()&&fxOn('silencio')&&JK[k]&&(JK[k].pvp==='atk'||JK[
 const recvTotal=()=>Object.values((S&&S.mp&&S.mp.recv)||{}).reduce((a,b)=>a+(+b||0),0);
 const pvpHP=()=>Math.max(0,Math.ceil(r1(S.mp.hp!=null?S.mp.hp:(S.mp.maxHp||PVP_HP)-recvTotal())));
 const pvpHeal=x=>{if(S.mp.hp==null)S.mp.hp=(S.mp.maxHp||PVP_HP)-recvTotal();S.mp.hp=r1(Math.min(S.mp.maxHp||PVP_HP,S.mp.hp+x))};
-const dmgOf=pts=>r1(pts/target(S.ante,0)*DMG_K);
+const dmgOf=pts=>r1(pts/PVP_BASE*DMG_K);
 const bossOn=k=>S&&S.bi===2&&S.boss===k&&S.phase==='play';
-function target(a,i){a=a??S.ante;i=i??S.bi;let base=a<=8?ANTE_BASE[a-1]:ANTE_BASE[7]*Math.pow(2.2,a-8);return Math.round(base*BLINDS[i].k/10)*10}
+function target(a,i){a=a??S.ante;i=i??S.bi;let base=a<=8?ANTE_BASE[a-1]:ANTE_BASE[7]*Math.pow(ENDLESS_K,a-8);return Math.round(base*BLINDS[i].k/10)*10}
 function blindName(i){i=i??S.bi;if(i===2)return (S&&S.mp&&S.mp.mode!=='pvp'?'Duelo · ':'')+BOSSES[S.boss].n;return BLINDS[i].n}
 function save(){if(!S||S.busy)return;if(S.mp)store.set(SAVE_MP,{S,rs:R.s,rs2:R2.s,code:MP.code});else if(S.phase!=='over')store.set(SAVE,{S,rs:R.s,rs2:R2.s})}
 
 /* ---------- Cartas ---------- */
-function newDeck(){if(isPvp()&&myDeck()!=='padrao')return shuffle(deckCards(myDeck()).map(c=>({...c,id:++S.uid})));const d=[];for(const s of SUITS)for(const r of RANKS)d.push({r,s,id:++S.uid});return shuffle(d)}
+function newDeck(){if(isPvp()&&myDeck()!=='padrao')return shuffle(deckCards(myDeck()).map(c=>({...c,id:++S.uid})));const alto=!isPvp()&&has('baralhoalto');const d=[];for(const s of SUITS)for(const r of RANKS){if(alto&&(r==='2'||r==='3'||r==='4'))continue;d.push({r,s,id:++S.uid})}return shuffle(d)}
 function draw(){if(!S.deck.length)S.deck=newDeck();return S.deck.pop()}
 const isRed=c=>c.s==='♥'||c.s==='♦';
 function baseVal(c){if(c.r==='A')return 11;if(c.r==='J'||c.r==='Q'||c.r==='K')return 10;return +c.r}
@@ -911,7 +928,7 @@ function renderJokers(){
   $('#rack').classList.toggle('withalvo',pvp);
   let h='';
   for(let i=0;i<5;i++){const j=S&&S.jokers[i];
-    if(j){const d=JK[j.k];h+=`<button class="joker" style="--jc:${d.bg}" data-act="joker" data-i="${i}" data-ji="${i}" aria-label="${d.n}">${j.k==='escalada'?`<span class="jv">+${j.v||0}</span>`:''}<span class="jg">${d.g}</span><span class="jn">${d.n}</span></button>`}
+    if(j){const d=JK[j.k];h+=`<button class="joker" style="--jc:${d.bg}" data-act="joker" data-i="${i}" data-ji="${i}" aria-label="${d.n}">${j.k==='escalada'?`<span class="jv">+${Math.floor((j.v||0)/4)}</span>`:j.k==='sequencia'&&j.v?`<span class="jv">×${1+j.v}</span>`:''}<span class="jg">${d.g}</span><span class="jn">${d.n}</span></button>`}
     else h+=`<div class="slot"></div>`}
   if(pvp)h+=alvoSlots();
   $('#rack').innerHTML=h;
@@ -1087,10 +1104,10 @@ function hv(k){const h=HANDS[k],l=S?S.levels[k]:1;return{c:h.c+h.lc*(l-1),m:h.m+
 /* ---------- Fluxo de jogo ---------- */
 function startBlind(){
   S.phase='play';S.deck=newDeck();S.roundScore=0;S.seguroUsed=false;
-  const short=isDuel()||isPvp();const base=short?4:5;
+  const short=isDuel()||isPvp();const base=short?4:6;
   S.handsLeft=base-(S.bi===2&&S.boss==='agulha'?(short?1:2):0)+(has('reserva')?1:0);
   S.roundDmg=0;
-  S.swapsLeft=(S.bi===2&&S.boss==='corrente')?0:3+(has('trocador')?2:0);
+  S.swapsLeft=(S.bi===2&&S.boss==='corrente')?0:3+(has('trocador')?3:0);
   S.calc=null;S.awaitNext=false;S.player=[];S.dealer=[];
   hideSheet();deal();
 }
@@ -1142,11 +1159,14 @@ async function resolve(){
   const isWin=WIN_TYPES.includes(type);
   S.msg=type==='bust'?`Estourou com ${p}`:type==='lose'?(dBJ?'Blackjack do dealer':`Dealer ganhou: ${d} contra ${p}`):type==='push'?`Empate em ${p}`:type==='five'?'Cinco cartas! Vitória automática':d>21?`Dealer estourou com ${d}!`:type==='bj'?'Blackjack!':`Você ganhou: ${p} contra ${d}`;
   S.stats.hands++;
-  if(isWin){S.stats.wins++;S.jokers.forEach((j,i)=>{if(j.k==='escalada'){j.v=(j.v||0)+1;setTimeout(()=>pop(jokerEl(i),'+1 Mult','mult'),50)}})}
+  if(isWin){S.stats.wins++;S.jokers.forEach((j,i)=>{if(j.k==='escalada'){j.v=(j.v||0)+1;const v=j.v;setTimeout(()=>pop(jokerEl(i),v%4===0?'+1 Mult':`${v%4}/4`,'mult'),50)}})}
   render();
   const pts=await scoreHand(type,{total:p,dBust:d>21,isWin});
   if(isWin&&has('agiota')){S.money++;pop(jokerEl(S.jokers.findIndex(j=>j.k==='agiota')),'+$1','gold');beep(990,.08)}
-  S.handsLeft--;S.stats.best=Math.max(S.stats.best,pts);S.stats.total+=pts;
+  /* Sequência: conta vitórias seguidas (depois de pontuar esta mão); derrota ou estouro zera, empate mantém */
+  S.jokers.forEach((j,i)=>{if(j.k!=='sequencia')return;if(isWin){j.v=(j.v||0)+1;setTimeout(()=>pop(jokerEl(i),`Sequência ${j.v}`,'mult'),50)}else if(type==='bust'||type==='lose'){if(j.v)setTimeout(()=>pop(jokerEl(i),'Zerou','info'),50);j.v=0}});
+  S.handsLeft--;
+  if(S.doubled&&isWin&&has('dobradinha')&&!isPvp()){S.handsLeft++;pop(jokerEl(S.jokers.findIndex(j=>j.k==='dobradinha')),'Mão de volta!','info')}S.stats.best=Math.max(S.stats.best,pts);S.stats.total+=pts;
   render();await sleep(450);
   const duel=isDuel(),pvp=isPvp();
   if(!duel&&!pvp&&S.roundScore>=target()){await sleep(300);blindWon();return}
@@ -1156,6 +1176,11 @@ async function resolve(){
 }
 async function scoreHand(type,ctx){
   if(type==='bust'||type==='lose'){
+    if(has('rede')&&!isPvp()){
+      /* Rede de Segurança: a mão perdida marca só as Fichas das cartas (×1) */
+      let c=0;S.calc={n:'Rede de Segurança',c:0,m:1};renderCalc();anim(jokerEl(S.jokers.findIndex(j=>j.k==='rede')),'wiggle');await sleep(350);
+      for(const card of S.player){const v=cardChips(card);c+=v;S.calc.c=c;renderCalc();pop(cardEl(card.id),'+'+v,'chips');beep(300,.04);await sleep(150)}
+      S.calc.total=c;renderCalc();await sleep(300);S.roundScore+=c;if(!isDuel())$('#bar').style.width=Math.min(100,S.roundScore/target()*100)+'%';$('#rs').textContent=fmt(S.roundScore);return c}
     S.calc={n:type==='bust'?'Estouro':'Derrota',c:0,m:0,lose:true,total:0};render();anim($('#calc'),'shake');beep(110,.3,'sawtooth',.05);await sleep(700);return 0}
   const base=hv(type);let c=base.c,m=base.m;
   if(bossOn('chama'))m=Math.max(1,Math.floor(m/2));
@@ -1179,11 +1204,12 @@ async function scoreHand(type,ctx){
   for(let s=1;s<=steps;s++){S.roundScore=Math.round(from+(to-from)*s/steps);if(!isPvp())$('#rs').textContent=fmt(S.roundScore);if(!isDuel())$('#bar').style.width=Math.min(100,S.roundScore/target()*100)+'%';await sleep(28)}
   S.roundScore=to;return tot;
 }
-function interestNow(){return Math.min(5,Math.floor(S.money/5))}
+function interestNow(){return has('juros')?Math.min(8,Math.floor(S.money/2)):Math.min(5,Math.floor(S.money/5))}
+const piggy=()=>has('cofrinho')?4:0;
 function blindWon(){
   S.stats.blinds++;S.busy=false;
   const b=BLINDS[S.bi];const interest=interestNow();
-  S.cash={reward:b.r,hands:S.handsLeft,interest,bonus:0,total:b.r+S.handsLeft+interest};
+  const pig=piggy();S.cash={reward:b.r,hands:S.handsLeft,interest,bonus:0,pig,total:b.r+S.handsLeft+interest+pig};
   S.phase='cash';beep(660,.1);setTimeout(()=>beep(990,.15),120);
   render();showCash();
 }
@@ -1251,7 +1277,7 @@ function duelContinue(){
   if(S.ante>=8){S.phase='done';render();showBoard();return}
   S.stats.blinds++;
   const interest=interestNow(),bonus=r&&r.iWin?3:0;
-  S.cash={reward:5,hands:0,interest,bonus,total:5+interest+bonus};
+  const pig=piggy();S.cash={reward:5,hands:0,interest,bonus,pig,total:5+interest+bonus+pig};
   S.phase='cash';render();showCash();
 }
 function eliminate(){S.busy=false;S.mp.alive=false;S.phase='out';render();showBoard()}
@@ -1333,7 +1359,7 @@ async function pvpShowdown(){
     if(S.round>=b.to)delete S.mp.bleed[pid]}
   if(bled)extra.push(`Sangria: ${bled} de dano`);
   if(pts>0&&beaten.length){
-    dmg=Math.round(pts/ANTE_BASE[0]*DMG_K);
+    dmg=Math.round(pts/PVP_BASE*DMG_K);
     per=Math.max(1,Math.round(dmg/Math.max(1,parts.length)),pvpMinHit(S.round));
     /* bônus de carta valem sobre o dano final (depois do dano mínimo da rodada) */
     if(t===21&&act('critico')){per=Math.round(per*1.5);extra.push('Golpe Crítico: dano ×1,5')}
@@ -1822,7 +1848,7 @@ function botTick(){
           const type=s2.bj?'bj':s2.f?'five':t===21?'t21':'win';
           const chips=HANDS[type].c+s2.c.reduce((a,x)=>{const r=String(x).replace(/[♠♥♦♣]/g,'');return a+(r==='A'&&bFx(b,'asferro')?1:baseVal({r}))},0);
           const pts=chips*HANDS[type].m*(b.dbl?(b.dk==='apostador'?3:2):1);
-          const dmg=Math.round(pts/ANTE_BASE[0]*DMG_K*(1+0.05*Math.min(10,b.r-1)));
+          const dmg=Math.round(pts/PVP_BASE*DMG_K*(1+0.05*Math.min(10,b.r-1)));
           let per=Math.max(1,Math.round(dmg/Math.max(1,parts.length)),pvpMinHit(b.r));
           if(t===21&&bAct(b,'critico'))per=Math.round(per*1.5);
           if(bAct(b,'furia')&&b.hpv<40)per=per*2;
@@ -2115,7 +2141,8 @@ function showCash(){
   ${c.reward?`<div class="kv"><span>Recompensa</span><span class="num">$${c.reward}</span></div>`:''}
   ${c.hands?`<div class="kv"><span>${c.hands} mão${c.hands===1?'':'s'} sobrando</span><span class="num">$${c.hands}</span></div>`:''}
   ${c.bonus?`<div class="kv"><span>Venceu o duelo</span><span class="num">$${c.bonus}</span></div>`:''}
-  <div class="kv"><span>${isPvp()?'Juros (1 a cada $10, máx. 2)':'Juros (1 a cada $5, máx. 5)'}</span><span class="num">$${c.interest}</span></div></div>
+  ${c.pig?`<div class="kv"><span>Cofrinho</span><span class="num">$${c.pig}</span></div>`:''}
+  <div class="kv"><span>${isPvp()?'Juros (1 a cada $10, máx. 2)':has('juros')?'Juros Altos (1 a cada $2, máx. 8)':'Juros (1 a cada $5, máx. 5)'}</span><span class="num">$${c.interest}</span></div></div>
   <button class="btn b-go" data-act="collect">Receber $${c.total}</button>`,'cash');
 }
 function showLifeLost(){
