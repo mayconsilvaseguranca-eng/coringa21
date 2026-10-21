@@ -414,7 +414,7 @@ hr{border:0;border-top:2px dashed rgba(251,244,226,.14);margin:0;width:100%}
 @media (max-height:720px){:root{--cw:clamp(42px,12.5vw,54px)}.joker,.slot{height:60px}.joker .jg{font-size:19px}.joker .jn{font-size:10px}.score .num{font-size:26px}.pill{font-size:23px}.btn{padding:10px 4px 8px}#app{gap:5px}.cards{padding-top:4px}}
 .shophead{display:flex;align-items:center;gap:8px}
 .shophead h2{text-align:left!important;flex:0 0 auto}
-.shophead .clock{padding:4px 10px;font-size:12.5px;margin-left:auto;white-space:nowrap}
+.shophead .clock{padding:4px 8px;font-size:12px;margin-left:auto;white-space:nowrap}
 .shophead .clock b{font-size:15px}
 .shophead .money{margin-left:auto;font-size:24px;color:var(--gold)}
 .shophead .clock + .money{margin-left:0}
@@ -511,6 +511,34 @@ html[data-tema=doce] .b-dim{--b:#ffc2df;color:#4a1f40;text-shadow:none}html[data
 .tbtn .tsw i{width:14px;height:14px;border-radius:50%;margin-left:-3px;border:1.5px solid rgba(0,0,0,.35)}.tbtn .tsw i:first-child{margin-left:0}
 html.claro .tbtn{background:rgba(255,255,255,.6)}
 @keyframes tpulse{0%,100%{box-shadow:0 3px 0 var(--edge),0 0 0 0 transparent}50%{box-shadow:0 3px 0 var(--edge),0 0 10px 1px var(--gold)}}
+
+/* Loja estilo Balatro (v22) */
+.shoppanel{gap:8px}
+.shophead h2{font-family:var(--font-px);font-size:28px!important;letter-spacing:.04em;color:var(--gold);text-shadow:2px 2px 0 var(--mult),4px 4px 0 var(--edge)}
+.shophead .money{background:var(--edge);border-radius:10px;padding:2px 10px;font-size:24px!important;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--gold) 45%,transparent)}
+.shoplist{display:grid!important;grid-template-columns:1fr 1fr;gap:13px 8px;padding-top:9px}
+.sc{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;background:var(--panel-2);border:2px solid var(--edge);border-radius:12px;padding:11px 5px 6px;cursor:pointer;font:inherit;color:var(--ink);text-align:center;box-shadow:0 3px 0 var(--edge)}
+.sc:active{transform:translateY(2px);box-shadow:0 1px 0 var(--edge)}
+.sc .tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--gold);color:#2a1b00;font-weight:800;font-size:16px;line-height:1;padding:4px 10px;border-radius:7px;border:2px solid var(--edge);box-shadow:0 2px 0 var(--edge);font-variant-numeric:tabular-nums;white-space:nowrap;z-index:1}
+.sc .tag.full{background:#5b6b7a;color:#fff;font-size:13px}
+.sc .face{position:relative;width:50px;height:50px;border-radius:9px;border:2px solid var(--edge);background:linear-gradient(160deg,color-mix(in srgb,var(--jc) 85%,#fff),var(--jc));display:grid;place-items:center;box-shadow:0 3px 0 var(--edge);animation:scFloat 3s ease-in-out infinite}
+.sc:nth-child(2) .face{animation-delay:-.8s}.sc:nth-child(3) .face{animation-delay:-1.6s}.sc:nth-child(4) .face{animation-delay:-2.2s}
+.sc .face::after{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.3);border-radius:6px}
+.sc .face .g{font-size:24px;font-weight:800;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.sc .face .kind{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);font-size:9.5px;padding:1px 5px;white-space:nowrap;border:1.5px solid var(--edge);background:var(--panel)}
+.sc .face.planet{border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffffff66,transparent 45%),var(--jc)}
+.sc b{font-size:15px;font-weight:800;line-height:1.1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sc .dd{font-size:12.5px;line-height:1.25;color:var(--ink-dim);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sc.sold{opacity:.4}
+.sc.sold .tag{background:var(--ok,#5fd38a)}
+@keyframes scFloat{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-3px) rotate(1.5deg)}}
+@media (prefers-reduced-motion:reduce){.sc .face{animation:none}}
+.shoppanel .rack .joker,.shoppanel .rack .slot{height:48px}
+.shoppanel .rack .joker .jg{font-size:19px}
+.shoppanel .rack .joker .jn{font-size:10px}
+.shopbtns .btn{padding:10px 4px 9px;font-size:18px}
+.b-reroll{--b:#3fa35a}.b-next{--b:var(--mult)}
+html.claro .sc .face .kind{color:#fff}
 </style>
 </head>
 <body>
@@ -543,7 +571,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v21';
+const VERSION='v22';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1183,7 +1211,8 @@ function genShopItems(){
   return items;
 }
 function leaveShop(){
-  if(isPvp()){S.shop=null;S.deadline=0;pvpStartRound();return}
+  if(isPvp()){S.shop=null;S.deadline=0;S.mp.shDone=S.round;S.mp.shAt=Date.now();S.phase='shopwait';mpSync();render();
+    if(shopWaitNames().length)showShopWait();else pvpStartRound();return}
   S.shop=null;S.bi++;
   if(S.bi>2){S.bi=0;S.ante++;S.boss=pickBoss(S.boss)}
   S.phase='select';S.player=[];S.dealer=[];S.calc=null;S.msg='';S.roundScore=0;render();showSelect();
@@ -1234,6 +1263,10 @@ const pvpMinHit=r=>Math.round(1+0.4*Math.max(0,(r||1)-1));
 const pvpShopIn=()=>PVP_SHOP_EVERY-(((S.round||1)-1)%PVP_SHOP_EVERY);
 const cardStr=c=>c.r+c.s;
 function pvpParts(){return gamePlayers().filter(p=>!p.me&&p.st&&p.st.al)}
+/* PvP: a rodada depois da loja só começa quando todos saíram da loja (ou 150 s depois, se alguém sumiu) */
+function shopWaitNames(){return gamePlayers().filter(p=>!p.me&&p.st&&p.st.al&&p.st.md==='pvp'&&(+p.st.sh||0)<S.round&&(+p.st.r||0)<=S.round).map(p=>p.name)}
+function showShopWait(){const w=shopWaitNames();showSheet(`<h2>Loja fechada</h2>
+  <div class="note" style="text-align:center;font-size:15px">Esperando ${w.length?`<b>${esc(w.slice(0,4).join(', '))}${w.length>4?' e mais '+(w.length-4):''}</b>`:'a mesa'} terminar${w.length>1?'em':''} as compras.<br><small class="c-dim">A próxima rodada começa para todos ao mesmo tempo.</small></div>`,'shopwait')}
 function pvpWaitingNames(){return pvpParts().filter(p=>!(p.st.sub&&p.st.sub.r===S.round)).map(p=>p.name)}
 function pvpStartRound(){
   if(!S.mp.alive)return;
@@ -1378,6 +1411,7 @@ function pvpTimer(){
   if((S.phase==='shop'||S.phase==='cash')&&S.deadline){const c=$('#shopclock');if(c){c.innerHTML=clockText();c.classList.toggle('late',S.deadline-now<20000)}}
   else if(S.phase==='shop'&&S.deadline&&now>S.deadline){leaveShop()}
   else if(S.phase==='select'&&S.deadline&&now>S.deadline){pvpStartRound()}
+  else if(S.phase==='shopwait'){const w=shopWaitNames();if(!w.length||now-(S.mp.shAt||0)>150000)pvpStartRound();else if(openSheet==='shopwait'){const n=$('#panel .note b');if(!n||n.textContent!==w.slice(0,4).join(', ')+(w.length>4?' e mais '+(w.length-4):''))showShopWait()}}
 }
 setInterval(pvpTimer,1000);
 function showPvpResult(){
@@ -1605,7 +1639,7 @@ let lastPres='';
 function mpSync(){
   if(!NR||!S||!S.mp)return;
   const st={a:S.ante,b:S.bi,l:S.mp.lives,al:S.mp.alive?1:0,sc:S.roundScore,t:S.stats.total,ph:S.phase,dh:S.mp.dh,n:S.jokers.length};
-  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);st.tg=(S.mp.tg||[]).slice(-8);st.mo=S.money;if(S.player&&S.player[0]&&S.round)st.f1={r:S.round,c:cardStr(S.player[0])};st.live=S.phase==='play'&&S.player.length?{r:S.round,c:S.player.map(cardStr)}:null;st.jk=S.jokers.map(j=>j.k);st.ai=alvoInv().slice();if(S.mp.rx)st.rx=S.mp.rx;delete st.dh;delete st.l;delete st.sc}
+  if(isPvp()){st.md='pvp';st.hp=pvpHP();st.hpr=r1(S.mp.hp!=null?S.mp.hp:pvpHP());st.hk=S.mp.hk||0;st.dm=S.mp.sent;st.r=S.round||0;st.sd=S.mp.sd||0;st.sh=S.mp.shDone||0;st.sub=S.mp.sub||null;st.ev=(S.mp.ev||[]).slice(-6);st.tg=(S.mp.tg||[]).slice(-8);st.mo=S.money;if(S.player&&S.player[0]&&S.round)st.f1={r:S.round,c:cardStr(S.player[0])};st.live=S.phase==='play'&&S.player.length?{r:S.round,c:S.player.map(cardStr)}:null;st.jk=S.jokers.map(j=>j.k);st.ai=alvoInv().slice();if(S.mp.rx)st.rx=S.mp.rx;delete st.dh;delete st.l;delete st.sc}
   const s=JSON.stringify(st);if(s===lastPres)return;lastPres=s;
   NR.presence({g:S.mp.gid,st}).catch(()=>{});
 }
@@ -1825,7 +1859,7 @@ function botTick(){
         }
         if(go){
           if(b.coleteR&&b.coleteR<=b.r){b.cards=b.cards.filter(k=>k!=='colete');b.coleteR=0;st.n=b.cards.length}
-          if(b.r%PVP_SHOP_EVERY===0&&!b.cl)botShop(b);
+          if(b.r%PVP_SHOP_EVERY===0&&!b.cl){botShop(b);st.sh=b.r}
           if(bAct(b,'bandagem')&&b.hpv<b.maxHp/2)b.hpv=r1(Math.min(b.maxHp,b.hpv+3));
           b.r++;st.r=b.r;st.a=1+Math.floor((b.r-1)/(PVP_SHOP_EVERY*2));st.ph='play';b.nextAt=now+1500+Math.random()*3500;ch=true;
           b.fx=botFx(b,all,b.r);
@@ -2091,18 +2125,18 @@ function showLifeLost(){
 }
 function showShop(){
   const sh=S.shop;const fullOf=k=>JK[k].pvp==='alvo'?alvoInv().length>=ALVO_MAX:S.jokers.length>=5;
-  /* Loja em linhas compactas: cabe inteira no iPhone SE sem rolar */
+  /* Loja no estilo Balatro: cartas grandes com etiqueta de preço; toque abre os detalhes e o Comprar. Cabe no iPhone SE. */
   const items=sh.items.map((it,i)=>{
-    if(it.t==='j'){const d=JK[it.k];
-      return `<button class="si ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="art" style="--jc:${d.bg}">${d.g}</span><span class="t"><b>${d.n}</b><span>${d.d}</span></span><span class="pc"><span class="pr">${it.sold?'✓':fullOf(it.k)?'Cheio':'$'+d.c}</span>${d.pvp?`<span class="kind ${d.pvp}">${KIND_TXT[d.pvp]}</span>`:''}</span></button>`}
+    if(it.t==='j'){const d=JK[it.k];const tag=it.sold?'✓':fullOf(it.k)?'Cheio':'$'+d.c;
+      return `<button class="sc ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="tag ${fullOf(it.k)&&!it.sold?'full':''}">${tag}</span><span class="face" style="--jc:${d.bg}"><span class="g">${d.g}</span>${d.pvp?`<span class="kind ${d.pvp}">${KIND_TXT[d.pvp]}</span>`:''}</span><b>${d.n}</b><span class="dd">${d.d}</span></button>`}
     const h=HANDS[it.k];
-    return `<button class="si ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="art planet" style="--jc:${h.pc}"></span><span class="t"><b>${h.p}</b><span>Sobe ${h.n} para nv ${S.levels[it.k]+1} (+${h.lc} Fichas, +${h.lm} Mult)</span></span><span class="pr">${it.sold?'✓':'$3'}</span></button>`}).join('');
+    return `<button class="sc pl ${it.sold?'sold':''}" data-act="shopitem" data-i="${i}"><span class="tag">${it.sold?'✓':'$3'}</span><span class="face planet" style="--jc:${h.pc}"></span><b>${h.p}</b><span class="dd">${h.n} nv ${S.levels[it.k]+1}<br>+${h.lc} Fichas · +${h.lm} Mult</span></button>`}).join('');
   showSheet(`<div class="shophead"><h2>Loja</h2>${clockHTML()}<span class="num money">$${S.money}</span></div>
-  <div class="shoplist">${items}</div>
-  <p class="shopnote">${isPvp()?'Suas cartas':'Seus coringas'} ${S.jokers.length}/5 · toque numa para vender</p>
+  <div class="shoplist ${isPvp()?'pvp':'solo'}">${items}</div>
+  <p class="shopnote">${isPvp()?'Suas cartas':'Seus coringas'} ${S.jokers.length}/5 · toque para vender</p>
   <div class="rack ${isPvp()&&S.mp.alvo?'withalvo':''}">${[0,1,2,3,4].map(i=>{const j=S.jokers[i];if(!j)return '<div class="slot"></div>';const d=JK[j.k];return `<button class="joker" style="--jc:${d.bg}" data-act="joker" data-i="${i}"><span class="jg">${d.g}</span><span class="jn">${d.n}</span></button>`}).join('')}${isPvp()&&S.mp.alvo?alvoSlots():''}</div>
-  <div class="row"><button class="btn b-dbl" data-act="reroll" ${S.money<sh.reroll?'disabled':''}>Trocar<small>novas opções · $${sh.reroll}</small></button>
-  <button class="btn b-hit" data-act="leave">${isPvp()?'Voltar à mesa':'Próxima blind'}<small>${isPvp()?'a mesa espera você':'continuar'}</small></button></div>`,'shop');
+  <div class="row shopbtns"><button class="btn b-reroll" data-act="reroll" ${S.money<sh.reroll?'disabled':''}>Trocar<small>novas opções · $${sh.reroll}</small></button>
+  <button class="btn b-next" data-act="leave">${isPvp()?'Voltar':'Próxima'}<small>${isPvp()?'a mesa espera você':'blind seguinte'}</small></button></div>`,'shop');
   $('#panel').classList.add('compact','shoppanel');
 }
 function clockHTML(){return isPvp()&&S.deadline&&['shop','cash'].includes(S.phase)?`<div class="clock" id="shopclock">${clockText()}</div>`:''}
@@ -2428,7 +2462,7 @@ function resumeSheet(){
   if(ph==='play'||ph==='pwait'){hideSheet();return}
   if(ph==='select')showSelect();else if(ph==='shop')showShop();else if(ph==='cash')showCash();else if(ph==='over')showOver();
   else if(ph==='won')(S.mp?showBoard:showWon)();else if(ph==='duelwait')showDuelWait();else if(ph==='duelres')showDuelRes();
-  else if(ph==='pshow')showPvpResult();else if(ph==='pwait')hideSheet();
+  else if(ph==='pshow')showPvpResult();else if(ph==='pwait')hideSheet();else if(ph==='shopwait')showShopWait();
   else if(ph==='lifelost')showLifeLost();else if(ph==='out'||ph==='done')showBoard();else hideSheet();
 }
 function resume(){
@@ -2436,6 +2470,7 @@ function resume(){
   if(isPvp()){
     if(S.phase==='play'){if(!S.player.length||total(S.player)>21){S.round=Math.max(0,(S.round||1)-1);pvpStartRound();return}S.deadline=Date.now()+PVP_TURN_MS;render();return}
     if(S.phase==='pwait'){render();mpTick();return}
+    if(S.phase==='shopwait'){S.mp.shAt=Date.now();render();showShopWait();return}
     if(S.phase==='pshow'){if(S.pv){render();showPvpResult()}else{S.phase='pwait';render();mpTick()}return}
   }
   if(S.phase==='play'){

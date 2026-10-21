@@ -20,6 +20,8 @@ export default async function () {
     for (const p of [A, B]) await p.click('[data-act=pvpgo]');
     const hp = () => Promise.all([A, B].map(p => p.evaluate(() => window.__c21.pvpHP())));
     async function round(ha, hb) {
+      // os dois saem da loja antes de jogar (a rodada só começa quando todos saíram)
+      for (let k = 0; k < 20; k++) { let any = false; for (const p of [A, B]) { const ph = await p.evaluate(() => window.__c21.S.phase); if (ph === 'cash') { any = true; await p.click('[data-act=collect]', { timeout: 1500 }).catch(() => {}); } else if (ph === 'shop') { any = true; await p.click('[data-act=leave]', { timeout: 1500 }).catch(() => {}); } } if (!any) break; await A.waitForTimeout(300); }
       for (const [p, h] of [[A, ha], [B, hb]]) {
         for (let k = 0; k < 40; k++) {
           const ph = await p.evaluate(() => window.__c21.S.phase);
