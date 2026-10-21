@@ -1,5 +1,8 @@
 import html
 V=[
+ ("v24.2","21/10 · 06:29","Textos do tutorial com mais tempo",
+  "Aumentar o tempo dos textos de 1,7 para 2,5 segundos.",
+  [("Mudou","No tutorial, cada texto que aparece enquanto as cartas chegam e a mesa revela as mãos agora fica pelo menos 2,5 segundos (era 1,7). As revelações, que são mais longas, ficam 3 segundos.")]),
  ("v24.1","21/10 · 06:25","Tutorial mais claro",
   "Acender a carta com alvo como as outras e corrigir os textos que apareciam rápido demais e sumiam enquanto as cartas chegavam.",
   [("Corrigido","No passo das cartas com alvo, a Mira agora acende com o brilho dourado junto com o botão Voltar à mesa, para ficar claro de qual carta o texto fala."),
@@ -272,7 +275,7 @@ cards="\n".join(card(v,i==0) for i,v in enumerate(V))
 import json,os
 _ag=os.path.join(os.path.dirname(os.path.abspath(__file__)),'agora.json')
 AG=json.load(open(_ag)) if os.path.exists(_ag) else None
-UPD=AG['atualizado'] if AG else '21/10/2026, 06:25'
+UPD=AG['atualizado'] if AG else '21/10/2026, 06:29'
 def live():
   if not AG: return ''
   ic={'feito':('✓','st-ok'),'agora':('●','st-now'),'falta':('○','st-todo')}

@@ -603,7 +603,7 @@ const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').match
 /* Ritmo do jogo: 1 = original. Maior = mais lento. */
 const PACE=1.6;
 /* Versão do jogo: mostrada na tela inicial. Suba a cada mudança, igual ao diário. */
-const VERSION='v24.1';
+const VERSION='v24.2';
 const sleep=ms=>new Promise(r=>setTimeout(r,RM?Math.min(ms,120):ms*PACE));
 const fmt=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('pt-BR',{maximumFractionDigits:1})};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2508,7 +2508,7 @@ const tTot=cs=>{let t=0,a=0;for(const c of cs){if(c.r==='A'){t+=11;a++}else t+=b
 const TUT_STEPS=12;
 const tWait=ms=>new Promise(r=>setTimeout(r,ms));
 /* narra o que está acontecendo durante as animações: o balão fica na tela, sem botão e sem escurecer */
-async function nar(text,ms=1800){if(!T)return;T.coach=text;T.pos='mid';T.btn=null;T.hi=null;T.allow=null;T.narr=true;tutRender();await tWait(ms)}
+async function nar(text,ms=2500){if(!T)return;T.coach=text;T.pos='mid';T.btn=null;T.hi=null;T.allow=null;T.narr=true;tutRender();await tWait(ms)}
 function startTutorial(){
   hideSheet();
   T={i:0,hp:TUT_MAX,riv:[{n:'Beto',col:1,hp:TUT_MAX,tag:'…',cls:''},{n:'Dama',col:3,hp:TUT_MAX,tag:'…',cls:''}],
@@ -2553,19 +2553,19 @@ async function tutAct(k){
   if(k!==T.allow)return;
   T.busy=true;T.allow=null;
   try{
-  if(k==='hit'){T.hand.push(tc('4','♣'));beep(640,.05);await nar('Veio um <b>4</b>: agora você tem <b>20</b>.',1700);tutStep(4)}
+  if(k==='hit'){T.hand.push(tc('4','♣'));beep(640,.05);await nar('Veio um <b>4</b>: agora você tem <b>20</b>.',2500);tutStep(4)}
   else if(k==='stand'){
-    T.msg='Esperando a mesa…';await nar('Você fechou com <b>20</b>. Agora a mesa espera o Beto e a Dama fecharem as mãos…',1700);
+    T.msg='Esperando a mesa…';await nar('Você fechou com <b>20</b>. Agora a mesa espera o Beto e a Dama fecharem as mãos…',2500);
     T.riv[0].tag='✓';T.riv[0].cls='ready';tutRender();await tWait(800);T.riv[1].tag='✓';T.riv[1].cls='ready';tutRender();await tWait(800);
     T.riv[0].tag='18';T.riv[0].cls='shown';T.riv[1].tag='estourou';T.riv[1].cls='bust';T.msg='Revelação: você fez 20';
-    await nar('<b>Revelação!</b> O Beto fez <b>18</b> e a Dama <b>estourou</b> com 25. Seu 20 ganha dos dois.',2400);
+    await nar('<b>Revelação!</b> O Beto fez <b>18</b> e a Dama <b>estourou</b> com 25. Seu 20 ganha dos dois.',3000);
     T.riv.forEach(r=>{r.dmg=24;r.hp-=24});beep(220,.12,'sawtooth');T.narr=false;tutRender();await tWait(900);tutStep(5)}
   else if(k==='double'){
     T.msg='Dobrou! ×2';T.hand.push(tc('K','♠'));beep(300,.08,'sawtooth');
-    await nar('Dobrou! Você recebe só mais 1 carta… veio um <b>K</b>: <b>21!</b>',1900);try{fx21()}catch(e){}
-    T.msg='Esperando a mesa…';T.riv[0].tag='✓';T.riv[0].cls='ready';T.riv[1].tag='✓';T.riv[1].cls='ready';await nar('Esperando a mesa fechar…',1200);
+    await nar('Dobrou! Você recebe só mais 1 carta… veio um <b>K</b>: <b>21!</b>',2500);try{fx21()}catch(e){}
+    T.msg='Esperando a mesa…';T.riv[0].tag='✓';T.riv[0].cls='ready';T.riv[1].tag='✓';T.riv[1].cls='ready';await nar('Esperando a mesa fechar…',2500);
     T.riv[0].tag='20';T.riv[0].cls='shown';T.riv[1].tag='17';T.riv[1].cls='shown';T.msg='Revelação: você fez 21';
-    await nar('<b>Revelação!</b> O Beto fez <b>20</b> e a Dama <b>17</b>. Seu 21 dobrado passa os dois.',2400);
+    await nar('<b>Revelação!</b> O Beto fez <b>20</b> e a Dama <b>17</b>. Seu 21 dobrado passa os dois.',3000);
     T.riv.forEach(r=>{r.dmg=60;r.hp-=60});beep(180,.15,'sawtooth');T.narr=false;tutRender();await tWait(900);tutStep(7)}
   else if(k==='buy'){T.bought=true;T.money-=4;beep(880,.08);setTimeout(()=>beep(1180,.1),90);tutRender();await sleep(300);tutStep(9)}
   else if(k==='leave'){tutStep(10)}
